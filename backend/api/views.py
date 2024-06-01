@@ -1,9 +1,10 @@
 from django.shortcuts import render
+from django.contrib.auth.hashers import check_password
 from django.http import JsonResponse, Http404, HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 import json
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout as auth_logout
 
 
 """ JSON REQUEST REGISTER BODY:
@@ -12,8 +13,18 @@ from django.contrib.auth import authenticate, login
     "password": "admin",
     "email": "newuser@example.com",
     "is_staff": true, //optional
-    "is_superuser": true //optional
+    "is_superuser": true, //optional
+    "is_active": true //optional
 }
+
+    JSON REQUEST LOGIN BODY:
+{
+    "username": "Admin",
+    "password": "admin"
+}
+
+
+
 
 """
 @csrf_exempt
@@ -28,6 +39,7 @@ def regis(request):
             email = data.get('email')
             is_staff = data.get('is_staff', False)
             is_superuser = data.get('is_superuser', False)
+            is_active = data.get('is_active', True)
             if not username or not password or not email:
                 return JsonResponse({'error': 'Please provide username, password, and email'}, status=400)
             if User.objects.filter(username=username).exists():
@@ -35,22 +47,24 @@ def regis(request):
             user = User.objects.create_user(
                 username=username,
                 password=password,
-                email=email
+                email=email,
+                is_active=is_active,
+                is_staff=is_staff,
+                is_superuser=is_superuser
             )
-            # Update the user with staff and superuser status if specified
             if is_staff:
                 user.is_staff = True
             if is_superuser:
                 user.is_superuser = True
-                user.is_staff = True  # Superusers must also be staff
+                user.is_staff = True
             user.save()
             return JsonResponse({'message': 'User registered successfully'}, status=201)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
     return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
 
+@csrf_exempt
 def log(request):
-    print("============================================  LOGIIIIIIIIIIIIIIINN ============================================ ")
     if request.method == "POST":
         body = json.loads(request.body)
         username = body.get('username')
@@ -58,10 +72,41 @@ def log(request):
         user = authenticate(request, username=username, password=password)
         if(user is not None):
             login(request, user)
-            response = {
+            if user.is_active == False:
+                return JsonResponse({"error": "User is suspended"}, status=400)
+            response_data = {
                 "Username": user.get_username(),
-                # "csrf_exempt": request.META.get('HTTP_AUTHORIZATION')
+                "Email": user.email,
+                "is_staff": user.is_staff,
+                "is_superuser": user.is_superuser,
+                "Headers": dict(request.headers)
             }
-            return JsonResponse(response, status=200)
+            response = JsonResponse(response_data, status=200)
+            return response
         else:
-            return JsonResponse({"error": "Wrong Credentials"}, status=404)
+            return JsonResponse({"error": "Username or password is incorrect"}, status=400)
+    else:
+        return JsonResponse({"error": "Invalid HTTP method"}, status=405)
+
+
+@csrf_exempt
+def logout(request):
+    if request.method == 'GET':
+        return HttpResponseForbidden('Forbidden')
+    if request.method == "POST":
+        auth_logout(request)
+        return JsonResponse({"message": "Logged out successfully"}, status=200)
+
+
+@csrf_exempt
+def get(requests):
+    users = User.objects.all()
+    response = []
+    for user in users:
+        response.append({
+            "Username": user.get_username(),
+            "Email": user.email,
+            "is_staff": user.is_staff,
+            "is_superuser": user.is_superuser
+        })
+    return JsonResponse(response, safe=False, status=200)
