@@ -27,66 +27,96 @@
   }
 }
 
+.bg-primary {
+  background-color: #1e2738 !important;
+}
+.bg-body-tertiary {
+  background-color: #1e2738 !important;
+}
+
+.text-white {
+  color: #fefefe !important;
+}
+
+a, h1, h2, h3, h4, h5, h6, p, span, div, button, input, label, li, ul, ol, textarea 
+{
+  color: #fefefe !important;
+}
+
+a:hover, h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, p:hover, span:hover, div:hover, button:hover, input:hover, label:hover, li:hover, ul:hover, ol:hover, textarea:hover{
+  color: #c5c5c5 !important;
+}
+
+
+.bg-dark-primary {
+  background-color: #2f3f5b96 !important;
+  /* background-color: transparent !important; */
+  backdrop-filter: blur(10px);
+
+}
+
+.card-header{
+  border-bottom: 1px solid #4b6693 !important;
+}
+
+input, textarea, select {
+  background-color: #2f3f5b !important;
+  color: #fefefe !important;
+  border: 1px solid #4b6693 !important;
+  padding: 0.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  background-color: #2f3f5b !important;
+  color: #fefefe !important;
+  border: 1px solid #4b6693 !important;
+}
+
+::placeholder {
+  color: #FCF6F5FF !important;
+}
+
 
 .h-screen {
   height: 100vh !important;
 }
-
-.h-20 {
-  height: 5rem !important;
+.w-screen {
+  width: 100vw !important;
 }
 
-.h-40 {
-  height: 10rem !important;
+.h-full {
+  height: 100% !important;
 }
 
-.h-60 {
-  height: 15rem !important;
+.w-full {
+  width: 100% !important;
 }
 
-.h-80 {
-  height: 20rem !important;
+.w-90 {
+  width: 90% !important;
 }
 
-.h-96 {
-  height: 24rem !important;
+.h-90 {
+  width: 90% !important;
 }
 
-.h-1-2 {
-  height: 50% !important;
-}
-
-.h-1-3 {
-  height: 33.333333% !important;
-}
-
-.h-2-3 {
-  height: 66.666667% !important;
-}
-
-.h-1-4 {
-  height: 25% !important;
-}
-
-.h-3-4 {
-  height: 75% !important;
-}
-
-.h-1-5 {
-  height: 20% !important;
-}
-
-.h-2-5 {
-  height: 40% !important;
-}
-
-.h-3-5 {
-  height: 60% !important;
-}
-
-.h-4-5 {
-  height: 80% !important;
+canvas {
+  background-color: #2e4b82 !important;
+  position: absolute;
+  z-index: -1;
 }
 
 
+@media (max-width: 400px) {
+  .hidden-sm {
+    display: none !important;
+  }
+}
 
+@media (max-width: 575px) {
+  .hidden-md {
+    display: none !important;
+  }
+}

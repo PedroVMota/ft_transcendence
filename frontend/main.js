@@ -1,4 +1,30 @@
 import './style.css'
+import { Client } from './Classes/Client'
+export var CurrentClient = new Client();
+import { Cookie } from './Classes/Cookie'
+import './Classes/Canva'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 Login responde
@@ -20,68 +46,64 @@ Login responde
 }
 */
 
-class Client {
-    constructor() {
-        this.Username = undefined;
-        this.Email = undefined;
-        this.is_staff = false;
-        this.is_superuser = false;
+
+export function MustBeLoggedIn() {
+    console.log('You must be logged in to access this page');
+    var loginRequiredElement = document.querySelectorAll('.loginRequired')
+    var _AfterLoginElement = document.querySelectorAll('._AfterLogin')
+    var _loginComponent = document.getElementById('_loginComponent');
+
+    // _loginComponent.style.display = 'block';
+    loginRequiredElement.forEach(element => {
+        element.style.display = 'none';
+    });
+    _AfterLoginElement.forEach(element => {
+        element.style.display = 'block';
     }
-    setUsername(username) { this.Username = username; }
-    setEmail(email) { this.Email = email; }
-    setIsStaff(is_staff) { this.is_staff = is_staff; }
-    setIsSuperuser(is_superuser) { this.is_superuser = is_superuser; }
-    getUsername() { return this.Username; }
-    getEmail() { return this.Email; }
-    getIsStaff() { return this.is_staff; }
-    getIsSuperuser() { return this.is_superuser; }
+    );
 }
 
-class Cookie { 
-    constructor() { }
-    isSessionLoggedIn() { return document.cookie.includes('csrftoken'); }
-    getSession() { return document.cookie; }
-    getCSRFToken() { return document.cookie.split('=')[1]; }
+export function AfterLogin() {
+    // console.log('You are now logged in');
+    var loginRequiredElement = document.querySelectorAll('.loginRequired')
+    var _AfterLoginElement = document.querySelectorAll('._AfterLogin')
+    loginRequiredElement.forEach(element => {
+        console.log(element);
+        element.style.display = 'block';
+    });
+    // console.log('_AfterLoginElement is defined');
+    // console.log(_AfterLoginElement);
+    _AfterLoginElement.forEach(element => {
+        console.log("Before: " + element.style.display)
+        element.style.display = 'hidden';
+        console.log("After: " + element.style.display)
+    });
 }
 
 
-var CurrentClient = new Client();
+
 var _loginComponent = document.getElementById('_loginComponent');
 var _registerComponent = document.getElementById('_registerComponent');
 var _loginSubmission = document.getElementById('_loginSubmission');
+var _logoutSubmission = document.getElementById('_logoutSubmission');
 var _toggleToRegister = document.getElementById('_toggleToRegister');
 var _registerSubmission = document.getElementById('_registerSubmission');
 var _toggleToLogin = document.getElementById('_toggleToLogin');
-var loginRequiredElement = document.querySelectorAll('.loginRequired')
-var loginNotRequiredElement = document.querySelectorAll('.loginNotRequired')
+// var loginRequiredElement = document.querySelectorAll('.loginRequired')
+// var _AfterLoginElement = document.querySelectorAll('._AfterLogin')
 
 
 document.addEventListener('DOMContentLoaded', () => {
 
     var Session = new Cookie();
-    if (Session.isSessionLoggedIn())
-    {
+    if (Session.isSessionLoggedIn()) {
         console.log('Session is logged in');
-        loginRequiredElement.forEach(element => {
-            console.log(element);
-            element.style.display = 'block';
-        });
-        loginNotRequiredElement.forEach(element => {
-            element.style.display = 'none';
-        });
+        AfterLogin();
     }
-    else
-    {
+    else {
         console.log('Session is not logged in');
-        _loginComponent.style.display = 'block';
+        MustBeLoggedIn();
 
-        loginRequiredElement.forEach(element => {
-            element.style.display = 'none';
-        });
-        loginNotRequiredElement.forEach(element => {
-            element.style.display = 'block';
-        }
-        );
     }
 
 
@@ -95,40 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // LOGIN
-    _loginSubmission.addEventListener('click', () => {
+    _loginSubmission.addEventListener('click', (event) => {
         event.preventDefault();
-        let user = document.getElementById('loginUser');
-        let password = document.getElementById('loginPassword');
+        CurrentClient.login();
+    });
 
-        fetch('http://localhost:8000/login', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: user.value,
-                password: password.value
-            }),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                CurrentClient.setUsername(data.Username);
-                CurrentClient.setEmail(data.Email);
-                CurrentClient.setIsStaff(data.is_staff);
-                CurrentClient.setIsSuperuser(data.is_superuser);
-                console.log(data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+    _logoutSubmission.addEventListener('click', (event) => {
+        event.preventDefault();
+        CurrentClient.logout();
     });
 
     // RESITER
