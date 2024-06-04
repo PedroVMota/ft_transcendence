@@ -1,11 +1,16 @@
 from django.shortcuts import render
 from django.contrib.auth.hashers import check_password
-from django.http import JsonResponse, Http404, HttpResponse, HttpResponseForbidden
+from django.http import JsonResponse, Http404, HttpResponse, HttpResponseForbidden, FileResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import User
+from .models import PongGameHistory, MyUser
 import json
 from django.contrib.auth import authenticate, login, logout as auth_logout
+import os, sys
 
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 """ JSON REQUEST REGISTER BODY:
 {
@@ -23,10 +28,31 @@ from django.contrib.auth import authenticate, login, logout as auth_logout
     "password": "admin"
 }
 
-
-
-
 """
+
+from django.http import HttpResponseRedirect
+
+def getProfilePicture(request, username=None):
+    if username is None:
+        user = request.user
+        if user.is_anonymous:
+            return  JsonResponse({"error": "User is not logged in"}, status=404)
+    else:
+        user = MyUser.objects.filter(username=username).first()
+        if not user:
+            raise Http404("User not found")
+    if user.profile_image:
+        path = os.getcwd() + user.profile_image.url
+        print(path)
+        if os.path.exists(path=path):
+            return FileResponse(open(path, 'rb'))
+        else:
+            return JsonResponse({}, status=404)
+    else:
+        return JsonResponse({}, status=404)
+
+
+
 @csrf_exempt
 def regis(request):
     if request.method == 'GET':
@@ -44,19 +70,22 @@ def regis(request):
                 return JsonResponse({'error': 'Please provide username, password, and email'}, status=400)
             if User.objects.filter(username=username).exists():
                 return JsonResponse({'error': 'Username already exists'}, status=400)
-            user = User.objects.create_user(
+            user = MyUser.objects.create_user(
                 username=username,
-                password=password,
                 email=email,
-                is_active=is_active,
-                is_staff=is_staff,
-                is_superuser=is_superuser
             )
-            if is_staff:
-                user.is_staff = True
-            if is_superuser:
-                user.is_superuser = True
-                user.is_staff = True
+            user.set_password(password)
+            user.is_staff = is_staff
+            user.is_superuser = is_superuser
+            user.is_active = is_active
+            
+            print(json.dumps({
+                "username": user.get_username(),
+                "email": user.email,
+                "is_staff": user.is_staff,
+                "is_superuser": user.is_superuser,
+                "is_active": user.is_active
+            }, indent=4))
             user.save()
             return JsonResponse({'message': 'User registered successfully'}, status=201)
         except json.JSONDecodeError:
@@ -103,10 +132,5 @@ def get(requests):
     users = User.objects.all()
     response = []
     for user in users:
-        response.append({
-            "Username": user.get_username(),
-            "Email": user.email,
-            "is_staff": user.is_staff,
-            "is_superuser": user.is_superuser
-        })
+        response += [user.jsonInformation()]
     return JsonResponse(response, safe=False, status=200)
