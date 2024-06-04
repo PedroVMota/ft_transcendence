@@ -9,6 +9,7 @@ urlpatterns = [
     path('getUsers', views.get, name='getUsers'),
     path('pImg/<str:username>/', views.getProfilePicture, name='get_profile_picture'),
     path('pImg/', views.getProfilePicture, name='get_own_profile_picture'),
+    path('UserDetails', views.getUserDetails, name='getUserDetails'),
     # path('upload', views.upload_file, name='upload_file'),
     # path('getImages', views.getImages, name='getImages'),
 ]

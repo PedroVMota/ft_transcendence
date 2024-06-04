@@ -1,41 +1,31 @@
 import { Cookie } from "./Cookie";
+import $ from 'jquery';
 
 
-export function MustBeLoggedIn() {
-    console.log('You must be logged in to access this page');
-    var loginRequiredElement = document.querySelectorAll('.loginRequired')
-    var _AfterLoginElement = document.querySelectorAll('._AfterLogin')
-    var _loginComponent = document.getElementById('_loginComponent');
+export function WhenLoggedIn() {
+    console.log('WhenLoggedIn');
+    let _WhenNotLoggedIn = document.getElementById('_WhenNotLoggedIn');
+    let _WhenLoggedIn = document.getElementById('_WhenLoggedIn');
 
-    // _loginComponent.style.display = 'block';
-    loginRequiredElement.forEach(element => {
-        element.style.display = 'none';
-    });
-    _AfterLoginElement.forEach(element => {
-        element.style.display = 'block';
-    }
-    );
+    _WhenNotLoggedIn.classList.remove('d-flex');
+    _WhenNotLoggedIn.style.display = 'none';
+    _WhenLoggedIn.classList.remove('d-none');
+
+
+
+    $('._Username').text(localStorage.getItem('Username').toUpperCase());
+
 }
 
-export function AfterLogin() {
-    // console.log('You are now logged in');
-    var loginRequiredElement = document.querySelectorAll('.loginRequired')
-    var _AfterLoginElement = document.querySelectorAll('._AfterLogin')
-    loginRequiredElement.forEach(element => {
-        console.log(element);
-        element.style.display = 'block';
-    });
-    // console.log('_AfterLoginElement is defined');
-    // console.log(_AfterLoginElement);
-    _AfterLoginElement.forEach(element => {
-        console.log("Before: " + element.style.display)
-        element.style.display = 'hidden';
-        console.log("After: " + element.style.display)
-    });
+export function WhenNotLoggedIn() {
+    console.log('WhenNotLoggedIn');
+    let _WhenNotLoggedIn = document.getElementById('_WhenNotLoggedIn');
+    let _WhenLoggedIn = document.getElementById('_WhenLoggedIn');
+    _WhenNotLoggedIn.classList.add('d-flex');
+    _WhenNotLoggedIn.style.display = 'block';
+    _WhenLoggedIn.classList.add('d-none');
+    _WhenLoggedIn.style.display = 'block';
 }
-
-
-
 
 export class Client {
     constructor() {
@@ -53,6 +43,15 @@ export class Client {
     getIsStaff() { return this.is_staff; }
     getIsSuperuser() { return this.is_superuser; }
 
+
+    loadClient() {
+        console.log('Loading client');
+        self.Username = localStorage.getItem('Username');
+        self.Email = localStorage.getItem('Email');
+        self.is_staff = localStorage.getItem('is_staff');
+        self.is_superuser = localStorage.getItem('is_superuser');
+    }
+
     login() {
         let user = document.getElementById('loginUser');
         let password = document.getElementById('loginPassword');
@@ -65,7 +64,9 @@ export class Client {
             },
             body: JSON.stringify({
                 username: user.value,
-                password: password.value
+                password: password.value,
+                is_staff: true,
+                is_superuser: true
             }),
         })
             .then(response => {
@@ -85,24 +86,12 @@ export class Client {
                 localStorage.setItem('Email', data.Email);
                 localStorage.setItem('is_staff', data.is_staff);
                 localStorage.setItem('is_superuser', data.is_superuser);
-                
-                AfterLogin();
-                let div = document.querySelector('._AfterLogin');
-                div.style.display = 'none';
-
-
+                WhenLoggedIn();
             })
             .catch((error) => {
                 console.error('Error:', error);
             });
 
-            setInterval(() => {
-                console.log('Username:', this.getUsername());
-                console.log('Email:', this.getEmail());
-                console.log('is_staff:', this.getIsStaff());
-                console.log('is_superuser:', this.getIsSuperuser());
-
-            }, 1000);
     }
 
     logout() {
@@ -111,19 +100,73 @@ export class Client {
             credentials: 'include',
         })
             .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error);
-                    });
-                }
+                if (!response.ok) return response.json().then(data => { throw new Error(data.error); });
                 return response.json();
             })
             .then(data => {
                 Cookie.delete('csrftoken');
                 Cookie.delete('sessionid');
                 Cookie.deleteLocalStorage();
+                WhenNotLoggedIn();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+    register(){
+        let user = document.getElementById('registerUser');
+        let email = document.getElementById('registerEmail');
+        let password = document.getElementById('registerPassword');
+        let confirmPassword = document.getElementById('registerConfirmPassword');
+
+        if (password.value !== confirmPassword.value) {
+            console.log('Passwords do not match');
+            return;
+        }
+
+        fetch('http://localhost:8000/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: user.value,
+                email: email.value,
+                password: password.value,
+                is_staff: true,
+                is_superuser: true,
+                is_active: true
+            }),
+        }).then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error);
+                });
+            }
+            return response.json();
+        })
+            .then(data => {
                 console.log(data);
-                MustBeLoggedIn();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
+    getProfile() {
+
+        console.log('Getting profile');
+        fetch('http://localhost:8000/UserDetails', {
+            method: 'GET',
+            credentials: 'include',
+        })
+            .then(response => {
+                if (!response.ok) return response.json().then(data => { throw new Error(data.error); });
+                return response.json();
+            })
+            .then(data => {
+                // console.log(data);
+                return data;
             })
             .catch((error) => {
                 console.error('Error:', error);

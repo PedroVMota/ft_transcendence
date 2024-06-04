@@ -41,6 +41,7 @@ def getProfilePicture(request, username=None):
         user = MyUser.objects.filter(username=username).first()
         if not user:
             raise Http404("User not found")
+    print("THE LOGGED USER IS: ", user.username)
     if user.profile_image:
         path = os.getcwd() + user.profile_image.url
         print(path)
@@ -134,3 +135,10 @@ def get(requests):
     for user in users:
         response += [user.jsonInformation()]
     return JsonResponse(response, safe=False, status=200)
+
+
+def getUserDetails(request):
+    user = request.user
+    if user.is_anonymous:
+        return JsonResponse({"error": "User is not logged in"}, status=404)
+    return JsonResponse(user.jsonInformation(), status=200)

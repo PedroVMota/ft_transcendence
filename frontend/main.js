@@ -1,29 +1,9 @@
 import './style.css'
-import { Client } from './Classes/Client'
+import { Client, WhenLoggedIn, WhenNotLoggedIn } from './Classes/Client'
 export var CurrentClient = new Client();
 import { Cookie } from './Classes/Cookie'
-import './Classes/Canva'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import "./Components/Menu";
+import $ from 'jquery';
 
 
 /*
@@ -46,123 +26,64 @@ Login responde
 }
 */
 
-
-export function MustBeLoggedIn() {
-    console.log('You must be logged in to access this page');
-    var loginRequiredElement = document.querySelectorAll('.loginRequired')
-    var _AfterLoginElement = document.querySelectorAll('._AfterLogin')
-    var _loginComponent = document.getElementById('_loginComponent');
-
-    // _loginComponent.style.display = 'block';
-    loginRequiredElement.forEach(element => {
-        element.style.display = 'none';
-    });
-    _AfterLoginElement.forEach(element => {
-        element.style.display = 'block';
-    }
-    );
-}
-
-export function AfterLogin() {
-    // console.log('You are now logged in');
-    var loginRequiredElement = document.querySelectorAll('.loginRequired')
-    var _AfterLoginElement = document.querySelectorAll('._AfterLogin')
-    loginRequiredElement.forEach(element => {
-        console.log(element);
-        element.style.display = 'block';
-    });
-    // console.log('_AfterLoginElement is defined');
-    // console.log(_AfterLoginElement);
-    _AfterLoginElement.forEach(element => {
-        console.log("Before: " + element.style.display)
-        element.style.display = 'hidden';
-        console.log("After: " + element.style.display)
-    });
-}
+document.getElementById('_ProfileManipulationSecion').addEventListener('mouseover', function () {
+    console.log('ProfileManipulationSecion');
+    /*
+        Data Jsong Example :
+        {
+            "username": "admin",
+            "email": "admin@admin.com",
+            "profile_image": "/api/defaultAssets/ProfilePicture.png",
+            "about_me": null,
+            "create_date": "2024-06-04T12:33:38.103Z",
+            "update_date": "2024-06-04T13:33:33.598Z"
+        },
+    */
+    JsonData = CurrentClient.getProfile();
+    console.log(JsonData);
+    $('#aboutMe').text(JsonData['about_me']);
 
 
+});
 
-var _loginComponent = document.getElementById('_loginComponent');
-var _registerComponent = document.getElementById('_registerComponent');
-var _loginSubmission = document.getElementById('_loginSubmission');
-var _logoutSubmission = document.getElementById('_logoutSubmission');
-var _toggleToRegister = document.getElementById('_toggleToRegister');
-var _registerSubmission = document.getElementById('_registerSubmission');
-var _toggleToLogin = document.getElementById('_toggleToLogin');
-// var loginRequiredElement = document.querySelectorAll('.loginRequired')
-// var _AfterLoginElement = document.querySelectorAll('._AfterLogin')
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    var Session = new Cookie();
+    let  _loginSubmission = document.getElementById('_loginSubmission');
+    let  _registerSubmission = document.getElementById('_registerSubmission');
+
+    let  Session = new Cookie();
     if (Session.isSessionLoggedIn()) {
         console.log('Session is logged in');
-        AfterLogin();
+        WhenLoggedIn();
     }
     else {
         console.log('Session is not logged in');
-        MustBeLoggedIn();
-
+        WhenNotLoggedIn();
     }
-
-
-    _toggleToRegister.addEventListener('click', () => {
-        _loginComponent.style.display = 'none';
-        _registerComponent.style.display = 'block';
-    });
-    _toggleToLogin.addEventListener('click', () => {
-        _loginComponent.style.display = 'block';
-        _registerComponent.style.display = 'none';
-    });
-
     // LOGIN
     _loginSubmission.addEventListener('click', (event) => {
         event.preventDefault();
         CurrentClient.login();
     });
-
-    _logoutSubmission.addEventListener('click', (event) => {
+    // RESITER
+    _registerSubmission.addEventListener('click', (event) => {
         event.preventDefault();
+        CurrentClient.register();
+    });
+    
+    $('#_Logout').on('click', function () {
         CurrentClient.logout();
     });
 
-    // RESITER
-    _registerSubmission.addEventListener('click', () => {
-        event.preventDefault();
-        let user = document.getElementById('registerUser');
-        let email = document.getElementById('registerEmail');
-        let password = document.getElementById('registerPassword');
-        let confirmPassword = document.getElementById('registerConfirmPassword');
-
-        if (password.value !== confirmPassword.value) {
-            console.log('Passwords do not match');
-            return;
-        }
-
-        fetch('http://localhost:8000/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: user.value,
-                email: email.value,
-                password: password.value,
-            }),
-        }).then(response => {
-            if (!response.ok) {
-                return response.json().then(data => {
-                    throw new Error(data.error);
-                });
-            }
-            return response.json();
-        })
-            .then(data => {
-                console.log(data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+    var _ProfileManipulationSecion = document.getElementById('_ProfileManipulationSecion');
+    CurrentClient.getProfile().then(data => {
+        console.log(">>>>>>>>>", _data);
     });
+
 });
+
+
+

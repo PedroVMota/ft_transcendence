@@ -12,18 +12,27 @@
     crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-  <script type="module" src="main.js"></script>
+  <script src="https://threejs.org/build/three.js"></script>
   <title>Vite App</title>
 
 </head>
 
+<!-- def jsonInformation(self):
+        return {
+            'username': self.username,
+            'email': self.email,
+            'profile_image': self.profile_image.url if self.profile_image else None,
+            'about_me': self.about_me,
+            'create_date': self.create_date,
+            'update_date': self.update_date
+        } -->
+
 <body class="bg-dark">
-  <div class="w-screen h-screen d-flex justify-content-center align-items-center _AfterLogin" style="display: none !important;">
-    <!-- <canvas id="canvas" class="w-full h-full"></canvas> -->
-    <div class="container-md mt-5" id="_loginComponent">
+  <div class="w-screen h-screen d-flex justify-content-center align-items-center" id="_WhenNotLoggedIn">
+    <div class="container-md mt-5">
       <div class="row">
-        <div class="col-sm-6">
-          <div class="card bg-dark-primary">
+        <div class="col-sm-6 d-flex justify-content-center align-items-center">
+          <div class="card bg-dark-primary w-full">
             <div class="card-header">Login</div>
             <div class="card-body">
               <form id="loginForm">
@@ -35,48 +44,30 @@
                   <input type="password" class="form-control" id="loginPassword" placeholder="Password"
                     autocomplete="current-password" required>
                 </div>
-                <button type="button" class="btn btn-secondary" id="_toggleToRegister">Register</button>
                 <button type="submit" class="btn btn-primary" id="_loginSubmission">Login</button>
               </form>
             </div>
           </div>
         </div>
-        <div class="col-sm-6 hidden-md">
-          <div class="d-flex justify-content-center align-items-center h-100">
-            <h1 class="">Welcome paradise!</h1>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Registration Form -->
-    <div class="container mt-5" id="_registerComponent" style="display: none;">
-      <div class="row justify-content-center">
-        <div class="col-md-6">
-          <div class="card">
+        <div class="col-sm-6">
+          <div class="card bg-dark-primary">
             <div class="card-header">Register</div>
             <div class="card-body">
               <form id="registerForm">
-                <div class="form-group">
+                <div class="form-group mb-3">
                   <label for="registerUser">Username</label>
                   <input type="text" class="form-control" id="registerUser" placeholder="Enter username"
                     autocomplete="username" required>
-                </div>
-                <div class="form-group">
-                  <label for="registerEmail">Email address</label>
+                  <label for="registerEmail">Email</label>
                   <input type="email" class="form-control" id="registerEmail" placeholder="Enter email"
                     autocomplete="email" required>
-                </div>
-                <div class="form-group">
                   <label for="registerPassword">Password</label>
                   <input type="password" class="form-control" id="registerPassword" placeholder="Password"
                     autocomplete="new-password" required>
+                  <label for="registerPasswordConfirm">Confirm password</label>
+                  <input type="password" class="form-control" id="registerConfirmPassword"
+                    placeholder="Confirm password" autocomplete="new-password" required>
                 </div>
-                <div class="form-group">
-                  <label for="registerConfirmPassword">Confirm Password</label>
-                  <input type="password" class="form-control" id="registerConfirmPassword" autocomplete="new-password"
-                    placeholder="Confirm Password" required>
-                </div>
-                <button type="button" class="btn btn-secondary" id="_toggleToLogin">Sign in</button>
                 <button type="submit" class="btn btn-primary" id="_registerSubmission">Register</button>
               </form>
             </div>
@@ -86,27 +77,68 @@
     </div>
   </div>
 
-  <div id="_header" class="fixed-bottom loginRequired z-index-1 bg-dark" style="display: none;">
-    <nav class="container-sm border shadow p-3 mb-5 bg-body-tertiary rounded d-flex justify-content-center border-dark">
-      <div class="d-flex justify-content-between">
-        <div class="col-2 text-white">
-          <!-- Home Icon -->
-          <button type="button" class="btn" id="_homeButton">
-            <i class="bi bi-house-door-fill"></i>
-            Home
-          </button>
-        </div>
-        <div class="col-2 text-white">
-          <!-- Logout Button -->
-          <button type="button" class="btn" id="_logoutSubmission">
-            <i class="bi bi-door-closed-fill"></i>
-            Logout
-          </button>
+  <div id="_WhenLoggedIn">
+    <nav class="navbar navbar-expand-lg navbar-dark w-90 d-flex m-auto">
+      <div class="container-lg p-2 d-flex justify-content-between align-items-center">
+        <button class="navbar-brand btn" id="_ResetWorkSpace">
+          <span class="navbar-brand _Username"></span>
+        </button>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse w-full mr-auto" id="navbarNav">
+          <div class="d-flex justify-content-center align-items-start flex-grow-1 flex-column ">
+            <div class="navbar-nav ">
+              <button class="nav-link btn btn-primary" id="_Logout">Logout</button>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
+
+
+
+    <section class="container-lg mt-5" id="_ProfileManipulationSecion">
+      <div class="card bg-dark-primary">
+        <div class="card-header">Profile</div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="card bg-dark-primary">
+                <div class="card-body">
+                  <div class="d-flex justify-content-center align-items-center p-8">
+                    <img src="http://localhost:8000/pImg" class="rounded-circle" id="_ProfileImage" alt="Profile Image" width="200" height="200">
+                  </div>
+                  <div class="d-flex justify-content-center align-items-center">
+                    <button class="btn btn-primary" id="_ChangeProfileImage">Change Profile Image</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="card bg-dark-primary">
+                <div class="card-body">
+                  <div class="form-group">
+                    <h5 class="_Username my-3"></h5>
+                  </div>
+                  <div class="form-group">
+                    <label for="aboutMe">Description</label>
+                    <textarea class="form-control" id="aboutMe" rows="3"></textarea>
+                  </div>
+                  <button class="btn btn-primary my-2" id="_UpdateProfile">Update Profile</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- PROFILE SECION -->
+    </section>
+
   </div>
 
 </body>
 
 </html>
+<script type="module" src="main.js"></script>
