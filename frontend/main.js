@@ -2,8 +2,10 @@ import './style.css'
 import { Client, WhenLoggedIn, WhenNotLoggedIn } from './Classes/Client'
 export var CurrentClient = new Client();
 import { Cookie } from './Classes/Cookie'
-import "./Components/Menu";
+// import "./Components/Menu";
 import $ from 'jquery';
+
+import { ErrorCompoentJavaScriptVanilla } from './Components/Alerts'
 
 
 /*
@@ -26,38 +28,21 @@ Login responde
 }
 */
 
-document.getElementById('_ProfileManipulationSecion').addEventListener('mouseover', function () {
-    console.log('ProfileManipulationSecion');
-    /*
-        Data Jsong Example :
-        {
-            "username": "admin",
-            "email": "admin@admin.com",
-            "profile_image": "/api/defaultAssets/ProfilePicture.png",
-            "about_me": null,
-            "create_date": "2024-06-04T12:33:38.103Z",
-            "update_date": "2024-06-04T13:33:33.598Z"
-        },
-    */
-    JsonData = CurrentClient.getProfile();
-    console.log(JsonData);
-    $('#aboutMe').text(JsonData['about_me']);
 
-
-});
 
 
 
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    let  _loginSubmission = document.getElementById('_loginSubmission');
-    let  _registerSubmission = document.getElementById('_registerSubmission');
+    let _loginSubmission = document.getElementById('_loginSubmission');
+    let _registerSubmission = document.getElementById('_registerSubmission');
 
-    let  Session = new Cookie();
+    let Session = new Cookie();
     if (Session.isSessionLoggedIn()) {
         console.log('Session is logged in');
         WhenLoggedIn();
+        $('#_UpdateProfile').attr('src', `http://localhost:8000/pImg`);
     }
     else {
         console.log('Session is not logged in');
@@ -73,17 +58,52 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         CurrentClient.register();
     });
-    
+
     $('#_Logout').on('click', function () {
         CurrentClient.logout();
     });
 
-    var _ProfileManipulationSecion = document.getElementById('_ProfileManipulationSecion');
+    // var _ProfileManipulationSecion = document.getElementById('_ProfileManipulationSecion');
     CurrentClient.getProfile().then(data => {
-        console.log(">>>>>>>>>", _data);
+        if(data == null || data == undefined)
+            return ;
+        $('#aboutMe').text(data['about_me']);
     });
 
 });
 
 
+$('#_ChangeProfileImage').on('click', function () {
 
+    let Session = new Cookie();
+    if (!Session.isSessionLoggedIn()) {
+        return;
+    }
+    var fileInput = $('<input type="file" accept="image/*" style="display: none;">');
+    fileInput.on('change', function (event) {
+        var file = event.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            $('#_UpdateProfile').attr('src', e.target.result);
+            // Send this file to the server
+            fetch(`http://localhost:8000/profile/image/update/${localStorage.getItem('Username')}`, {
+                method: 'PUT',
+                body: file  // Send the file as raw binary data
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if(data['status'] == '400' || data['status'] == '404')
+                    {
+                        let _ServerResponse = document.getElementById('_ServerResponse');
+                        console.log(_ServerResponse);
+                        _ServerResponse.appendChild(ErrorCompoentJavaScriptVanilla(data));
+                    }
+                })
+        };
+        reader.readAsDataURL(file);
+        // Remove the file input element from the body after the file is selected
+        fileInput.remove();
+    });
+    $('body').append(fileInput);
+    fileInput.click();
+});

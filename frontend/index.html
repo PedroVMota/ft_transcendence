@@ -28,7 +28,8 @@
         } -->
 
 <body class="bg-dark">
-  <div class="w-screen h-screen d-flex justify-content-center align-items-center" id="_WhenNotLoggedIn">
+  <div class="w-screen h-screen d-flex justify-content-center align-items-center" id="_WhenNotLoggedIn"
+    style="display: none;">
     <div class="container-md mt-5">
       <div class="row">
         <div class="col-sm-6 d-flex justify-content-center align-items-center">
@@ -108,7 +109,8 @@
               <div class="card bg-dark-primary">
                 <div class="card-body">
                   <div class="d-flex justify-content-center align-items-center p-8">
-                    <img src="http://localhost:8000/pImg" class="rounded-circle" id="_ProfileImage" alt="Profile Image" width="200" height="200">
+                    <img src="http://localhost:8000/pImg" class="rounded-circle" id="_UpdateProfile" alt="Profile Image"
+                      width="200" height="200">
                   </div>
                   <div class="d-flex justify-content-center align-items-center">
                     <button class="btn btn-primary" id="_ChangeProfileImage">Change Profile Image</button>
@@ -128,12 +130,13 @@
                   </div>
                   <button class="btn btn-primary my-2" id="_UpdateProfile">Update Profile</button>
                 </div>
+                <div id="_ServerResponse" class="p-3" role="alert">
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <!-- PROFILE SECION -->
+        <!-- PROFILE SECION -->
     </section>
 
   </div>

@@ -11,10 +11,10 @@ export function WhenLoggedIn() {
     _WhenNotLoggedIn.style.display = 'none';
     _WhenLoggedIn.classList.remove('d-none');
 
+    $('._Username').text(localStorage.getItem('Username'));
 
 
-    $('._Username').text(localStorage.getItem('Username').toUpperCase());
-
+    
 }
 
 export function WhenNotLoggedIn() {
@@ -70,11 +70,7 @@ export class Client {
             }),
         })
             .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error);
-                    });
-                }
+                if (!response.ok) return ;
                 return response.json();
             })
             .then(data => {
@@ -100,7 +96,7 @@ export class Client {
             credentials: 'include',
         })
             .then(response => {
-                if (!response.ok) return response.json().then(data => { throw new Error(data.error); });
+                if (!response.ok) return ;
                 return response.json();
             })
             .then(data => {
@@ -139,9 +135,7 @@ export class Client {
             }),
         }).then(response => {
             if (!response.ok) {
-                return response.json().then(data => {
-                    throw new Error(data.error);
-                });
+                return ;
             }
             return response.json();
         })
@@ -154,23 +148,22 @@ export class Client {
     }
 
     getProfile() {
-
         console.log('Getting profile');
-        fetch('http://localhost:8000/UserDetails', {
+        return fetch('http://localhost:8000/UserDetails', {
             method: 'GET',
             credentials: 'include',
         })
-            .then(response => {
-                if (!response.ok) return response.json().then(data => { throw new Error(data.error); });
-                return response.json();
-            })
-            .then(data => {
-                // console.log(data);
-                return data;
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+        .then(response => {
+            if (!response.ok) return undefined;
+            return response.json();
+        })
+        .then(data => {
+            // console.log(data);
+            return data;
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
     }
 }
 
