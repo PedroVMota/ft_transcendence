@@ -8,8 +8,9 @@ from django.conf import settings
 DEFAULT_IMAGE = 'Auth/defaultAssets/ProfilePicture.png'
 
 def upload_to(instance, filename):
-    print('instance', instance)
-    return 'images/{filename}'.format(filename=filename)
+    # Save the image in a subdirectory of MEDIA_ROOT
+    # return '{instance}/{filename}'.format(filename=filename)
+    return 'Auth/{instance}/{filename}'.format(filename=filename)
 
 class MyUser(AbstractUser):
     profile_picture = models.ImageField(upload_to=upload_to, default=DEFAULT_IMAGE)
@@ -22,3 +23,14 @@ class MyUser(AbstractUser):
         super().save(*args, **kwargs)
     def __str__(self):
         return self.username
+    
+
+class serverLogs(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    mehod = models.CharField(max_length=10, default='GET')
+    path = models.CharField(max_length=100, default='/')
+    status = models.IntegerField()
+    create_date = models.DateTimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.user.username

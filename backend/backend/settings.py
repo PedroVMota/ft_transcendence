@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 from datetime import timedelta
 
 
@@ -22,8 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6nvu^(nt)3je_ho-(k&c39@r1%#ybq(ni1xi_9zsmny_zk#y+3'
+# SECRET_KEY = 'django-insecure-6nvu^(nt)3je_ho-(k&c39@r1%#ybq(ni1xi_9zsmny_zk#y+3'
+SECRET_KEY = "@1_zs)rtcfb+3!8x(1+i1ue5swaa-9jltt6utcuk^h=u2kxl75"
 AUTH_USER_MODEL = 'Auth.MyUser'
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -74,6 +80,7 @@ SIMPLE_JWT = {
 }
 
 MIDDLEWARE = [
+    'backend.middleware.LoggingMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
