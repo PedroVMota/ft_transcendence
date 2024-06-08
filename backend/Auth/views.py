@@ -1,3 +1,4 @@
+#Auth/views.py
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,7 +15,7 @@ import json
 """ HOW TO USE THIS API
 
     Register a user is just a simple post request to the /register/ endpoint
-    The body should be something like:
+    The body should be something like: /token/register
     
     {
         "username": "johndoe",
@@ -24,8 +25,7 @@ import json
         "last_name": "Doe"
     }
     
-    Login is done by sending a post request to the /login/ endpoint with the body:
-        
+    Login is done by sending a post request to the /login/ endpoint with the body: /token
     {
         "username": "johndoe",
         "password": "securepassword"
@@ -34,7 +34,7 @@ import json
     The response will contain the access token and refresh token, which should be stored by the client.
     
     
-    to update the acess token, send a post request to the /refresh/ endpoint with the body:
+    to update the acess token, send a post request to the /refresh/ endpoint with the body: /token/refresh
         
     {
         "refresh": "refresh_token"

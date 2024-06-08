@@ -4,7 +4,7 @@ from .views import HomeView, UserDetailView, closeSession, UserRegistrationView
 
 
 urlpatterns = [
-    path('register/', UserRegistrationView.as_view(), name='register'),
+    path('token/register/', UserRegistrationView.as_view(), name='register'),
     path('token/flush/', closeSession.as_view(), name='token_flush'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
