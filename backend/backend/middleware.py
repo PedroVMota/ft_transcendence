@@ -5,9 +5,7 @@ from Auth.models import serverLogs
 
 class LoggingMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
-        print("LoggingMiddleware process_response called")  # Add this line
         if request.user.is_authenticated:
-            print("REQUEST USER IS AUTHENTICATED")  # Add this line
             serverLogs.objects.create(
                 user=request.user,
                 mehod=request.method,

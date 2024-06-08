@@ -19,6 +19,19 @@ class MyUser(AbstractUser):
     update_date = models.DateTimeField(auto_now=True)
     friendlist = models.ManyToManyField('self', blank=True)
     
+    def getJson(self):
+        return {
+            'username': self.username,
+            'email': self.email,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'profile_picture': self.profile_picture.url,
+            'about_me': self.about_me,
+            'create_date': self.create_date,
+            'update_date': self.update_date,
+            'friendlist': self.friendlist
+        }
+    
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
     def __str__(self):
