@@ -7,8 +7,25 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.sessions.models import Session
 from .serializers import UserSerializer, SessionSerializer
 from rest_framework import status, permissions
+from django.contrib.auth import login
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.forms.models import model_to_dict
+from django.core.files.storage import default_storage
+import datetime
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from django.forms.models import model_to_dict
 import json
+from django.db.models.fields.files import ImageFieldFile
 
+
+class utils:
+    class DateTimeEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, datetime.datetime):
+                return obj.isoformat()
+            return json.JSONEncoder.default(self, obj)
 
 
 
@@ -32,21 +49,42 @@ import json
     }
     
     The response will contain the access token and refresh token, which should be stored by the client.
-    
-    
     to update the acess token, send a post request to the /refresh/ endpoint with the body: /token/refresh
-        
     {
         "refresh": "refresh_token"
     }
-
-
 """
 
-class UserRegistrationView(APIView):
-    # Allow any user (authenticated or not) to access this url 
-    permission_classes = (permissions.AllowAny,)
 
+
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        user_dict = model_to_dict(self.user)
+        # Convert the image field to its URL
+        user_dict['profile_picture'] = self.user.profile_picture.url
+        data.update({'username': self.user.username, 'object': user_dict})
+        return data
+
+class UserLoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+    def get(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        User = get_user_model()
+        try:
+            user = User.objects.get(username=serializer.validated_data['username'])
+        except User.DoesNotExist:
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        sessions = Session.objects.filter(expire_date__gte=timezone.now(), session_key=request.session.session_key)
+        if not sessions.exists():
+            request.session.create()
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+class UserRegistrationView(APIView):
+    permission_classes = (permissions.AllowAny,)
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
