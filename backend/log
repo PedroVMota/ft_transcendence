@@ -1,7 +1,0 @@
-Performing system checks...
-
-System check identified no issues (0 silenced).
-June 01, 2024 - 15:41:13
-Django version 3.2.12, using settings 'backend.settings'
-Starting development server at http://127.0.0.1:8000/
-Quit the server with CONTROL-C.
