@@ -17,8 +17,8 @@ services:
     volumes:
       - ./backend/Server:/code
       - static_volume:/code/staticfiles
-    # ports:
-      # - 8000:8000
+    ports:
+      - 8000:8000
     depends_on:
       - db
     networks:
@@ -36,6 +36,18 @@ services:
     command: ["sh", "-c", "npm run dev"]
     networks:
       - default
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - 5050:80
+    volumes:
+      - ./Db/pgadmin:/root/.pgadmin
+      - ./Db/pgdata:/var/lib/postgresql/data
+      - ./Db/pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: pgadmin
 
 volumes:
   static_volume:
