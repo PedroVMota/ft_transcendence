@@ -59,33 +59,38 @@ class utils:
 
 
 
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         user_dict = model_to_dict(self.user)
         # Convert the image field to its URL
         user_dict['profile_picture'] = self.user.profile_picture.url
-        data.update({'username': self.user.username, 'object': user_dict})
+        data['user'] = user_dict  # Add user information to the response
         return data
 
 class UserLoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
-    def get(self, request, *args, **kwargs):
+
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        User = get_user_model()
         try:
-            user = User.objects.get(username=serializer.validated_data['username'])
-        except User.DoesNotExist:
-            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-        sessions = Session.objects.filter(expire_date__gte=timezone.now(), session_key=request.session.session_key)
-        if not sessions.exists():
-            request.session.create()
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+            serializer.is_valid(raise_exception=True)
+            User = get_user_model()
+            sessions = Session.objects.filter(expire_date__gte=timezone.now(), session_key=request.session.session_key)
+            if not sessions.exists():
+                request.session.create()
+            response_data = serializer.validated_data
+            response_data['sessionid'] = request.session.session_key  # Add session id to the response data
+            response = Response(response_data, status=status.HTTP_200_OK)
+            response.set_cookie('sessionid', request.session.session_key, samesite='None', secure=True)
+            return response
+        except Exception as e:
+            return Response({"message":str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserRegistrationView(APIView):
     permission_classes = (permissions.AllowAny,)
-    def post(self, request):
+    def get(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -123,3 +128,5 @@ class HomeView(APIView):
     def get(self, request):
         content = {'message': 'Hello, World!'}
         return Response(content)
+
+        

@@ -27,6 +27,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "@1_zs)rtcfb+3!8x(1+i1ue5swaa-9jltt6utcuk^h=u2kxl75"
 AUTH_USER_MODEL = 'Auth.MyUser'
 
+ASGI_APPLICATION = 'backend.asgi.application'
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -38,17 +40,22 @@ ALLOWED_HOSTS = []
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:3000",
 ]
-CORS_ALLOW_CREDENTIALS = True
-
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
-
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',  # Replace with the domain of your front-end
+]
 
 
 # Application definition
 
+
+
 INSTALLED_APPS = [
+    'channels',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
@@ -58,8 +65,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Auth.apps.AuthConfig'
+    'Auth.apps.AuthConfig',
+    'Sockets.apps.SocketsConfig',
 ]
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 # put on your settings.py file below INSTALLED_APPS
 REST_FRAMEWORK = {
@@ -125,12 +142,20 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'postgres',  # database name
+    #     'USER': 'postgres',  # database user
+    #     'PASSWORD': 'example',  # database password
+    #     'HOST': 'db',  # use localhost if running the database on your local machine
+    #     'PORT': '5432',  # default postgres port
+    # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',  # database name
         'USER': 'postgres',  # database user
         'PASSWORD': 'example',  # database password
-        'HOST': 'db',  # use localhost if running the database on your local machine
+        'HOST': 'localhost',  # use localhost for the second database
         'PORT': '5432',  # default postgres port
     }
 }
