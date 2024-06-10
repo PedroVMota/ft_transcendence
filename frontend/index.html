@@ -18,6 +18,7 @@
 </head>
 
 <body>
+  
   <div class="page-container">
     <div class="container-md login-container" id="loginContainer">
       <div class="row">
@@ -76,47 +77,6 @@
     </div>
   </div>
 
-  <script>
-    document.getElementById('showRegisterForm').addEventListener('click', function (event) {
-      event.preventDefault();
-      const loginContainer = document.getElementById('loginContainer');
-      const registerContainer = document.getElementById('registerContainer');
-
-      loginContainer.classList.add('fade-out');
-      setTimeout(() => {
-        loginContainer.classList.add('hidden');
-        loginContainer.classList.remove('fade-out');
-        registerContainer.classList.remove('hidden');
-        registerContainer.classList.add('fade-in');
-      }, 500);
-    });
-
-    document.getElementById('showLoginForm').addEventListener('click', function (event) {
-      event.preventDefault();
-      const loginContainer = document.getElementById('loginContainer');
-      const registerContainer = document.getElementById('registerContainer');
-
-      registerContainer.classList.add('fade-out');
-      setTimeout(() => {
-        registerContainer.classList.add('hidden');
-        registerContainer.classList.remove('fade-out');
-        loginContainer.classList.remove('hidden');
-        loginContainer.classList.add('fade-in');
-      }, 500);
-    });
-
-    document.getElementById('loginForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-      // Your login logic here
-      alert('Login form submitted');
-    });
-
-    document.getElementById('registerForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-      // Your registration logic here
-      alert('Register form submitted');
-    });
-  </script>
 </body>
-
+<script type="module" src="main.js"></script>
 </html>
