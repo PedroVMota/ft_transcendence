@@ -20,6 +20,8 @@ import json
 from django.db.models.fields.files import ImageFieldFile
 
 
+
+
 class utils:
     class DateTimeEncoder(json.JSONEncoder):
         def default(self, obj):
@@ -31,9 +33,7 @@ class utils:
 
 """ HOW TO USE THIS API
 
-    Register a user is just a simple post request to the /register/ endpoint
-    The body should be something like: /token/register
-    
+    Register a user is just a simple post request to the /register/ endpoint The body should be something like: /token/register
     {
         "username": "johndoe",
         "password": "securepassword",
@@ -63,27 +63,22 @@ class utils:
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        user_dict = model_to_dict(self.user)
-        # Convert the image field to its URL
-        user_dict['profile_picture'] = self.user.profile_picture.url
-        data['user'] = user_dict  # Add user information to the response
         return data
+
 
 class UserLoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
-
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
             User = get_user_model()
             sessions = Session.objects.filter(expire_date__gte=timezone.now(), session_key=request.session.session_key)
-            if not sessions.exists():
-                request.session.create()
             response_data = serializer.validated_data
-            response_data['sessionid'] = request.session.session_key  # Add session id to the response data
+            # response_data['sessionid'] = request.session.session_key  # Add session id to the response data
             response = Response(response_data, status=status.HTTP_200_OK)
-            response.set_cookie('sessionid', request.session.session_key, samesite='None', secure=True)
+            # response.set_cookie('sessionid', request.session.session_key, samesite='None', secure=True)
+            login(request, serializer.user)
             return response
         except Exception as e:
             return Response({"message":str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -114,7 +109,9 @@ class closeSession(APIView):
         
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
+    print("Permission Classes: ", permission_classes)
     authentication_classes = [JWTAuthentication]
+    print("Authentication Classes: ", authentication_classes)
     def get(self, request):
         user = request.user
         serializer = UserSerializer(user)

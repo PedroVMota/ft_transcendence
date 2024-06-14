@@ -10,19 +10,18 @@ services:
       POSTGRES_PASSWORD: example
     networks:
       - default
-  # backend:
-  #   container_name: backend
-  #   build: ../backend
-  #   command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-  #   volumes:
-  #     - ./backend/Server:/code
-  #     - static_volume:/code/staticfiles
-  #   ports:
-  #     - 8000:8000
-  #   depends_on:
-  #     - db
-  #   networks:
-  #     - default
+  backend:
+    container_name: backend
+    build: ../backend
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ../backend/Server:/code
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    networks:
+      - default
   web:
     container_name: web
     build:
@@ -31,8 +30,8 @@ services:
       - ../frontend:/app
     ports:
       - "5173:5173"
-    # depends_on:
-      # - backend
+    depends_on:
+      - backend
     command: ["sh", "-c", "npm run dev"]
     networks:
       - default

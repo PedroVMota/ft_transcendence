@@ -12,12 +12,14 @@ class Args:
 
 
 def dockerService():
-    os.system("docker-compose -f Services/compose.yml up --build")
-
+    os.system("docker-compose -f Services/compose.yml up -d --build")
 
 def main(args: Args):
     if(args.getArgc() == 1):
         dockerService()
+    if(args.getArgc() == 2):
+        if(args.getArgv()[1] == "stop"):
+            os.system("docker-compose -f Services/compose.yml down")
     
     
 if __name__ == "__main__":
