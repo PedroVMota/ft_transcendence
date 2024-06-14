@@ -1,7 +1,6 @@
 altgraph==0.17
 asgiref==3.8.1
 async-timeout==4.0.3
-bpytop==1.0.68
 c-formatter-42==0.2.7
 channels==3.0.5
 channels-redis==4.2.0

@@ -48,7 +48,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',  # Replace with the domain of your front-end
 ]
-
+APPEND_SLASH=False
 
 # Application definition
 
@@ -142,22 +142,22 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'postgres',  # database name
-    #     'USER': 'postgres',  # database user
-    #     'PASSWORD': 'example',  # database password
-    #     'HOST': 'db',  # use localhost if running the database on your local machine
-    #     'PORT': '5432',  # default postgres port
-    # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',  # database name
         'USER': 'postgres',  # database user
         'PASSWORD': 'example',  # database password
-        'HOST': 'localhost',  # use localhost for the second database
+        'HOST': 'db',  # use localhost if running the database on your local machine
         'PORT': '5432',  # default postgres port
-    }
+    },
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'postgres',  # database name
+    #     'USER': 'postgres',  # database user
+    #     'PASSWORD': 'example',  # database password
+    #     'HOST': 'localhost',  # use localhost for the second database
+    #     'PORT': '5432',  # default postgres port
+    # }
 }
 
 
