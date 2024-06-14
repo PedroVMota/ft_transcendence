@@ -1,8 +1,7 @@
 
 function app() {
   console.log("APP");
-  if (document.getElementById('_AppLogin'))
-  {
+  if (document.getElementById('_AppLogin')) {
     var _AppLogin = document.getElementById('_AppLogin');
     _AppLogin.classList.add('hidden');
     _AppLogin.classList.remove('fade-out');
@@ -26,8 +25,7 @@ function app() {
 }
 
 function login() {
-  if (document.getElementById('_appAfterLogin'))
-  {
+  if (document.getElementById('_appAfterLogin')) {
     var _appAfterLogin = document.getElementById('_appAfterLogin');
     _appAfterLogin.classList.add('hidden');
     _appAfterLogin.classList.remove('fade-out');
@@ -155,8 +153,6 @@ function login() {
     }).then(response => {
       return response.json();
     }).then(data => {
-      console.log(data);
-      app();
     }).catch(error => {
       login();
       console.error('Error:', error.message);
@@ -192,33 +188,30 @@ function login() {
 }
 
 
-/* ============= CHECK THE LOCALSTORAGE ACESS TOKEN ============= */
-document.addEventListener('DOMContentLoaded', function () {
-  if (localStorage.getItem('Access') === null) {
-    login();
-  }
-  if (localStorage.getItem('Access') !== null) {
-    fetch('http://localhost:8000/token/verify/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        "token": localStorage.getItem('Access')
-      })
-    }).then(response => {
-      if (response.status === 200) {
-        console.log("THE TOKEN IS VALID");
-        return response.json();
-      }
-      throw new Error('Invalid token');
-    }).then(data => {
-      console.log(data);
-      app();
+if (localStorage.getItem('Access') === null) {
+  login();
+}
+else {
+  fetch('http://localhost:8000/token/verify/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      "token": localStorage.getItem('Access')
+    })
+  }).then(response => {
+    if (response.status === 200) {
+      console.log("THE TOKEN IS VALID");
+      return response.json();
+    }
+    throw new Error('Invalid token');
+  }).then(data => {
+    console.log(data);
+    app();
 
-    }).catch(error => {
-      console.log(error);
-      login();
-    });
-  }
-});
+  }).catch(error => {
+    console.log(error);
+    login();
+  });
+}
