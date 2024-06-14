@@ -81,6 +81,7 @@ class UserLoginView(TokenObtainPairView):
             login(request, serializer.user)
             return response
         except Exception as e:
+            print(e)
             return Response({"message":str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserRegistrationView(APIView):
@@ -90,6 +91,7 @@ class UserRegistrationView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response({"message":"User Created"}, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class closeSession(APIView):
