@@ -1,3 +1,38 @@
+import { Color } from  './Utils/Color'
+import { treeJSAplication } from './treeJSAplication'
+
+
+function showAlert(message, duration = 1000) {
+  // Create the alert div
+  if(document.getElementById('alertDiv')){
+    document.getElementById('alertDiv').remove();
+  }
+  const alertDiv = document.createElement('div');
+  alertDiv.id = 'alertDiv';
+  alertDiv.style.position = 'absolute';
+  alertDiv.style.top = '20px';
+  alertDiv.style.right = '20px';
+  alertDiv.style.padding = '10px';
+  alertDiv.style.color = 'white';
+  alertDiv.style.backdropFilter = 'blur(10px)';
+  alertDiv.style.backgroundColor = Color.RGBToRGBA(150, 150, 150, 0.1);
+  alertDiv.style.boxShadow = '0 0 30px rgba(0, 0, 0, 0.1)';
+  alertDiv.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+  alertDiv.style.borderRadius = '5px';
+  alertDiv.style.zIndex = '1000'; // Ensure it's on top of other elements
+  alertDiv.innerText = message;
+
+  // Append the alert div to the body
+  document.body.appendChild(alertDiv);
+
+  // Remove the alert div after 'duration' milliseconds
+  setTimeout(() => {
+    alertDiv.remove();
+  }, duration);
+}
+
+// Example usage: Call this function when login fails
+// showAlert('Login failed. Please try again.', 1000);
 
 function app() {
   console.log("APP");
@@ -7,21 +42,7 @@ function app() {
     _AppLogin.classList.remove('fade-out');
     _AppLogin.remove();
   }
-  var newApp = document.createElement('div');
-  // Apply the id _appAfterLogin
-  newApp.id = '_appAfterLogin';
-  newApp.innerHTML = `
-    <div class="container-md">
-      <div class="row">
-        <div class="col-12 text-center">
-          <h1>Welcome to the Dashboard</h1>
-          <button class="btn btn-primary" id="logout">Logout</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  `
-  document.body.appendChild(newApp);
+  treeJSAplication();  
 }
 
 function login() {
@@ -127,6 +148,7 @@ function login() {
       app();
     }).catch(error => {
       console.log(error);
+      showAlert('Login failed. Please try again.', 5000);
     });
   });
 
@@ -156,6 +178,7 @@ function login() {
     }).catch(error => {
       login();
       console.error('Error:', error.message);
+      showAlert('Registration failed. Please try again.', 5000);
     });
   });
   document.getElementById('showRegisterForm').addEventListener('click', function (event) {

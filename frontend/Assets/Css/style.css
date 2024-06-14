@@ -31,7 +31,8 @@
   background-color: #050716;
 }
 
-.login-container, .register-container {
+.login-container,
+.register-container {
   position: relative;
   z-index: 1;
   background: rgba(255, 255, 255, 0.1);
@@ -49,7 +50,8 @@
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-.form-control, .btn {
+.form-control,
+.btn {
   border-radius: 5px;
 }
 
@@ -73,7 +75,8 @@
   background: rgba(255, 255, 255, 0.5);
 }
 
-.login-header, .register-header {
+.login-header,
+.register-header {
   font-size: 2rem;
   margin-bottom: 1.5rem;
 }
