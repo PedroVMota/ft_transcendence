@@ -27,12 +27,13 @@ services:
     build:
       context: ../frontend
     volumes:
-      - ../frontend/Code:/app
+      - ../frontend:/app
     ports:
       - "5173:5173"
     depends_on:
       - backend
     command: ["sh", "-c", "npm run dev"]
+    # command: sleep 1000000000
     networks:
       - default
   pgadmin:
