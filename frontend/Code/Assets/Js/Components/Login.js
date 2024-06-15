@@ -1,7 +1,50 @@
 import { showAlert } from "./Alert";
+import { app } from "./App";
+
+/**
+ * Toggles the visibility of the login and registration forms by fading out the login form and fading in the registration form.
+ * It also hides the login form after the fade-out animation and shows the registration form after the fade-in animation.
+*/
+const ToggleRegisterToLogin = () => {
+    const loginContainer = document.getElementById('loginContainer');
+    const registerContainer = document.getElementById('registerContainer');
+
+    registerContainer.classList.add('fade-out');
+    setTimeout(() => {
+        registerContainer.classList.add('hidden');
+        registerContainer.classList.remove('fade-out');
+        loginContainer.classList.remove('hidden');
+        loginContainer.classList.add('fade-in');
+    }, 500);
+}
+
+/**
+ * Toggles the view from the login form to the registration form by fading out the login form and fading in the registration form.
+ * It also hides the login form after the fade-out animation and shows the registration form after the fade-in animation.
+*/
+const ToggleLoginToRegister = () => {
+    const loginContainer = document.getElementById('loginContainer');
+    const registerContainer = document.getElementById('registerContainer');
+
+    loginContainer.classList.add('fade-out');
+    setTimeout(() => {
+        loginContainer.classList.add('hidden');
+        loginContainer.classList.remove('fade-out');
+        registerContainer.classList.remove('hidden');
+        registerContainer.classList.add('fade-in');
+    }, 500);
+}
 
 
+/**
+ * Renders the login and registration forms on the page. It handles the creation and removal of these forms dynamically.
+ * It also sets up event listeners for form submissions and link clicks to toggle between login and registration forms.
+ * The login form submission is handled to authenticate users by sending their credentials to a server and storing received tokens.
+ * The registration form submission is handled to register new users by sending their details to a server.
+ * Additionally, it provides functionality to switch views between the login and registration forms.
+ */
 export function login() {
+    console.log("Login");
     if (document.getElementById('_appAfterLogin')) {
         var _appAfterLogin = document.getElementById('_appAfterLogin');
         _appAfterLogin.classList.add('hidden');
@@ -132,37 +175,78 @@ export function login() {
         }).then(response => {
             return response.json();
         }).then(data => {
+            ToggleRegisterToLogin();
         }).catch(error => {
             login();
             console.error('Error:', error.message);
             showAlert('Registration failed. Please try again.', 5000);
         });
     });
-    document.getElementById('showRegisterForm').addEventListener('click', function (event) {
-        event.preventDefault();
-        const loginContainer = document.getElementById('loginContainer');
-        const registerContainer = document.getElementById('registerContainer');
-
-        loginContainer.classList.add('fade-out');
-        setTimeout(() => {
-            loginContainer.classList.add('hidden');
-            loginContainer.classList.remove('fade-out');
-            registerContainer.classList.remove('hidden');
-            registerContainer.classList.add('fade-in');
-        }, 500);
-    });
 
     document.getElementById('showLoginForm').addEventListener('click', function (event) {
         event.preventDefault();
-        const loginContainer = document.getElementById('loginContainer');
-        const registerContainer = document.getElementById('registerContainer');
-
-        registerContainer.classList.add('fade-out');
-        setTimeout(() => {
-            registerContainer.classList.add('hidden');
-            registerContainer.classList.remove('fade-out');
-            loginContainer.classList.remove('hidden');
-            loginContainer.classList.add('fade-in');
-        }, 500);
+        ToggleRegisterToLogin();
+    })
+    document.getElementById('showRegisterForm').addEventListener('click', function (event) {
+        event.preventDefault();
+        ToggleLoginToRegister();
     });
+
+
+}
+/**
+ * Sends a JSON request to a specified URL using fetch API. It is an asynchronous function that returns a promise.
+ * 
+ * @param {string} url - The URL to send the request to.
+ * @param {string} method - The HTTP method to use for the request (e.g., 'POST', 'GET').
+ * @param {Object} data - The data to be sent with the request, as a JavaScript object.
+ * @returns {Promise} A promise that resolves with the response of the request, parsed as JSON.
+ */
+async function jsonRequest(url, method, data) {
+    let response = await fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    });
+    return response.json();
+}
+
+
+/**
+ * Sends a request with a bearer token authorization header. This function is used for authenticated requests.
+ * It throws an error if the response status is not successful.
+ * 
+ * @param {string} url - The URL to send the request to.
+ * @param {string} method - The HTTP method to use for the request (e.g., 'GET', 'POST').
+ * @param {string} token - The bearer token to be used for authorization.
+ * @returns {Promise} A promise that resolves with the response of the request, parsed as JSON.
+ */
+async function bearerRequest(url, method, token) {
+    let response = await fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json(); // Assuming the server responds with JSON
+}
+
+/**
+ * Validates the authentication of the user by checking if an access token exists in localStorage.
+ * If the token exists, it makes a request to a server endpoint to validate the token.
+ * 
+ * @returns {Promise} A promise that resolves with the server's response if the token is valid, or false if no token is found.
+ */
+export function ValidateAuth() {
+    let Access = localStorage.getItem('Access');
+    if (!Access) {
+        return Promise.resolve(false);
+    }
+    return bearerRequest('http://localhost:8000/user/', 'GET', Access);
 }

@@ -1,5 +1,11 @@
 import { Color } from  '../Utils/Color'
 
+/*
+    * Shows an alert message on the top right of the screen
+    * @param {string} message - The message to display in the alert
+    * @param {number} duration - The duration in milliseconds to display the alert
+    * 
+*/
 export function showAlert(message, duration = 1000) {
     // Create the alert div
     if (document.getElementById('alertDiv')) {
