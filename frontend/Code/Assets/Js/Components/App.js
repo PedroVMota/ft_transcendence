@@ -1,33 +1,31 @@
 import { showAlert } from "./Alert";
+import { login } from "./Login";
+import { treeJSAplication } from "../treeJSAplication";
 
 /*
     * Function to render the login page
 */
 export function app() {
-    var _AppLogin = document.getElementById('_AppLogin'); // Correctly define _AppLogin
-    console.log(_AppLogin); // Log _AppLogin to the console
+    var _AppLogin = document.getElementById('_AppLogin');
     if (_AppLogin) {
         _AppLogin.remove();
     }
 
-    // Verifica se o botão de logout já existe
     if (!document.getElementById('logoutButton')) {
-        // Cria um botão de logout
         var logoutButton = document.createElement('button');
         logoutButton.id = 'logoutButton';
         logoutButton.textContent = 'Logout';
         logoutButton.addEventListener('click', function () {
-            window.history.pushState({}, '', '/'); // Muda a URL para '/'
-            // Limpa todo o conteúdo da página
+            window.history.pushState({}, '', '/');
             document.body.innerHTML = '';
-            login(); // Chama a função login para renderizar a página de login
+            localStorage.removeItem('Access');
+            localStorage.removeItem('Refresh');
+            login();
         });
 
-        // Adiciona o botão de logout ao body
         document.body.appendChild(logoutButton);
     }
 
-    // Adiciona mais elementos à página
     var heading = document.createElement('h1');
     heading.textContent = 'Welcome to the app!';
     document.body.appendChild(heading);
@@ -36,5 +34,11 @@ export function app() {
     paragraph.textContent = 'This is some more content on the page.';
     document.body.appendChild(paragraph);
 
-    treeJSAplication();
+    // Ensure the canvas is added after the paragraph
+    var canvasContainer = document.createElement('div');
+    canvasContainer.id = 'canvasContainer';
+    document.body.appendChild(canvasContainer);
+
+    // Modify treeJSAplication to accept a container element for the renderer
+    treeJSAplication(canvasContainer);
 }

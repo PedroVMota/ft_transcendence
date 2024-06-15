@@ -248,5 +248,6 @@ export function ValidateAuth() {
     if (!Access) {
         return Promise.resolve(false);
     }
+    // Ensure bearerRequest returns a Promise
     return bearerRequest('http://localhost:8000/user/', 'GET', Access);
 }

@@ -6,6 +6,7 @@ import { treeJSAplication } from './treeJSAplication'
 /**
  * Check if the acess token the user is valid, otherwise, toggle the login page
  */
+document.addEventListener('DOMContentLoaded', () => {
 ValidateAuth().then((response) => {
     console.log(response)
     if (response) {
@@ -13,5 +14,4 @@ ValidateAuth().then((response) => {
     } else {
         login()
     }
-}
-)
+})})
