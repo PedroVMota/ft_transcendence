@@ -202,15 +202,19 @@ export function login() {
  * @param {Object} data - The data to be sent with the request, as a JavaScript object.
  * @returns {Promise} A promise that resolves with the response of the request, parsed as JSON.
  */
-async function jsonRequest(url, method, data) {
-    let response = await fetch(url, {
+function jsonRequest(url, method, data) {
+    return fetch(url, {
         method: method,
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json(); // Assuming the server responds with JSON
     });
-    return response.json();
 }
 
 
@@ -223,18 +227,18 @@ async function jsonRequest(url, method, data) {
  * @param {string} token - The bearer token to be used for authorization.
  * @returns {Promise} A promise that resolves with the response of the request, parsed as JSON.
  */
-async function bearerRequest(url, method, token) {
-    let response = await fetch(url, {
+function bearerRequest(url, method, token) {
+    return fetch(url, {
         method: method,
         headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         }
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json(); // Assuming the server responds with JSON
     });
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json(); // Assuming the server responds with JSON
 }
 
 /**
