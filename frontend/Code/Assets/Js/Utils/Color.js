@@ -23,4 +23,22 @@ export class Color{
     static RGBToRGBA(r, g, b, alpha){
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
+
+    static LinearGradient(angle, ...colors) {
+        let gradient = `linear-gradient(${angle}deg`;
+        for (const color of colors) {
+            gradient += `, ${color}`;
+        }
+        gradient += `)`;
+        return gradient;
+    }
+
+    static RadialGradient(shape, ...colors) {
+        let gradient = `radial-gradient(${shape}`;
+        for (const color of colors) {
+            gradient += `, ${color}`;
+        }
+        gradient += `)`;
+        return gradient;
+    }
 }

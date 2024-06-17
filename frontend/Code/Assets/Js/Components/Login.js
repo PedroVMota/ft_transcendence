@@ -166,6 +166,7 @@ export function login() {
             "email": document.getElementById('registerEmail').value,
             "password": document.getElementById('registerPassword').value
         }
+
         fetch('http://localhost:8000/token/register/', {
             method: 'POST',
             headers: {
@@ -173,11 +174,13 @@ export function login() {
             },
             body: JSON.stringify(data)
         }).then(response => {
+            console.log(response);
+            if(response.status === 400 || response.status === 500)
+                throw new Error(response.json()['message']); 
             return response.json();
         }).then(data => {
             ToggleRegisterToLogin();
         }).catch(error => {
-            login();
             console.error('Error:', error.message);
             showAlert('Registration failed. Please try again.', 1500);
         });

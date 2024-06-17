@@ -87,6 +87,7 @@ class UserLoginView(TokenObtainPairView):
 class UserRegistrationView(APIView):
     permission_classes = (permissions.AllowAny,)
     def post(self, request):
+        print("Permission Classes: ", request)
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

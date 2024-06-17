@@ -2,6 +2,7 @@ import { showAlert } from "./Alert";
 import { login } from "./Login";
 import { treeJSAplication } from "../treeJSAplication";
 import { Menu } from "./Menu/Menu";
+import { Color } from "../Utils/Color";
 
 /*
     * Function to render the login page
@@ -14,7 +15,12 @@ export function app() {
 
     var _App = document.createElement('div');
     _App.id = '_App';
-    _App.classList.add('bg-primary');
+    // _App.style.background = Color.LinearGradient(45, Color.RGBToRGBA(60,60,255, 0.8), Color.RGBToRGBA(60,60,255, 0.8));
+    _App.style.background = 'url("https://wallpapercave.com/wp/wp3837751.jpg")';
+    _App.style.backgroundSize = 'cover';
+    _App.style.backgroundPosition = 'center';
+    // _App.style.filter = 'blur(5px)';
+    console.log(_App.style.background);
     document.body.appendChild(_App);
     
     Menu(_App);
@@ -24,11 +30,7 @@ export function app() {
     //     logoutButton.id = 'logoutButton';
     //     logoutButton.textContent = 'Logout';
     //     logoutButton.addEventListener('click', function () {
-    //         window.history.pushState({}, '', '/');
-    //         document.body.innerHTML = '';
-    //         localStorage.removeItem('Access');
-    //         localStorage.removeItem('Refresh');
-    //         login();
+    //        
     //     });
 
         // _App.body.appendChild(logoutButton);

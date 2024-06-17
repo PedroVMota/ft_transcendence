@@ -47,7 +47,7 @@ SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',  # Replace with the domain of your front-end
+    'http://web:3000',  # Replace with the domain of your front-end
 ]
 APPEND_SLASH=False
 
