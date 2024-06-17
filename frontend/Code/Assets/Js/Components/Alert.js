@@ -1,3 +1,4 @@
+import { color } from 'three/examples/jsm/nodes/Nodes.js';
 import { Color } from  '../Utils/Color'
 
 /*
@@ -6,7 +7,7 @@ import { Color } from  '../Utils/Color'
     * @param {number} duration - The duration in milliseconds to display the alert
     * 
 */
-export function showAlert(message, duration = 1000) {
+export function showAlert(message, duration = 1000, backgroundColor = Color.RGBToRGBA(200, 75, 75, .5), color = Color.RGBToRGBA(200,200,200,1), borderColor = Color.RGBToRGBA(200, 100, 100, .5)) {
     // Create the alert div
     if (document.getElementById('alertDiv')) {
         document.getElementById('alertDiv').remove();
@@ -17,20 +18,25 @@ export function showAlert(message, duration = 1000) {
     alertDiv.style.top = '20px';
     alertDiv.style.right = '20px';
     alertDiv.style.padding = '10px';
-    alertDiv.style.color = 'white';
+    alertDiv.style.color = `${color}`;
     alertDiv.style.backdropFilter = 'blur(10px)';
-    alertDiv.style.backgroundColor = Color.RGBToRGBA(150, 150, 150, 0.1);
+    alertDiv.style.backgroundColor = `${backgroundColor}`;
     alertDiv.style.boxShadow = '0 0 30px rgba(0, 0, 0, 0.1)';
-    alertDiv.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+    alertDiv.style.border = `1px solid ${borderColor}`
     alertDiv.style.borderRadius = '5px';
     alertDiv.style.zIndex = '1000'; // Ensure it's on top of other elements
     alertDiv.innerText = message;
-
     // Append the alert div to the body
-    document.body.appendChild(alertDiv);
+    alertDiv.classList.add('fade-in');
 
+    document.body.appendChild(alertDiv);
     // Remove the alert div after 'duration' milliseconds
     setTimeout(() => {
-        alertDiv.remove();
+        alertDiv.classList.add('fade-out');
+        setTimeout(() => {
+            alertDiv.classList.add('hidden');
+            alertDiv.classList.remove('fade-out');
+        }, 500);
+
     }, duration);
 }

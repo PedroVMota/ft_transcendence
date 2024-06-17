@@ -148,7 +148,7 @@ export function login() {
             app();
         }).catch(error => {
             console.log(error);
-            showAlert('Login failed. Please try again.', 5000);
+            showAlert('Login failed. Please try again.', 1500);
         });
     });
 
@@ -179,7 +179,7 @@ export function login() {
         }).catch(error => {
             login();
             console.error('Error:', error.message);
-            showAlert('Registration failed. Please try again.', 5000);
+            showAlert('Registration failed. Please try again.', 1500);
         });
     });
 
