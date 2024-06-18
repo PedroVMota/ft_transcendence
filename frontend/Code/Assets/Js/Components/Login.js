@@ -144,7 +144,7 @@ export function login() {
             let RefreshToken = data.refresh;
             localStorage.setItem('Access', AcessToken);
             localStorage.setItem('Refresh', RefreshToken);
-            window.history.pushState({}, '', '/dashboard');
+            window.history.pushState({}, '', '/home');
             app();
         }).catch(error => {
             console.log(error);

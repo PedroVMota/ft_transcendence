@@ -11,9 +11,12 @@ export class HTML_PROPS{
     addEventListener(event, callback){
         this.element.addEventListener(event, callback);
     }
-    addClass(className){
-        
-        this.element.classList.add(className);
+    addClass(...className){
+        // Case if the classname is more than one
+        // this.element.classList.add(className);
+        for (const name of className) {
+            this.element.classList.add(name);
+        }
     }
     removeClass(className){
         this.element.classList.remove(className);
@@ -52,14 +55,29 @@ export class HTML_PROPS{
         parent.appendChild(this.element);
     }
 
+    mouseHover(callback){
+        this.element.addEventListener('mouseover', callback);
+    }
 
+    mouseOut(callback){
+        this.element.addEventListener('mouseout', callback);
+    }
+
+    setFunction(event, callback){
+        this.element.addEventListener(event, callback);
+    }
 }
 
 export class li extends HTML_PROPS{
     constructor(styleString){
         super();
         this.createElement('li');
+     
         this.element.classList.add(styleString);
+    }
+
+    setText(text){
+        this.element.textContent = text;
     }
 }
 
@@ -72,7 +90,31 @@ export class ul extends HTML_PROPS{
     setElement(element){
         this.element = element;
     }
+}
 
 
+export class Button extends HTML_PROPS{
+    constructor(){
+        super();
+        this.createElement('button');
+    }
 
+    setText(text){
+        this.element.textContent = text;
+    }
+}
+
+export class ahref extends HTML_PROPS{
+    constructor(){
+        super();
+        this.createElement('a');
+    }
+
+    setHref(href){
+        this.element.href = href;
+    }
+
+    setText(text){
+        this.element.textContent = text;
+    }
 }

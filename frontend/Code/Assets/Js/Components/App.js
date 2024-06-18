@@ -19,7 +19,6 @@ export function app() {
     _App.style.background = 'url("https://wallpapercave.com/wp/wp3837751.jpg")';
     _App.style.backgroundSize = 'cover';
     _App.style.backgroundPosition = 'center';
-    // _App.style.filter = 'blur(5px)';
     console.log(_App.style.background);
     document.body.appendChild(_App);
     
