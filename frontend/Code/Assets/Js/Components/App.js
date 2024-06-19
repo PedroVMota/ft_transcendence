@@ -16,7 +16,6 @@ export function app() {
     var _App = document.createElement('div');
     _App.id = '_App';
     // _App.style.background = Color.LinearGradient(45, Color.RGBToRGBA(60,60,255, 0.8), Color.RGBToRGBA(60,60,255, 0.8));
-    _App.style.background = 'url("https://wallpapercave.com/wp/wp3837751.jpg")';
     _App.style.backgroundSize = 'cover';
     _App.style.backgroundPosition = 'center';
     console.log(_App.style.background);

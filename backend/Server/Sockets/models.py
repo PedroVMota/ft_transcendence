@@ -106,6 +106,7 @@ def get_default_paddle(player):
 
 # Room Model:
 # This model is used to store the room data
+
 class Room(models.Model):
     roomName = models.CharField(max_length=1000000, null=False, blank=False, default="Default")
     paddles = JSONField(null=False, blank=False, default=dict)

@@ -10,16 +10,27 @@ services:
       POSTGRES_PASSWORD: example
     networks:
       - default
+
+  redis-server:
+    container_name: redis-server
+    command: redis-server
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - default
+
   backend:
     container_name: backend
     build: ../backend
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "sleep 2; python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ../backend/Server:/code
     ports:
       - 8000:8000
     depends_on:
       - db
+      - redis-server
     networks:
       - default
   web:
