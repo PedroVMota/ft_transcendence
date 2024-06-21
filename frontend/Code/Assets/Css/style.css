@@ -114,6 +114,10 @@
   animation: fadeOut 0.5s forwards;
 }
 
+.h-full {
+  height: 100%;
+}
+
 @keyframes fadeIn {
   to {
     opacity: 1;
@@ -126,4 +130,40 @@
     opacity: 0;
     transform: translateY(20px);
   }
+}
+
+/* Custom CSS for the sidebar */
+#menuCollapse {
+  z-index: 1000; /* Ensure sidebar is above other content */
+  overflow-y: auto; /* Enable scroll if content overflows */
+  transition: transform 0.3s ease; /* Smooth transition for toggling */
+  min-height: 100vh;
+  transform: translateX(-100%); /* Start hidden off-screen */
+  background-color: rgb(230, 230, 230);
+}
+
+/* Show sidebar by translating it into view */
+#menuCollapse.show {
+  transform: translateX(0); /* Slide in */
+}
+
+/* Hide sidebar by default on larger screens */
+@media (min-width: 992px) {
+  #menuCollapse.collapsing {
+      display: block;
+      width: 0;
+      transition: width 0.3s ease;
+  }
+  #menuCollapse.show {
+      width: 250px; /* Adjust width as needed */
+      height: 100%;
+  }
+  #menuCollapse {
+      width: 0;
+  }
+}
+
+.btn:hover {
+  background-color: transparent;
+  color: black;
 }

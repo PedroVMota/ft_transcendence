@@ -20,6 +20,7 @@ def main(args: Args):
     if(args.getArgc() == 2):
         if(args.getArgv()[1] == "stop"):
             os.system("docker-compose -f Services/compose.yml down")
+    print("http://localhost:5173")
     
     
 if __name__ == "__main__":
