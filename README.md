@@ -251,3 +251,135 @@ The Transcendence project is structured as follows:
 - **Sockets**: Manages WebSocket connections, consumers, and routing.
 - **static**: Contains static assets like CSS and JavaScript files.
 - **WebApp**: Contains the core web application logic, including models, views, templates, and
+
+ migrations.
+- **Nginx**: Contains configuration files and Docker setup for the Nginx server.
+- **compose.yml**: Docker Compose configuration for managing multi-container Docker applications.
+- **Dockerfile**: Docker configurations for building the Django and Nginx images.
+- **Makefile**: Contains useful commands for setting up and managing the project.
+
+## Docker Concepts for the Project
+
+The project utilizes Docker to manage and deploy the application across various containers. The Docker Compose file (`compose.yml`) defines the services required for the application to run:
+
+```yaml
+services:
+  db:
+    container_name: db
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: example
+    networks:
+      - default
+
+  redis-server:
+    container_name: redis-server
+    command: redis-server
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - default
+
+  django:
+    container_name: Django
+    build: ./Django
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./Django/Code/:/code/
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - redis-server
+    networks:
+      - default
+
+  web:
+    container_name: Nginx
+    build: ./Nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./Django/Code/static/:/static/
+    depends_on:
+      - django
+    networks:
+      - default
+    
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - 5050:80
+    volumes:
+      - ../Db/pgadmin:/root/.pgadmin
+      - ../Db/pgdata:/var/lib/postgresql/data
+      - ../Db/pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: pgadmin
+
+volumes:
+  static_volume:
+
+networks:
+  default:
+```
+
+### Services:
+- **db**: A PostgreSQL container that serves as the database for the Django application.
+- **redis-server**: A Redis container used for caching and session management.
+- **django**: The main Django application container. It depends on the `db` and `redis-server` services and runs the development server.
+- **web**: An Nginx container that serves as a reverse proxy for the Django application.
+- **pgadmin**: A container running pgAdmin, a web-based interface for managing PostgreSQL databases.
+
+### Volumes and Networks:
+- **Volumes**: Persistent storage for the database and static files.
+- **Networks**: Internal communication between containers.
+
+## Setting Up and Running the Project
+
+### Prerequisites:
+- Docker and Docker Compose installed on your machine.
+
+### Steps:
+
+1. **Clone the Repository:**
+   ```bash
+   git clone <repository-url>
+   cd Trans
+   ```
+
+2. **Build and Start the Containers:**
+   ```bash
+   docker-compose up --build
+   ```
+
+3. **Access the Application:**
+   - Django: `http://localhost:8000`
+   - Nginx: `http://localhost`
+   - pgAdmin: `http://localhost:5050`
+
+4. **Create a Superuser:**
+   ```bash
+   docker exec -it Django python manage.py createsuperuser
+   ```
+
+5. **Collect Static Files:**
+   ```bash
+   docker exec -it Django python manage.py collectstatic
+   ```
+
+## Deployment
+
+To deploy the Transcendence project, ensure that your production server is set up with Docker and Docker Compose. Modify environment variables in the `compose.yml` file to suit your production environment and follow the steps mentioned in the [Setting Up and Running the Project](#setting-up-and-running-the-project) section.
+
+For securing your Nginx server with SSL, you can integrate Let's Encrypt or another SSL provider by configuring the `Nginx` Dockerfile and `default.conf`.
+
+## Conclusion
+
+This README serves as a comprehensive guide to understanding and working with the Transcendence project. Whether you are setting up the project locally for development or deploying it to a production environment, this documentation provides the necessary steps and insights to get started.
