@@ -1,60 +1,110 @@
-# ft_transcendence
+# Transcendence Project README
 
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Key Components of Django](#key-components-of-django)
+   - [Models](#models)
+   - [URLs](#urls)
+   - [Views](#views)
+   - [Templates](#templates)
+   - [Middleware](#middleware)
+   - [Forms](#forms)
+   - [Static Files](#static-files)
+3. [Basic Django Commands](#basic-django-commands)
+4. [Migrations in Django](#migrations-in-django)
+5. [Transcendence Project Structure](#transcendence-project-structure)
+6. [Docker Concepts for the Project](#docker-concepts-for-the-project)
+7. [Setting Up and Running the Project](#setting-up-and-running-the-project)
+8. [Deployment](#deployment)
+9. [Conclusion](#conclusion)
 
-<!-- ## USE THE PYTHON ENVIROMENT VIRTUAL > https://docs.python.org/3/library/venv.html -->
+---
 
+## Introduction
 
-### Python Enviroment Setup
+Django is a high-level Python web framework that encourages rapid development and clean, pragmatic design. It is built by experienced developers to make web development easier by handling many of the common web development tasks, such as handling database connections, rendering HTML, managing user sessions, and much more. Django follows the "Don't Repeat Yourself" (DRY) principle, promoting reusability and the use of less code to achieve more.
 
-```shell
-python3 -m venv name
-source name/bin/activate
+## Key Components of Django
+
+### Models
+- Models define the structure of the database, essentially mapping database tables to Python objects.
+- Each model is a Python class that subclasses `django.db.models.Model`.
+- Django automatically generates the necessary SQL statements to create and manage the database tables based on these models.
+
+```python
+from django.db import models
+
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=100)
+    published_date = models.DateField()
 ```
 
-In case of any error check if you have all the dependencies. [Link](https://reintech.io/blog/install-python3-pip-debian-12)
+### URLs
+- Django uses URL routing to map URL patterns to views. The `urls.py` file in your app or project is where you define these mappings.
+- Each URL pattern is associated with a view function or class that handles the request.
 
-### Django Structure.
+```python
+from django.urls import path
+from . import views
 
-What is called `Project` is where is the whole project. The `App` is the **application** that will be used on the `Project` 
-
-Example:
-
-- WebSite:
-    - > Login
-    - > Chat
-    - > User Management
-
-
-Here is some basic commands, I suggest to search and mess around with the framework to get to know.
-
-```sh
-#Setup the Project require the django admin installed on the Python Enviroment pip
-django-admin startproject myproject
-#Start the server
-python manage.py runserver
-#Setup an application inside the current project.
-python manage.py startapp blog
+urlpatterns = [
+    path('books/', views.book_list, name='book_list'),
+    path('books/<int:id>/', views.book_detail, name='book_detail'),
+]
 ```
 
-#### The Django DB
-Django has an integrated database, that means that you can having a saved database for you logins you chat what ever you have.
+### Views
+- Views are the functions or classes that handle the logic for a particular URL route.
+- A view receives an HTTP request, processes it, interacts with the model if needed, and returns an HTTP response.
 
-For each app you have a `model.py` each model represents a table of the database. If you trying to create or update a database, be carefull to always backup first. and run the following commands.
+```python
+from django.shortcuts import render
+from .models import Book
 
-```sh
-#this will update the database and append a table, or update etc... on cache
-python manage.py makemigrations <appname> 
-
-
-#this will access for each app cache and update based on the things changed.
-pythob manage.py migrate 
-
-#In case of listing the changes maded. this command will help you see the migrations
-python manage.py showmigrations
+def book_list(request):
+    books = Book.objects.all()
+    return render(request, 'books/book_list.html', {'books': books})
 ```
 
-#### Django Administration.
+### Templates
+- Templates are used to define the structure and layout of your HTML pages. They allow you to embed Django Template Language (DTL) to dynamically generate content.
+- Templates are typically stored in a `templates` directory within your app.
 
-Django has a integretaed Django Administration panel, here you will be able to update, craate data that represents you models. Let's say you have a model that will store just a name, You can create a user called "Pedro" for example and will be updated on the database. For those who already know some database managment it would be something like `INSET INTO (x) VALUES (x); commit`. Something around that. 
+```html
+<!-- templates/books/book_list.html -->
+<h1>Book List</h1>
+<ul>
+    {% for book in books %}
+        <li>{{ book.title }} by {{ book.author }}</li>
+    {% endfor %}
+</ul>
+```
 
-In Django A Model is just a class that have his own attributes etc...
+### Middleware
+- Middleware is a framework of hooks into Django's request/response processing. It's a lightweight, low-level "plugin" system for globally altering Django's input or output.
+- Middleware is defined in the `MIDDLEWARE` setting in `settings.py`.
+
+Example of common middleware:
+- `django.middleware.security.SecurityMiddleware`: Enhances security.
+- `django.middleware.csrf.CsrfViewMiddleware`: Provides Cross-Site Request Forgery protection.
+
+### Forms
+- Forms in Django are used to handle user input and validation. Forms can be generated either from a model (`ModelForm`) or can be created manually.
+
+```python
+from django import forms
+from .models import Book
+
+class BookForm(forms.ModelForm):
+    class Meta:
+        model = Book
+        fields = ['title', 'author', 'published_date']
+```
+
+### Static Files
+- Static files are files like CSS, JavaScript, and images that aren't dynamically generated by Django.
+- Django has a dedicated app called `django.contrib.staticfiles` that helps in managing static files.
+
+```html
+<!--
