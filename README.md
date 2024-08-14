@@ -107,4 +107,147 @@ class BookForm(forms.ModelForm):
 - Django has a dedicated app called `django.contrib.staticfiles` that helps in managing static files.
 
 ```html
-<!--
+<!-- Including a static file in a template -->
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+```
+
+## Basic Django Commands
+
+1. **Starting a New Django Project**
+   ```bash
+   django-admin startproject myproject
+   ```
+   - This command creates a new Django project with the necessary files and directory structure.
+
+2. **Creating a New Django App**
+   ```bash
+   python manage.py startapp myapp
+   ```
+   - An app is a self-contained module that can be plugged into a project. This command sets up the basic structure for an app.
+
+3. **Running the Development Server**
+   ```bash
+   python manage.py runserver
+   ```
+   - Starts the built-in Django development server to test your application locally.
+
+4. **Making Migrations**
+   ```bash
+   python manage.py makemigrations
+   ```
+   - This command tells Django to create new migrations based on the changes you have made to your models.
+
+5. **Applying Migrations**
+   ```bash
+   python manage.py migrate
+   ```
+   - Applies the migrations to the database, synchronizing the database schema with your models.
+
+6. **Creating a Superuser**
+   ```bash
+   python manage.py createsuperuser
+   ```
+   - Creates a superuser account that can log in to the Django admin site.
+
+7. **Collecting Static Files**
+   ```bash
+   python manage.py collectstatic
+   ```
+   - Gathers all static files from your apps into one directory, usually for deployment.
+
+8. **Shell**
+   ```bash
+   python manage.py shell
+   ```
+   - Opens an interactive Python shell with the Django environment loaded, useful for testing and debugging.
+
+## Migrations in Django
+
+Migrations are Django's way of propagating changes you make to your models (adding a field, deleting a model, etc.) into your database schema. Migrations are stored as files on disk, and they allow Django to apply or unapply the changes you made to your database in a controlled manner.
+
+- **Creating Migrations**: `python manage.py makemigrations`
+  - This command generates migration files based on the changes detected in your models.
+  
+- **Applying Migrations**: `python manage.py migrate`
+  - Applies the migration files to the database, updating the database schema.
+
+- **Rollback Migrations**: `python manage.py migrate <app_name> <previous_migration_name>`
+  - Allows you to revert to a previous migration, essentially undoing changes to the database.
+
+## Transcendence Project Structure
+
+The Transcendence project is structured as follows:
+
+```
+└── 📁Trans
+    └── 📁Django
+        └── 📁Code
+            └── 📁Auth
+                └── __init__.py
+                └── admin.py
+                └── apps.py
+                └── models.py
+                └── serializers.py
+                └── urls.py
+                └── views.py
+            └── 📁backend
+                └── __init__.py
+                └── asgi.py
+                └── middleware.py
+                └── settings.py
+                └── urls.py
+                └── wsgi.py
+            └── 📁media
+                └── 📁Auth
+                    └── 📁defaultAssets
+                        └── ProfilePicture.png
+            └── 📁Sockets
+                └── __init__.py
+                └── admin.py
+                └── apps.py
+                └── consumers.py
+                └── models.py
+                └── routing.py
+                └── tests.py
+                └── views.py
+            └── 📁static
+                └── 📁css
+                    └── style.css
+                └── 📁js
+                    └── 📁Menu
+                        └── index.js
+            └── 📁WebApp
+                └── 📁migrations
+                    └── __init__.py
+                └── 📁templates
+                    └── 📁Components
+                        └── Menu.html
+                    └── index.html
+                └── __init__.py
+                └── admin.py
+                └── apps.py
+                └── models.py
+                └── tests.py
+                └── urls.py
+                └── views.py
+            └── manage.py
+        └── Dockerfile
+        └── requirements.txt
+    └── 📁Nginx
+        └── 📁Conf
+            └── default.conf
+        └── Dockerfile
+    └── compose.yml
+    └── export.md
+    └── Makefile
+    └── README.md
+```
+
+### Explanation:
+- **Auth**: Handles user authentication, including models, views, and serializers for user data.
+- **backend**: Contains the core settings and configurations for the Django project, including middleware, URLs, and WSGI/ASGI configuration.
+- **media**: Contains media files, such as user-uploaded content.
+- **Sockets**: Manages WebSocket connections, consumers, and routing.
+- **static**: Contains static assets like CSS and JavaScript files.
+- **WebApp**: Contains the core web application logic, including models, views, templates, and
