@@ -10,6 +10,9 @@ from django.http import JsonResponse
 def index(request):
     return render(request, 'register.html')
 
+def home(request):
+    return render(request, 'index.html')
+
 def login(request):
     return render(request, 'login.html')
 
