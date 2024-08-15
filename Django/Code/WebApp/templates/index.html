@@ -16,9 +16,9 @@
     
     </div>
     {% if user.is_authenticated %}
-        Not Logged
+        <p>Logged in as {{ user.username }}</p>
     {% else %}
-        Logged
+        <p>Not Logged</p>
     {% endif %}
 </body>
 </body>

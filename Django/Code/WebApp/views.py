@@ -7,6 +7,10 @@ from django.http import JsonResponse
 
 
 
+
+def my_view(request):
+    return render(request, 'index.html', {'user': request.user})
+
 def index(request):
     return render(request, 'register.html')
 
