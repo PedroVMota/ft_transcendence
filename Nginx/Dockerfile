@@ -13,6 +13,7 @@ RUN mkdir -p /etc/ssl/private /etc/ssl/certs && \
 
 # Copy the Nginx configuration file
 COPY ./Conf/default.conf /etc/nginx/nginx.conf
+COPY ./html/ /usr/share/nginx/html/
 
 
 # Expose ports 80 and 443

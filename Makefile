@@ -1,7 +1,6 @@
-.PHONY: Database Django fclean clean
-
+.PHONY: all stop start restart down Database Django Nginx fclean clean inside
 all:
-	docker-compose up -d --build
+	docker-compose up --build
 
 stop:
 	docker-compose stop
@@ -20,6 +19,9 @@ Database:
 
 Django:
 	docker-compose up django
+
+Nginx:
+	docker-compose up web
 
 fclean: down
 	- docker stop $$(docker ps -a -q)

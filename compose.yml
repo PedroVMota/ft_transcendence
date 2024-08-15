@@ -40,10 +40,10 @@ services:
       - 443:443
     volumes:
       - ./Django/Code/static/:/static/
-    depends_on:
-      - django
     networks:
       - default
+    depends_on:
+      - django
     
   pgadmin:
     container_name: pgadmin
@@ -54,6 +54,8 @@ services:
       - ../Db/pgadmin:/root/.pgadmin
       - ../Db/pgdata:/var/lib/postgresql/data
       - ../Db/pgadmin:/var/lib/pgadmin
+    depends_on:
+      - db
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin@pgadmin.org
       PGADMIN_DEFAULT_PASSWORD: pgadmin
