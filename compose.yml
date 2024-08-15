@@ -36,7 +36,6 @@ services:
     container_name: Nginx
     build: ./Nginx
     ports:
-      - 80:80
       - 443:443
     volumes:
       - ./Django/Code/static/:/static/
