@@ -1,32 +1,91 @@
 {% load static %}
-<nav class="navbar navbar-expand-lg bg-body-tertiary bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        <span class="text-white">Django</span>
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="text-white">
-          <img src="{% static '/svg/Menu.svg' %}" alt="menu" width="30" height="30">
-        </span>
+<!-- 
+MODEL OF THE USER
+
+
+class MyUser(AbstractUser):
+    profile_picture = models.ImageField(upload_to=upload_to, default=DEFAULT_IMAGE)
+    about_me = models.TextField(null=True, blank=True)
+    create_date = models.DateTimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+    friendlist = models.ManyToManyField('self', blank=True)
+    darkMode = models.BooleanField(default=False)
+    
+-->
+
+<script src="{% static 'js/Menu/index.js' %}"></script>
+{% if not user.darkMode %}
+<!-- Main Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container">
+    <div>
+      <button class="btn" type="button" id="MenuToggler">
+        <img src="{% static 'svg/Menu.svg' %}" alt="menu" width="30" height="30">
       </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#" data-url="{% url 'Home' %}">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#" data-url="{% url 'Register' %}">Register</a>
-          </li>
-          {% if not user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#" data-url="{% url 'Profile' %}">Profile</a>
-          </li>
-          {% else %}
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#" data-url="{% url 'Login' %}">Login</a>
-          </li>
-          {% endif %}
-        </ul>
-      </div>
     </div>
+    <div>
+      <a class="navbar-brand ms-auto" href="">
+        <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" width="30" height="30">
+      </a>
+    </div>
+  </div>
 </nav>
+
+<!-- Sidebar Menu -->
+<div id="MenuScreenBlur" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-none"
+  style="z-index: 1040;"></div>
+<aside id="MenuItems" class="position-fixed top-0 start-0 bg-light shadow-sm p-3"
+  style="width: 250px; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1050;">
+  <button class="btn btn-close" id="CloseMenu" aria-label="Close"></button>
+  <ul class="nav flex-column mt-4">
+    <li class="nav-item">
+      <a class="nav-link text-black" href="/">Home</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-black" href="/Social/">Social</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-black" href="/Profile/">Profile</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-black" href="/Logout/">Logout</a>
+    </li>
+  </ul>
+</aside>
+
+{% else %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <div>
+      <button class="btn btn-outline-light" type="button" id="MenuToggler">
+        <img src="{% static 'svg/Menu.svg' %}" alt="menu" width="30" height="30">
+      </button>
+    </div>
+    <div>
+      <a class="navbar-brand ms-auto" href="">
+        <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" width="30" height="30">
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Sidebar Menu -->
+<div id="MenuScreenBlur" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-none"
+  style="z-index: 1040;"></div>
+<aside id="MenuItems" class="position-fixed top-0 start-0 bg-dark text-white shadow-sm p-3"
+  style="width: 250px; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1050;">
+  <button class="btn btn-close btn-close-white" id="CloseMenu" aria-label="Close"></button>
+  <ul class="nav flex-column mt-4">
+    <li class="nav-item">
+      <a class="nav-link text-white" href="/">Home</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white" href="/Profile/">Profile</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white" href="/Logout/">Logout</a>
+    </li>
+  </ul>
+</aside>
+
+{% endif %}

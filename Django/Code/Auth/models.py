@@ -18,6 +18,7 @@ class MyUser(AbstractUser):
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
     friendlist = models.ManyToManyField('self', blank=True)
+    darkMode = models.BooleanField(default=False)
     
     def getJson(self):
         return {

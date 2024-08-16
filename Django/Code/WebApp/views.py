@@ -8,26 +8,39 @@ from django.http import JsonResponse
 
 
 
-def my_view(request):
-    return render(request, 'index.html', {'user': request.user})
 
 def index(request):
-    return render(request, 'register.html')
+    if(request.user.is_authenticated):
+        return render(request, 'index.html', {'user': request.user})
+    else:
+        return render(request, 'register.html')
 
 def home(request):
-    return render(request, 'index.html')
+    if(request.user.is_authenticated):
+        return render(request, 'index.html')
+    else:
+        return render(request, 'register.html')
 
-def login(request):
-    return render(request, 'login.html')
-
-def register(request):
-    return render(request, 'register.html')
+def Auth(request):
+    if(request.user.is_authenticated):
+        return render(request, 'profile.html')
+    else:
+        return render(request, 'register.html')
 
 def Profile(request):
-    return render(request, {'foo': 'bar'}) # This is a placeholder for now
+    if(request.user.is_authenticated):
+        return render(request, 'profile.html')
+    else:
+        return render(request, 'register.html')
 
 def logout(request):
-    return render(request, 'logout.html')
+    if(request.user.is_authenticated):
+        return render(request, 'profile.html')
+    else:    
+        return render(request, 'register.html')
 
 def profile(request):
-    return JSONResponse({'foo': 'bar'}) # This is a placeholder for now
+    if(request.user.is_authenticated):
+        return render(request, 'profile.html')
+    else:
+        return render(request, 'register.html')
