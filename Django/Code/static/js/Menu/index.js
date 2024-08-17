@@ -1,45 +1,104 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // Get references to elements
-  const MenuToggler = document.getElementById('MenuToggler');
-  const MenuScreenBlur = document.getElementById('MenuScreenBlur');
-  const MenuItems = document.getElementById('MenuItems');
-  const CloseMenu = document.getElementById('CloseMenu');
+import Requests from "../Utils/Requests.js";
+import { route as spa } from "../Spa/Spa.js";
 
-  // Function to show the sidebar and overlay
-  function showSidebar() {
-    MenuScreenBlur.classList.remove('d-none');
-    MenuItems.style.transform = 'translateX(0)';
-  }
+/**
+ * Menu class to handle menu operations.
+ */
+export default class Menu {
+    /**
+     * Creates a Menu object.
+     * @param {HTMLElement} parentelement - The parent element to attach the menu.
+     * @param {Object} spa - The SPA instance.
+     */
+    constructor(parentelement, spa) {
+        console.log("Menu object created");
+        this.parentelement = spa.createDiv("Menu", ["menu"]);
+        parentelement.appendChild(this.parentelement);
+        this.url = "/Menu/";
+    }
 
-  // Function to hide the sidebar and overlay
-  function hideSidebar() {
-    MenuScreenBlur.classList.add('d-none');
-    MenuItems.style.transform = 'translateX(-100%)';
-  }
+    /**
+     * Initializes the menu by loading it and attaching event listeners.
+     */
+    async init() {
+        await this.loadMenu();
+        this.attachEventListeners();
+    }
 
-  // Add event listeners
-  MenuToggler.addEventListener('click', showSidebar);
-  CloseMenu.addEventListener('click', hideSidebar);
+    /**
+     * Loads the menu content from the server.
+     */
+    async loadMenu() {
+        try {
+            const menu = await Requests.get(this.url);
+            this.parentelement.innerHTML = menu;
+        } catch (error) {
+            console.error("Failed to load menu", error);
+        }
+    }
 
-  // // Handle sidebar navigation link clicks
-  // document.querySelectorAll('#MenuItems .nav-link').forEach(link => {
-  //   link.addEventListener('click', function (e) {
-  //     // Check if the link is not a dropdown toggle
-  //     if (!this.classList.contains('dropdown-toggle-link')) {
-  //       e.preventDefault();
-  //       const url = this.getAttribute('href'); // URL from href attribute
+    /**
+     * Attaches event listeners to menu elements.
+     */
+    attachEventListeners() {
+        const events = [
+            { id: "MenuToggler", event: "click", handler: this.openMenu.bind(this) },
+            { id: "CloseMenu", event: "click", handler: this.closeMenu.bind(this) },
+            { id: "MenuScreenBlur", event: "click", handler: this.closeMenu.bind(this) },
+            { id: "nav-home", event: "click", handler: (e) => this.navigateTo(e, "/") },
+            { id: "nav-profile", event: "click", handler: (e) => this.navigateTo(e, "/Profile/") },
+            { id: "nav-friends", event: "click", handler: (e) => this.navigateTo(e, "/Friends/") },
+            { id: "nav-logout", event: "click", handler: (e) => this.navigateTo(e, "/Logout/") },
+        ];
 
-  //       fetch(url)
-  //         .then(response => response.text())
-  //         .then(html => {
-  //           console.log('Page loaded:', html);
-  //           document.getElementById('SinglePageApplicationRoot').innerHTML = html;
-  //           hideSidebar(); // Hide sidebar after loading content
-  //         })
-  //         .catch(error => {
-  //           console.error('Error loading the page:', error);
-  //         });
-  //     }
-  //   });
-  // });
-});
+        events.forEach(({ id, event, handler }) => {
+            const element = document.getElementById(id);
+            if (element) element.addEventListener(event, handler);
+        });
+    }
+
+    /**
+     * Opens the menu.
+     * @param {Event} e - The event object.
+     */
+    openMenu(e) {
+        e.preventDefault();
+        this.toggleMenu("translateX(0)", false);
+    }
+
+    /**
+     * Closes the menu.
+     * @param {Event} e - The event object.
+     */
+    closeMenu(e) {
+        e.preventDefault();
+        this.toggleMenu("translateX(-100%)", true);
+    }
+
+    /**
+     * Toggles the menu visibility.
+     * @param {string} transform - The transform style for the menu.
+     * @param {boolean} hideBlur - Whether to hide the blur effect.
+     */
+    toggleMenu(transform, hideBlur) {
+        const menuItems = document.getElementById("MenuItems");
+        const menuScreenBlur = document.getElementById("MenuScreenBlur");
+        if (menuItems) menuItems.style.transform = transform;
+        if (menuScreenBlur) menuScreenBlur.classList.toggle("d-none", hideBlur);
+    }
+
+    /**
+     * Navigates to a specified URL.
+     * @param {Event} e - The event object.
+     * @param {string} url - The URL to navigate to.
+     */
+    navigateTo(e, url) {
+        e.preventDefault();
+        if (typeof spa !== "undefined") {
+            spa.get(url);
+            this.closeMenu(new Event("click"));
+        } else {
+            console.error("Spa instance not available");
+        }
+    }
+}

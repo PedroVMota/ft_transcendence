@@ -1,19 +1,5 @@
 {% load static %}
-<!-- 
-MODEL OF THE USER
 
-
-class MyUser(AbstractUser):
-    profile_picture = models.ImageField(upload_to=upload_to, default=DEFAULT_IMAGE)
-    about_me = models.TextField(null=True, blank=True)
-    create_date = models.DateTimeField(auto_now_add=True)
-    update_date = models.DateTimeField(auto_now=True)
-    friendlist = models.ManyToManyField('self', blank=True)
-    darkMode = models.BooleanField(default=False)
-    
--->
-
-<script src="{% static 'js/Menu/index.js' %}"></script>
 {% if not user.darkMode %}
 <!-- Main Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -49,7 +35,7 @@ class MyUser(AbstractUser):
       <a class="nav-link text-black" href="javascript:void(0)" id="nav-friends">Friends</a>
     </li>
     <li class="nav-item"> 
-      <a class="nav-link text-black" hhref="javascript:void(0)" id="nav-logout">Settings</a>
+      <a class="nav-link text-black" hhref="javascript:void(0)" id="nav-logout">Logout</a>
     </li>
   </ul>
 </aside>
@@ -89,4 +75,3 @@ class MyUser(AbstractUser):
 </aside>
 
 {% endif %}
-

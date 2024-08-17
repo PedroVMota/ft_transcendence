@@ -1,173 +1,138 @@
+import Requests from '../Utils/Requests.js';
+import Menu from '../Menu/index.js';
+
+/**
+ * Retrieves the value of a specified cookie.
+ * @param {string} name - The name of the cookie.
+ * @returns {string|null} The value of the cookie, or null if not found.
+ */
 function GetCookie(name) {
-    let cookie = document.cookie;
-    let cookieList = cookie.split(";");
-    for (let i = 0; i < cookieList.length; i++) {
-        let cookieName = cookieList[i].split("=")[0].trim();
-        let cookieValue = cookieList[i].split("=")[1].trim();
-        if (cookieName === name) {
-            return cookieValue;
-        }
+    const cookieList = document.cookie.split(";");
+    for (const cookie of cookieList) {
+        const [cookieName, cookieValue] = cookie.split("=").map(c => c.trim());
+        if (cookieName === name) return cookieValue;
     }
     return null;
 }
-const STATUS = {
-    "HOME": 0,
-    "PROFILE": 1,
-    "LOGIN": 2,
-    "LOGOUT": 3
-};
-export class Spa {
+
+const STATUS = { "HOME": 0, "PROFILE": 1, "LOGIN": 2, "LOGOUT": 3, "FRIENDS": 4 };
+
+/**
+ * Spa class to handle single-page application operations.
+ */
+class Spa {
     #status = STATUS.LOGIN;
     #user = null;
     #accessToken = null;
     #refreshToken = null;
     #body = null;
+    #Menu = null;
+    #spaBody = null;
 
+    /**
+     * Creates a Spa object.
+     */
     constructor() {
         console.log("Spa object created");
-        this.#status = STATUS.LOGIN;
-        this.#user = null;
-        this.#accessToken = null;
-        this.#refreshToken = null;
         this.#body = document.querySelector("body");
 
-        if (GetCookie("access") !== null && GetCookie("refresh") !== null) {
-            this.#accessToken = GetCookie("access");
-            this.#refreshToken = GetCookie("refresh");
+        const accessToken = GetCookie("access");
+        const refreshToken = GetCookie("refresh");
+        if (accessToken && refreshToken) {
+            this.#accessToken = accessToken;
+            this.#refreshToken = refreshToken;
             console.log("User logged in");
         }
 
-        this.setStatus();
+        this.#Menu = new Menu(this.#body, this);
+        this.#Menu.init();
+
+        this.#spaBody = this.createDiv("SpaBody");
+        this.#body.appendChild(this.#spaBody);
     }
 
-    async #fetchGet(url) {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + this.#accessToken
-            }
-        });
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.text(); // Return the HTML content as text
+    /**
+     * Creates a div element with optional id and classes.
+     * @param {string|null} id - The id of the div.
+     * @param {Array<string>} classes - The classes to add to the div.
+     * @returns {HTMLDivElement} The created div element.
+     */
+    createDiv(id = null, classes = []) {
+        const div = document.createElement("div");
+        if (id) div.id = id;
+        if (classes.length > 0) div.classList.add(...classes);
+        return div;
     }
 
+    /**
+     * Translates a URL to a status.
+     * @param {string} url - The URL to translate.
+     * @returns {number} The corresponding status.
+     */
     #translationUrlToStatus(url) {
-        switch (url) {
-            case '/':
-                return STATUS.HOME;
-            case '/Profile/':
-                return STATUS.PROFILE;
-            case '/Logout/':
-                return STATUS.LOGOUT;
-            default:
-                return null;
+        const urlPreset = ["/", "/Profile/", "/Login/", "/Logout/", "/Friends/"];
+        const statusPreset = [STATUS.HOME, STATUS.PROFILE, STATUS.LOGIN, STATUS.LOGOUT, STATUS.FRIENDS];
+        const index = urlPreset.indexOf(url);
+        if (index !== -1) {
+            console.log(`Url: ${url} Status: ${statusPreset[index]}`);
+            return statusPreset[index];
         }
     }
 
+    /**
+     * Updates the page content based on the current status.
+     */
     async #updatePage() {
-        console.log("Update Page");
-        switch (this.#status) {
-            case STATUS.HOME:
-                await this.#setMenu();
-                break;
-            case STATUS.PROFILE:
-                this.#body.innerHTML = "<h1>Profile</h1>";
-                break;
-            case STATUS.LOGOUT:
-                this.#body.innerHTML = "<h1>Logout</h1>";
-                break;
-            default:
-                this.#body.innerHTML = "<h1>404 Not Found</h1>";
-                break;
-        }
+        const content = {
+            [STATUS.HOME]: "<h1>Home</h1>",
+            [STATUS.PROFILE]: "<h1>Profile</h1>",
+            [STATUS.LOGIN]: "<h1>Login</h1>",
+            [STATUS.LOGOUT]: "<h1>Logout</h1>",
+            [STATUS.FRIENDS]: "<h1>Friends</h1>",
+        }[this.#status] || "<h1>404</h1>";
+
+        this.#cleanSpaBody();
+        this.#spaBody.innerHTML = content;
     }
 
-    async #setMenu() {
-        let url = "/Menu/";
-        let response = await this.#fetchGet(url);
-        this.#body.innerHTML = response;
-        this.#jsMenu();
-    }
-
+    /**
+     * Navigates to a specified URL.
+     * @param {string} url - The URL to navigate to.
+     */
     async get(url) {
-        // Update the browser history and status
         window.history.pushState({}, '', url);
         this.#status = this.#translationUrlToStatus(url);
-
-        if (this.#status !== null) {
-            await this.#updatePage();
+        console.log("Status: ", this.#status);
+        if (this.#status !== undefined && this.#status !== null) {
+            this.#updatePage();
         }
     }
 
+    /**
+     * Sets the status based on the current URL.
+     */
     setStatus() {
-        let currentUrl = window.location.pathname;
-        console.log("Current URL:", currentUrl);
-        let newStatus = this.#translationUrlToStatus(currentUrl);
-        console.log("New Status:", newStatus);
-
-        if (newStatus !== null) {
-            this.#status = newStatus;
-            this.get(currentUrl);
+        const url = window.location.pathname;
+        this.#status = this.#translationUrlToStatus(url);
+        console.log("Status: ", this.#status);
+        if (this.#status !== undefined && this.#status !== null) {
+            this.#updatePage();
         }
     }
 
-    #jsMenu() {
-        let menuToggler = document.getElementById("MenuToggler");
-        let closeMenu = document.getElementById("CloseMenu");
-        let menuScreenBlur = document.getElementById("MenuScreenBlur");
-        let navHome = document.getElementById("nav-home");
-        let navProfile = document.getElementById("nav-profile");
-
-        if (menuToggler) {
-            menuToggler.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.getElementById("MenuItems").style.transform = "translateX(0)";
-                document.getElementById("MenuScreenBlur").classList.remove("d-none");
-            });
-        }
-        if (closeMenu) {
-            closeMenu.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.getElementById("MenuItems").style.transform = "translateX(-100%)";
-                document.getElementById("MenuScreenBlur").classList.add("d-none");
-            });
-        }
-
-        if (menuScreenBlur) {
-            menuScreenBlur.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.getElementById("MenuItems").style.transform = "translateX(-100%)";
-                document.getElementById("MenuScreenBlur").classList.add("d-none");
-            });
-        }
-
-        if (navHome) {
-            navHome.addEventListener("click", (e) => {
-                e.preventDefault();
-                this.get("/"); // Load the home page via SPA
-            });
-        }
-        if (navProfile) {
-            navProfile.addEventListener("click", (e) => {
-                e.preventDefault();
-                this.get("/Profile/"); // Load the profile page via SPA
-            });
-        }
-    }
-
-    #emptyHtml() {
-        this.#body.innerHTML = "";
+    /**
+     * Cleans the Spa body by removing all its children.
+     */
+    #cleanSpaBody() {
+        this.#spaBody.innerHTML = '';
     }
 }
 
-const spa = new Spa();
+const route = new Spa();
 
 // Handle back/forward browser button clicks
 window.addEventListener('popstate', () => {
-    spa.setStatus();
+    // route.setStatus();
 });
 
-
+export { route, GetCookie, Spa, STATUS };
