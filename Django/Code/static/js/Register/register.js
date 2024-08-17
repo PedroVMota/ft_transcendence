@@ -55,7 +55,7 @@ document.getElementById('loginForm').addEventListener('submit', function (event)
         let RefreshToken = data.refresh;
         localStorage.setItem('Access', AccessToken);
         localStorage.setItem('Refresh', RefreshToken);
-        window.location.href = '/home/'; // Redireciona para a página inicial após o login bem-sucedido
+        window.location.href = '/'; // Redireciona para a página inicial após o login bem-sucedido
     }).catch(error => {
         console.log(error);
         showAlert('Login failed. Please try again.', 1500);

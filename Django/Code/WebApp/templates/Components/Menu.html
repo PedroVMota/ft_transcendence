@@ -31,6 +31,7 @@ class MyUser(AbstractUser):
   </div>
 </nav>
 
+
 <!-- Sidebar Menu -->
 <div id="MenuScreenBlur" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-none"
   style="z-index: 1040;"></div>
@@ -39,16 +40,16 @@ class MyUser(AbstractUser):
   <button class="btn btn-close" id="CloseMenu" aria-label="Close"></button>
   <ul class="nav flex-column mt-4">
     <li class="nav-item">
-      <a class="nav-link text-black" href="/">Home</a>
+      <a class="nav-link text-black" href="javascript:void(0)" id="nav-home">Home</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link text-black" href="/Social/">Social</a>
+      <a class="nav-link text-black" href="javascript:void(0)" id="nav-profile">Profile</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link text-black" href="/Profile/">Profile</a>
+      <a class="nav-link text-black" href="javascript:void(0)" id="nav-friends">Friends</a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link text-black" href="/Logout/">Logout</a>
+    <li class="nav-item"> 
+      <a class="nav-link text-black" hhref="javascript:void(0)" id="nav-logout">Settings</a>
     </li>
   </ul>
 </aside>
@@ -70,22 +71,22 @@ class MyUser(AbstractUser):
 </nav>
 
 <!-- Sidebar Menu -->
-<div id="MenuScreenBlur" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-none"
-  style="z-index: 1040;"></div>
+
 <aside id="MenuItems" class="position-fixed top-0 start-0 bg-dark text-white shadow-sm p-3"
   style="width: 250px; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1050;">
   <button class="btn btn-close btn-close-white" id="CloseMenu" aria-label="Close"></button>
   <ul class="nav flex-column mt-4">
     <li class="nav-item">
-      <a class="nav-link text-white" href="/">Home</a>
+      <span class="nav-link text-white" id="nav-home">Home</span>
     </li>
     <li class="nav-item">
-      <a class="nav-link text-white" href="/Profile/">Profile</a>
+      <span class="nav-link text-white" id="nav-profile">Profile</span>
     </li>
     <li class="nav-item">
-      <a class="nav-link text-white" href="/Logout/">Logout</a>
+      <span class="nav-link text-white" id="nav-logout">Logout</span>
     </li>
   </ul>
 </aside>
 
 {% endif %}
+

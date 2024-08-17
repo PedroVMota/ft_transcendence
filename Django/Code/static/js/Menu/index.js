@@ -21,25 +21,25 @@ document.addEventListener('DOMContentLoaded', () => {
   MenuToggler.addEventListener('click', showSidebar);
   CloseMenu.addEventListener('click', hideSidebar);
 
-  // Handle sidebar navigation link clicks
-  document.querySelectorAll('#MenuItems .nav-link').forEach(link => {
-    link.addEventListener('click', function (e) {
-      // Check if the link is not a dropdown toggle
-      if (!this.classList.contains('dropdown-toggle-link')) {
-        e.preventDefault();
-        const url = this.getAttribute('href'); // URL from href attribute
+  // // Handle sidebar navigation link clicks
+  // document.querySelectorAll('#MenuItems .nav-link').forEach(link => {
+  //   link.addEventListener('click', function (e) {
+  //     // Check if the link is not a dropdown toggle
+  //     if (!this.classList.contains('dropdown-toggle-link')) {
+  //       e.preventDefault();
+  //       const url = this.getAttribute('href'); // URL from href attribute
 
-        fetch(url)
-          .then(response => response.text())
-          .then(html => {
-            console.log('Page loaded:', html);
-            document.getElementById('SinglePageApplicationRoot').innerHTML = html;
-            hideSidebar(); // Hide sidebar after loading content
-          })
-          .catch(error => {
-            console.error('Error loading the page:', error);
-          });
-      }
-    });
-  });
+  //       fetch(url)
+  //         .then(response => response.text())
+  //         .then(html => {
+  //           console.log('Page loaded:', html);
+  //           document.getElementById('SinglePageApplicationRoot').innerHTML = html;
+  //           hideSidebar(); // Hide sidebar after loading content
+  //         })
+  //         .catch(error => {
+  //           console.error('Error loading the page:', error);
+  //         });
+  //     }
+  //   });
+  // });
 });

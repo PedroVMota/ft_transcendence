@@ -1,13 +1,13 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 
 
 
 
 
 
-
-
+def Menu(request):
+    return render(request, 'Components/Menu.html')
 
 def index(request):
     if(request.user.is_authenticated):
@@ -17,30 +17,19 @@ def index(request):
 
 def home(request):
     if(request.user.is_authenticated):
-        return render(request, 'index.html')
+        return render(request, 'index.html', {'user': request.user})
     else:
         return render(request, 'register.html')
 
 def Auth(request):
-    if(request.user.is_authenticated):
-        return render(request, 'profile.html')
-    else:
-        return render(request, 'register.html')
+    return render(request, 'register.html')
 
-def Profile(request):
-    if(request.user.is_authenticated):
-        return render(request, 'profile.html')
-    else:
-        return render(request, 'register.html')
 
 def logout(request):
-    if(request.user.is_authenticated):
-        return render(request, 'profile.html')
-    else:    
-        return render(request, 'register.html')
+    return render(request, {'user': request.user})
 
 def profile(request):
     if(request.user.is_authenticated):
-        return render(request, 'profile.html')
+        return render(request, 'profile.html', {'user': request.user})
     else:
         return render(request, 'register.html')

@@ -76,7 +76,17 @@ class UserLoginView(TokenObtainPairView):
             sessions = Session.objects.filter(expire_date__gte=timezone.now(), session_key=request.session.session_key)
             response_data = serializer.validated_data
             # response_data['sessionid'] = request.session.session_key  # Add session id to the response data
+
+            print("\n\n\nResponse Data: ", response_data)
+            response_data['refresh'] = str(response_data['refresh'])
+            response_data['access'] = str(response_data['access'])
+
+
             response = Response(response_data, status=status.HTTP_200_OK)
+
+            response.set_cookie('access', response_data['access'], samesite='None', secure=True)
+            response.set_cookie('refresh', response_data['refresh'], samesite='None', secure=True)
+            
             # response.set_cookie('sessionid', request.session.session_key, samesite='None', secure=True)
             login(request, serializer.user)
             return response
