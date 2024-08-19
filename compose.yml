@@ -4,6 +4,7 @@ services:
     image: postgres
     ports:
       - 5432:5432
+    restart: always
     environment:
       POSTGRES_PASSWORD: example
     networks:
@@ -21,7 +22,7 @@ services:
   django:
     container_name: Django
     build: ./Django
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py makemigrations Auth && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./Django/Code/:/code/
     ports:
@@ -29,6 +30,7 @@ services:
     depends_on:
       - db
       - redis-server
+    restart: always
     networks:
       - default
 
@@ -37,6 +39,7 @@ services:
     build: ./Nginx
     ports:
       - 443:443
+    restart: always
     volumes:
       - ./Django/Code/static/:/static/
       - ./Django/Code/media/:/media/

@@ -1,3 +1,19 @@
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
 // Função para alternar entre os formulários de registro e login
 const ToggleRegisterToLogin = () => {
     const loginContainer = document.getElementById('loginContainer');
@@ -33,32 +49,34 @@ const showAlert = (message, timeout) => {
 // Evento de submissão do formulário de login
 document.getElementById('loginForm').addEventListener('submit', function (event) {
     event.preventDefault();
-    let data = {
+    let loginData = {
         "username": document.getElementById('loginUser').value,
         "password": document.getElementById('loginPassword').value
     };
 
-    fetch('https://localhost:443/auth/token/login/', {
+    fetch('/auth/token/login/', {
         method: 'POST',
-        credentials: 'include',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(loginData),
+        credentials: 'include' // This ensures cookies (like the session cookie) are included in requests
     }).then(response => {
-        if (response.status === 400) {
-            throw new Error('Invalid credentials');
+        if (response.status === 200) {
+            return response.json();
+        } else if (response.status === 400) {
+            throw new Error('Invalid username or password');
+        } else {
+            throw new Error('Login failed');
         }
-        return response.json();
     }).then(data => {
-        let AccessToken = data.access;
-        let RefreshToken = data.refresh;
-        localStorage.setItem('Access', AccessToken);
-        localStorage.setItem('Refresh', RefreshToken);
-        window.location.href = '/'; // Redireciona para a página inicial após o login bem-sucedido
+        console.log('Login successful:', data.message);
+        window.location.replace('/');
+        // Handle successful login (e.g., redirect to a different page)
     }).catch(error => {
-        console.log(error);
-        showAlert('Login failed. Please try again.', 1500);
+        console.error('Error:', error.message);
+        // Handle errors (e.g., display an error message)
     });
 });
 
@@ -76,13 +94,16 @@ document.getElementById('registerForm').addEventListener('submit', function (eve
     let data = {
         "username": document.getElementById('registerUser').value,
         "email": document.getElementById('registerEmail').value,
-        "password": pass
+        "password": pass,
+        "password2": pass2
     };
 
     fetch('https://localhost:443/auth/token/register/', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+
         },
         body: JSON.stringify(data)
     }).then(response => {

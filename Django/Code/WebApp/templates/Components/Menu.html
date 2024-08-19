@@ -1,6 +1,5 @@
 {% load static %}
 
-{% if not user.darkMode %}
 <!-- Main Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container">
@@ -12,6 +11,9 @@
     <div>
       <a class="navbar-brand ms-auto" href="">
         <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" width="30" height="30">
+      </a>
+      <a class="" href="javascript:void(0)" id="nav-logout">
+        <img src="{% static 'svg/logout.svg' %}" alt="logout" width="30" height="30">
       </a>
     </div>
   </div>
@@ -31,47 +33,6 @@
     <li class="nav-item">
       <a class="nav-link text-black" href="javascript:void(0)" id="nav-profile">Profile</a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link text-black" href="javascript:void(0)" id="nav-friends">Friends</a>
-    </li>
-    <li class="nav-item"> 
-      <a class="nav-link text-black" hhref="javascript:void(0)" id="nav-logout">Logout</a>
-    </li>
   </ul>
 </aside>
 
-{% else %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <div>
-      <button class="btn btn-outline-light" type="button" id="MenuToggler">
-        <img src="{% static 'svg/Menu.svg' %}" alt="menu" width="30" height="30">
-      </button>
-    </div>
-    <div>
-      <a class="navbar-brand ms-auto" href="">
-        <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" width="30" height="30">
-      </a>
-    </div>
-  </div>
-</nav>
-
-<!-- Sidebar Menu -->
-
-<aside id="MenuItems" class="position-fixed top-0 start-0 bg-dark text-white shadow-sm p-3"
-  style="width: 250px; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1050;">
-  <button class="btn btn-close btn-close-white" id="CloseMenu" aria-label="Close"></button>
-  <ul class="nav flex-column mt-4">
-    <li class="nav-item">
-      <span class="nav-link text-white" id="nav-home">Home</span>
-    </li>
-    <li class="nav-item">
-      <span class="nav-link text-white" id="nav-profile">Profile</span>
-    </li>
-    <li class="nav-item">
-      <span class="nav-link text-white" id="nav-logout">Logout</span>
-    </li>
-  </ul>
-</aside>
-
-{% endif %}

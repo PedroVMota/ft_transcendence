@@ -1,5 +1,5 @@
 import Requests from "../Utils/Requests.js";
-import { route as spa } from "../Spa/Spa.js";
+import { route as spa, GetCookie } from "../Spa/Spa.js";
 
 /**
  * Menu class to handle menu operations.
@@ -48,7 +48,7 @@ export default class Menu {
             { id: "nav-home", event: "click", handler: (e) => this.navigateTo(e, "/") },
             { id: "nav-profile", event: "click", handler: (e) => this.navigateTo(e, "/Profile/") },
             { id: "nav-friends", event: "click", handler: (e) => this.navigateTo(e, "/Friends/") },
-            { id: "nav-logout", event: "click", handler: (e) => this.navigateTo(e, "/Logout/") },
+            { id: "nav-logout", event: "click", handler: (e) => this.#logout(e) }
         ];
 
         events.forEach(({ id, event, handler }) => {
@@ -88,12 +88,15 @@ export default class Menu {
     }
 
     /**
-     * Navigates to a specified URL.
-     * @param {Event} e - The event object.
-     * @param {string} url - The URL to navigate to.
-     */
+ * Navigates to a specified URL.
+ * @param {Event|null} e - The event object, or null if no event.
+ * @param {string} url - The URL to navigate to.
+ */
     navigateTo(e, url) {
-        e.preventDefault();
+        
+        if (e && typeof e.preventDefault === 'function') {
+            e.preventDefault();
+        }
         if (typeof spa !== "undefined") {
             spa.get(url);
             this.closeMenu(new Event("click"));
@@ -101,4 +104,16 @@ export default class Menu {
             console.error("Spa instance not available");
         }
     }
+
+   async #logout(e) {
+        e.preventDefault();
+        const Header = {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': GetCookie('csrftoken')
+        }
+        const rep = await Requests.post('/Logout/', {}, Header);
+        console.log(rep);
+        window.location.href = '/';
+    }
+
 }
