@@ -1,9 +1,0 @@
-.btn {
-    border: none !important;
-}
-
-.btn:focus,
-.btn:active {
-    outline: none !important;
-    box-shadow: none !important;
-}

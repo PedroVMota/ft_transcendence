@@ -15,6 +15,17 @@ function GetCookie(name) {
     return null;
 }
 
+function checyAnyKindaUndefined(value, msgAlert) {
+    let isUndefined = false;
+    if (value === undefined) {
+        isUndefined = true;
+    }
+    if(isUndefined) {
+        console.trace()
+        console.alert(msgAlert);
+    }
+}
+
 /**
  * Removes a cookie by setting its expiration date to the past.
  * @param {string} name - The name of the cookie to remove.
@@ -47,6 +58,7 @@ class Spa {
         this.#Menu.init();
 
         this.#spaBody = this.createDiv("SpaBody");
+        this.#spaBody.classList.add("px-4");
         this.#body.appendChild(this.#spaBody);
         
 
@@ -74,7 +86,7 @@ class Spa {
     #translationUrlToStatus(url) {
         console.trace("URL: ", url);
         if(url === "/") return STATUS.HOME;
-        if(url === "/profile/") return STATUS.PROFILE;
+        if(url === "/Profile/") return STATUS.PROFILE;
         if(url === "/friends/") return STATUS.FRIENDS;
         if(url === "/logout/") return STATUS.LOGOUT;
         return STATUS.LOGIN;
@@ -86,17 +98,19 @@ class Spa {
     async #updatePage() {
         console.log("Updating page content... Status: ", this.#status);
         this.#status = this.#translationUrlToStatus(window.location.pathname);
-        const content = {
-            [STATUS.HOME]: "<h1>Home</h1>",
-            [STATUS.PROFILE]: "<h1>Profile</h1>",
-            [STATUS.FRIENDS]: "<h1>Friends</h1>",
-        }
-        console.table(content);
-        console.log("Content: ", content[this.#status]);
-
-        this.#cleanSpaBody();
-        this.#spaBody.innerHTML = content[this.#status];
-        console.log("Content: ", content);
+        // const content = {
+            // [STATUS.HOME]: "<h1>Home</h1>",
+            // [STATUS.PROFILE]: "<h1>Profile</h1>",
+            // [STATUS.FRIENDS]: "<h1>Friends</h1>",
+        // }
+// 
+// 
+        // console.table(content);
+        // console.log("Content: ", content[this.#status]);
+// 
+        // this.#cleanSpaBody();
+        // this.#spaBody.innerHTML = content[this.#status];
+        // console.log("Content: ", content);
     }
 
     /**
@@ -138,4 +152,4 @@ window.addEventListener('popstate', () => {
     route.setStatus();
 });
 
-export { GetCookie, removeCookie, Spa, STATUS , route};
+export { GetCookie, removeCookie, Spa, STATUS , route, checyAnyKindaUndefined};

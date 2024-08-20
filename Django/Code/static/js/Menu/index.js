@@ -10,33 +10,20 @@ export default class Menu {
      * @param {HTMLElement} parentelement - The parent element to attach the menu.
      * @param {Object} spa - The SPA instance.
      */
-    constructor(parentelement, spa) {
-        console.log("Menu object created");
-        this.parentelement = spa.createDiv("Menu", ["menu"]);
-        parentelement.appendChild(this.parentelement);
-        this.url = "/Menu/";
-    }
 
     /**
      * Initializes the menu by loading it and attaching event listeners.
      */
+    constructor(){
+        this.init();
+    }
     async init() {
-        await this.loadMenu();
         this.attachEventListeners();
     }
 
     /**
      * Loads the menu content from the server.
      */
-    async loadMenu() {
-        try {
-            const menu = await Requests.get(this.url);
-            this.parentelement.innerHTML = menu;
-        } catch (error) {
-            console.error("Failed to load menu", error);
-        }
-    }
-
     /**
      * Attaches event listeners to menu elements.
      */

@@ -60,4 +60,6 @@ def profile(request):
         return render(request, 'register.html')
     
 def Friends(request):
-    return render(request, 'Friends.html')
+    if(request.user.is_authenticated):
+        return render(request, 'Friends.html')
+    return redirect('/')

@@ -1,38 +1,84 @@
 {% load static %}
 
-<!-- Main Navbar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container">
-    <div>
-      <button class="btn" type="button" id="MenuToggler">
-        <img src="{% static 'svg/Menu.svg' %}" alt="menu" width="30" height="30">
-      </button>
-    </div>
-    <div>
-      <a class="navbar-brand ms-auto" href="">
-        <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" width="30" height="30">
-      </a>
-      <a class="" href="javascript:void(0)" id="nav-logout">
-        <img src="{% static 'svg/logout.svg' %}" alt="logout" width="30" height="30">
-      </a>
-    </div>
+<!-- <div class="sidebar" id="sidebar"> -->
+<!-- <div> -->
+<!-- <div> -->
+<!-- <a href="javascript:void(0)" id="nav-home" class="p-2"> -->
+<!-- <img src="{% static '/svg/home.svg' %}" alt="menu" /> -->
+<!-- </a> -->
+<!-- </div> -->
+<!-- <div> -->
+<!-- <a href="javascript:void(0)" id="nav-profile" class="p-2"> -->
+<!-- <img src="{% static '/svg/Set.svg' %}" alt="menu" /> -->
+<!-- </a> -->
+<!-- </div> -->
+<!-- <div> -->
+<!-- <a href="javascript:void(0)" id="nav-friends" class="p-2 relative"> -->
+<!-- <div class="relative"> -->
+<!-- <img src="{% static '/svg/Peo.svg' %}" alt="menu" /> -->
+<!-- <span class="badge bg-danger text-white absolute badge-position">3</span> -->
+<!-- </div> -->
+<!-- </a> -->
+<!-- </div> -->
+<!-- <div> -->
+<!-- <a href="javascript:void(0)" id="nav-logout" class="p-2"> -->
+<!-- <img src="{% static '/svg/Log.svg' %}" alt="menu" /> -->
+<!-- </a> -->
+<!-- </div> -->
+<!-- </div> -->
+<!-- </div> -->
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light">
+  <div class="container-fluid px-4 py-2">
+    <a class="navbar-brand" href="#">Pong</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu"
+      aria-controls="offcanvasMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
   </div>
 </nav>
 
+<!-- Offcanvas Side Menu -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasMenuLabel">Menu</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link d-flex align-items-center" href="javascript:void(0)" id="nav-home">
+          <img src="{% static '/svg/home.svg' %}" alt="menu" class="p-1" />
+          Home
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link d-flex align-items-center" href="javascript:void(0)" id="nav-profile">
+          <img src="{% static '/svg/Set.svg' %}" alt="menu" class="p-1" />
+          Profile
+        </a>
+      </li>
+      <li class="nav-item">
+        <div class="relative">
 
-<!-- Sidebar Menu -->
-<div id="MenuScreenBlur" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-none"
-  style="z-index: 1040;"></div>
-<aside id="MenuItems" class="position-fixed top-0 start-0 bg-light shadow-sm p-3"
-  style="width: 250px; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1050;">
-  <button class="btn btn-close" id="CloseMenu" aria-label="Close"></button>
-  <ul class="nav flex-column mt-4">
-    <li class="nav-item">
-      <a class="nav-link text-black" href="javascript:void(0)" id="nav-home">Home</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link text-black" href="javascript:void(0)" id="nav-profile">Profile</a>
-    </li>
-  </ul>
-</aside>
+          <a class="nav-link d-flex align-items-center position-relative" href="javascript:void(0)" id="nav-friends">
+            <img src="{% static '/svg/Peo.svg' %}" alt="menu" class="p-1 position-relative" />
+              <span class="badge bg-danger text-white"
+              style="font-size: 0.7rem; transform: translate(-50%, -50%);">
+              3
+            </span>
+            Friends
+          </a>
+        </div>
+      </li>
 
+      <li class="nav-item">
+        <a class="nav-link d-flex align-items-center" href="javascript:void(0)" id="nav-logout">
+          <img src="{% static '/svg/Log.svg' %}" alt="menu" class="p-1" />
+          Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
