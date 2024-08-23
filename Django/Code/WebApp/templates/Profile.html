@@ -19,15 +19,15 @@
                         <h3 class="mb-0 text-dark">Edit Profile</h3>
                     </div>
                     <div class="card-body p-4">
-                        <form method="post" enctype="multipart/form-data">
+                        <form method="post" enctype="multipart/form-data" id="profileForm">
                             {% csrf_token %}
                             <div class="text-center mb-4">
                                 {% if user.profile_picture %}
                                 <img src="{{ user.profile_picture.url }}" alt="Profile Picture"
-                                    class="rounded-circle img-fluid shadow-sm" width="120" height="120">
+                                    class="rounded-circle img-fluid shadow-sm" width="120" height="120" id="profilePicture">
                                 {% else %}
                                 <img src="{{ DEFAULT_IMAGE_URL }}" alt="Default Profile Picture"
-                                    class="rounded-circle img-fluid shadow-sm" width="120" height="120">
+                                    class="rounded-circle img-fluid shadow-sm" width="120" height="120" id="profilePicture">
                                 {% endif %}
                             </div>
                             <div class="mb-3">
@@ -47,7 +47,7 @@
                             <div class="mb-3">
                                 <label for="id_about_me" class="form-label text-muted">About Me</label>
                                 <textarea class="form-control form-control-lg" id="id_about_me" name="about_me" rows="4"
-                                    required>{{ form.about_me.value }}</textarea>
+                                    required id="id_about_me">{{ form.about_me.value }}</textarea>
                             </div>
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-dark btn-lg">Save Changes</button>
@@ -59,39 +59,9 @@
         </div>
     </div>
 
-    <script src="{% static 'Spa/spa.js' %}"></script>
+    <!-- <script src="{% static 'js/Spa/Spa.js' %}"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<script>
-    if (document.getElementById('profileForm') !== null) {
-        document.getElementById('profileForm').addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            const formData = new FormData(this);
-
-            fetch('/Profile/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Handle success (e.g., show a success message or update the page content)
-                        alert('Profile updated successfully!');
-                    } else {
-                        // Handle errors (e.g., show error messages)
-                        alert('An error occurred while updating the profile.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while updating the profile.');
-                });
-        });
-    }
-</script>
+<script type="module" src="{% static 'js/profile/profile.js' %}"></script>
 
 </html>

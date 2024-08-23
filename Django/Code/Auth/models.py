@@ -55,7 +55,7 @@ class MyUser(AbstractUser):
             'about_me': self.about_me,
             'create_date': self.create_date,
             'update_date': self.update_date,
-            'friendlist': self.friendlist
+            'friendlist': [friend.username for friend in self.friendlist.all()]
         }
     
     def save(self, *args, **kwargs):

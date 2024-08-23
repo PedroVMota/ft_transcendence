@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpRequest
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
 from .forms import LoginForm, RegistrationForm, ProfileForm
+from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout as auth_logout
 
 
@@ -47,6 +48,15 @@ def login_register_view(request):
         register_form = RegistrationForm()
     return render(request, 'register.html', {'login_form': login_form, 'register_form': register_form})
 
+import os
+@login_required
+def getUserData(request):
+    if(request.method == 'GET'):
+        os.system('clear')
+        user = get_user_model()
+        print(request.user.getJson())
+        return JsonResponse({'user': request.user.getJson()})
+
 
 def logout(request):
     if request.method == 'POST':
@@ -59,11 +69,13 @@ def edit_profile(request):
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect('Profile')  # Redirect to a profile page or any other page
+            return JsonResponse({'message': 'Profile updated'}, status=200)
+        else:
+            return JsonResponse({'error': 'Invalid form data'}, status=400)
     else:
         form = ProfileForm(instance=request.user)
-    
     return render(request, 'Profile.html', {'form': form, 'user': request.user})
+
     
 def Friends(request):
     if(request.user.is_authenticated):
