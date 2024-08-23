@@ -32,6 +32,10 @@ AUTH_USER_MODEL = 'Auth.MyUser'
 ASGI_APPLICATION = 'backend.asgi.application'
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 * 3  # 10 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760 * 3  # 10 MB
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 

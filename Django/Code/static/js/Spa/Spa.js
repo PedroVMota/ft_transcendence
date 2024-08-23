@@ -45,6 +45,7 @@ class Spa {
     #status = STATUS.LOGIN;
     #body = null;
     #Menu = null;
+    #BMenu = null;
     #spaBody = null;
 
     /**
@@ -52,9 +53,13 @@ class Spa {
      */
     constructor() {
         console.log("Spa object created");
+        
         this.#body = document.querySelector("body");
 
-        this.#Menu = new Menu(this.#body, this);
+        this.#BMenu = this.createDiv("MenuBody");
+        document.querySelector("body").appendChild(this.#BMenu);
+
+        this.#Menu = new Menu(this.#BMenu, this);
         this.#Menu.init();
 
         this.#spaBody = this.createDiv("SpaBody");
@@ -84,7 +89,6 @@ class Spa {
      * @returns {number} The corresponding status.
      */
     #translationUrlToStatus(url) {
-        console.trace("URL: ", url);
         if(url === "/") return STATUS.HOME;
         if(url === "/Profile/") return STATUS.PROFILE;
         if(url === "/friends/") return STATUS.FRIENDS;
@@ -96,21 +100,27 @@ class Spa {
      * Updates the page content based on the current status.
      */
     async #updatePage() {
-        console.log("Updating page content... Status: ", this.#status);
         this.#status = this.#translationUrlToStatus(window.location.pathname);
-        // const content = {
-            // [STATUS.HOME]: "<h1>Home</h1>",
-            // [STATUS.PROFILE]: "<h1>Profile</h1>",
-            // [STATUS.FRIENDS]: "<h1>Friends</h1>",
-        // }
-// 
-// 
-        // console.table(content);
-        // console.log("Content: ", content[this.#status]);
-// 
-        // this.#cleanSpaBody();
-        // this.#spaBody.innerHTML = content[this.#status];
-        // console.log("Content: ", content);
+        switch (this.#status) {
+            case STATUS.HOME:
+                console.log("Home page");
+                this.#cleanSpaBody();
+                
+
+                break;
+            case STATUS.PROFILE:
+                console.log("Profile page");
+                await Requests.get('/Profile/').then((html) => {
+                    this.#cleanSpaBody();
+                    this.#spaBody.innerHTML = html;
+                }).catch((error) => {
+                    console.error(error);
+                }
+                );
+                break;
+            default:
+                break;
+        }
     }
 
     /**
@@ -120,10 +130,6 @@ class Spa {
     async get(url) {
         window.history.pushState({}, '', url);
         this.#status = this.#translationUrlToStatus(url);
-        console.log("Status: ", this.#status);
-        if (this.#status === STATUS.LOGOUT) {
-            return;
-        }
         this.#updatePage();
     }
     /**
@@ -132,7 +138,6 @@ class Spa {
     setStatus() {
         const url = window.location.pathname;
         this.#status = this.#translationUrlToStatus(url);
-        console.log("Status: ", this.#status);
         this.#updatePage();
     }
 
@@ -148,7 +153,6 @@ const route = new Spa();
 
 // Handle back/forward browser button clicks
 window.addEventListener('popstate', () => {
-    console.log("Popstate event triggered");
     route.setStatus();
 });
 

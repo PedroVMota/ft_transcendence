@@ -70,3 +70,18 @@ class GameConsumer(AsyncWebsocketConsumer):
                     # 'message': message
                 # }
             # )
+
+
+
+
+class GeneralConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.roomName = "general"
+        self.roomGroup = "generalChat"
+        # Use sync_to_async to perform the synchronous database query
+        try:
+            self.room = await sync_to_async(Room.objects.get)(roomName=self.roomName)
+        except Room.DoesNotExist:
+            # If the room doesn't exist, create a new one
+            self.room = await sync_to_async(Room.objects.create)(roomName=self.roomName)
+        

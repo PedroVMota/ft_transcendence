@@ -14,11 +14,23 @@ export default class Menu {
     /**
      * Initializes the menu by loading it and attaching event listeners.
      */
-    constructor(){
+
+    #spa = null;
+    #parentelement = null;
+    constructor(parentelement, spa) {
+        this.parentelement = parentelement;
+        this.#spa = spa;
+        Requests.get('/Menu/').then((html) => {
+            console.log("HTML: ", html);
+            this.parentelement.innerHTML = html;
+         this.attachEventListeners();
+        }).catch((error) => {
+            console.error(error);
+        }
+        );
         this.init();
     }
     async init() {
-        this.attachEventListeners();
     }
 
     /**
@@ -28,6 +40,7 @@ export default class Menu {
      * Attaches event listeners to menu elements.
      */
     attachEventListeners() {
+        console.log("Attaching event listeners");
         const events = [
             { id: "MenuToggler", event: "click", handler: this.openMenu.bind(this) },
             { id: "CloseMenu", event: "click", handler: this.closeMenu.bind(this) },
@@ -80,16 +93,10 @@ export default class Menu {
  * @param {string} url - The URL to navigate to.
  */
     navigateTo(e, url) {
-        
-        if (e && typeof e.preventDefault === 'function') {
-            e.preventDefault();
-        }
-        if (typeof spa !== "undefined") {
-            spa.get(url);
-            this.closeMenu(new Event("click"));
-        } else {
-            console.error("Spa instance not available");
-        }
+        e.preventDefault();
+        console.log("Navigate to: ", url);
+        spa.get(url);
+        this.closeMenu(new Event("click"));
     }
 
    async #logout(e) {

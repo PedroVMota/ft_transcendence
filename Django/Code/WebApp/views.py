@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpRequest
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, ProfileForm
 from django.contrib.auth import authenticate, login, logout as auth_logout
 
 
@@ -53,11 +53,17 @@ def logout(request):
         auth_logout(request)
         return JsonResponse({'message': 'Logout successful'})
 
-def profile(request):
-    if(request.user.is_authenticated):
-        return render(request, 'Profile.html', {'user': request.user})
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('Profile')  # Redirect to a profile page or any other page
     else:
-        return render(request, 'register.html')
+        form = ProfileForm(instance=request.user)
+    
+    return render(request, 'Profile.html', {'form': form, 'user': request.user})
     
 def Friends(request):
     if(request.user.is_authenticated):
