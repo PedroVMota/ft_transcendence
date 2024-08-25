@@ -42,19 +42,21 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.43.129']
+ALLOWED_HOSTS = ['*']
 
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
     'https://localhost',
-    'https://127.0.0.1'
+    'https://127.0.0.1',
+    'https://192.168.43.129'
 ]
 
 CSRF_COOKIE_SECURE = True
 
-CSRF_TRUSTED_ORIGINS = ["https://localhost"]
+CSRF_TRUSTED_ORIGINS = ["https://localhost", "https://192.168.43.129"]
 CORS_ALLOW_ALL_ORIGINS = True
 
 

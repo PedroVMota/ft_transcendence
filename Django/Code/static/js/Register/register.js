@@ -98,7 +98,7 @@ document.getElementById('registerForm').addEventListener('submit', function (eve
         "password2": pass2
     };
 
-    fetch('https://localhost:443/auth/token/register/', {
+    fetch('/auth/token/register/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
