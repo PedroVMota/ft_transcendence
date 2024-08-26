@@ -5,11 +5,15 @@ from django.contrib.auth.decorators import login_required
 from .forms import LoginForm, RegistrationForm, ProfileForm
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout as auth_logout
-
+import time
 
 
 def Menu(request):
-    return render(request, 'Components/Menu.html')
+    start_time = time.time()
+    response = render(request, 'Components/Menu.html')
+    end_time = time.time()
+    print(f"\n\n\n\n\nMenu view processing time: {end_time - start_time} seconds")
+    return response
 
 @login_required
 def index(request):
@@ -65,16 +69,20 @@ def logout(request):
 
 @login_required
 def edit_profile(request):
+    if request.method == 'GET':
+        return render(request, 'Profile.html')
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=request.user)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'message': 'Profile updated'}, status=200)
-        else:
-            return JsonResponse({'error': 'Invalid form data'}, status=400)
-    else:
-        form = ProfileForm(instance=request.user)
-    return render(request, 'Profile.html', {'form': form, 'user': request.user})
+        user = request.user
+        # Directly update the fields on the user object
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.about_me = request.POST.get('about_me')
+        profile_picture = request.FILES.get('profile_picture')
+        if profile_picture:
+            user.profile_picture = profile_picture
+        user.save()
+        return JsonResponse({'message': 'Profile updated successfully!'})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
     
 def Friends(request):

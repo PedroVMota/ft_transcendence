@@ -44,6 +44,14 @@ class Requests {
             throw error;
         }
     }
+
+
 }
 
-export default Requests;
+
+function getCookie(name) {
+    const cookieValue = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return cookieValue ? cookieValue[2] : null;
+}
+
+export { Requests, getCookie };

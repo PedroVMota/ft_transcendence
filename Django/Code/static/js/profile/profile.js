@@ -1,62 +1,162 @@
+// document.addEventListener('DOMContentLoaded', function () {
+//     const profileForm = document.getElementById('profileForm');
+
+//     // Function to populate the form with user data
+//     function loadUserData() {
+//         fetch('/getUserData/', {
+//             method: 'GET',
+//             headers: {
+//                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+//             }
+//         })
+//         .then(response => {
+//             if (!response.ok) {
+//                 throw new Error('Network response was not ok');
+//             }
+//             return response.json();
+//         })
+//         .then(userData => {
+//             // Populate form fields with the user data
+//             document.getElementById('id_first_name').value = userData.user.first_name;
+//             document.getElementById('id_last_name').value = userData.user.last_name;
+//             document.getElementById('id_about_me').value = userData.user.about_me;
+//             document.getElementById('profilePicture').src = userData.user.profile_picture;
+//         })
+//         .catch(error => {
+//             console.error('Error fetching user data:', error);
+//             alert('An error occurred while loading your profile data. Please try again.');
+//         });
+//     }
+
+//     // Load user data when the page loads
+//     loadUserData();
+
+//     if (profileForm) {
+//         profileForm.addEventListener('submit', function (event) {
+//             event.preventDefault(); // Prevent the default form submission
+
+//             const formData = new FormData(profileForm);
+
+//             fetch('/Profile/', {
+//                 method: 'POST',
+//                 body: formData,
+//                 headers: {
+//                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+//                 }
+//             })
+//             .then(response => {
+//                 if (!response.ok) {
+//                     throw new Error('Network response was not ok');
+//                 }
+//                 return response.json();
+//             })
+//             .then(data => {
+//                 if (data.message) {
+//                     alert(data.message); // Display success message
+
+//                     // Optionally reload the updated user data
+//                     loadUserData();
+//                 } else if (data.error) {
+//                     alert('Error updating profile: ' + data.error); // Display error message
+//                 }
+//             })
+//             .catch(error => {
+//                 console.error('Error during fetch:', error);
+//                 alert('An error occurred. Please try again.');
+//             });
+//         });
+//     }
+// });
 
 
-/*
-{'username': 'admin', 'email': 'admin@admin.com', 'first_name': 'None', 'last_name': 'None', 'profile_picture': '/media/Auth/admin/200w_5cM2iEd.webp', 'about_me': 'None', 'create_date': datetime.datetime(2024, 8, 23, 16, 6, 3, 406483, tzinfo=datetime.timezone.utc), 'update_date': datetime.datetime(2024, 8, 23, 16, 13, 26, 772989, tzinfo=datetime.timezone.utc), 'friendlist': []}
-*/
-document.addEventListener('DOMContentLoaded', function () {
-    const profileForm = document.getElementById('profileForm');
-    if (profileForm) {
-        profileForm.addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            const formData = new FormData(this);
-
-            fetch('/Profile/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message) {
-                        console.log(data.message);
+// // forcing loading
 
 
-                        fetch('/getUserData/', {
-                            method: 'GET',
-                            headers: {
-                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                            }
-                        }
-                        ).then(response => response.json())
-                        .then(data => {
-                            console.log(data);
-                            document.getElementById('id_first_name').value = data.user.first_name;
-                            document.getElementById('id_last_name').value = data.user.last_name;
-                            document.getElementById('id_about_me').value = data.user.about_me;
-                            document.getElementById('profilePicture').src = data.user.profile_picture;
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('An error occurred. Please try again.');
-                        });
+import AComponent from "../Spa/AComponent.js";
+import spa from "../Spa/Spa.js";
+import { getCookie, Requests } from "../Utils/Requests.js";
 
 
+export default class Profile extends AComponent {
+    #parentElement = null;
+    #spaObject = null;
 
-
-
-
-                    } else if (data.error) {
-                        console.error(data.error);
-                        alert('Error updating profile: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                });
+    constructor(url, spaObject) {
+        super(url, spaObject);
+        console.log("Profile constructor");
+        this.#parentElement = document.getElementById("root");
+        console.log(">>>> Spa Object: ", spaObject);
+        this.#spaObject = spaObject;
+        console.trace({
+            "Parent Element": this.#parentElement
         });
     }
-});
+
+    render() {
+        let url = this.getUrl();
+        // Display pending message
+        this.#parentElement.innerHTML = '<span>Pending...</span>';
+
+        this._getHtml(url).then((html) => {
+            this.#parentElement.innerHTML = html;
+            this.#loadData();
+            document.getElementById('profileForm').addEventListener('submit', (event) => this.#updateProfile(event));
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
+
+    destroy() {
+        this.#parentElement.innerHTML = '';
+    }
+
+    #loadData() {
+
+        Requests.get('/getUserData/').then((userData) => {
+            console.log(userData.user);
+            // userData = userData.user;
+            document.getElementById('id_first_name').value = userData.user.first_name ? userData.user.first_name : 'Empty';
+            document.getElementById('id_last_name').value = userData.user.last_name ? userData.user.last_name : 'Empty';
+            document.getElementById('id_about_me').value = userData.user.about_me ? userData.user.about_me : 'Empty';
+            document.getElementById('profilePicture').src = userData.user.profile_picture;
+
+            console.trace({
+                "First Name": document.getElementById('id_first_name').value,
+                "Last Name": document.getElementById('id_last_name').value,
+                "About Me": document.getElementById('id_about_me').value,
+                "Profile Picture": document.getElementById('profilePicture').src
+            });
+        })
+    }
+
+    #updateProfile(event) {
+        event.preventDefault();
+        const formData = new FormData(document.getElementById('profileForm'));
+        fetch('/Profile/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    this.#loadData();
+                } else if (data.error) {
+                    alert('Error updating profile: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error during fetch:', error);
+                alert('An error occurred. Please try again.');
+            });
+    }
+}
+
