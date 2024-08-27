@@ -2,14 +2,17 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+import random
+import os
 
 # Create your models here.
 
 DEFAULT_IMAGE = 'Auth/defaultAssets/ProfilePicture.png'
 
 def upload_to(instance, filename):
-    # Save the image in a subdirectory of MEDIA_ROOT
-    return 'Auth/{}/{}'.format(instance.username, filename)
+    extension = filename.split('.')[-1]
+    new_filename = f'profile_{instance.username}.{extension}'
+    return os.path.join('Auth', instance.username, new_filename)
 
 class ChatRoom(models.Model):
     name = models.CharField(max_length=255, null=True, blank=True)  # Used for group chats
@@ -34,6 +37,9 @@ class Message(models.Model):
     class Meta:
         ordering = ('-timestamp',)
 
+def RandomNumber(min=1000000000000000, max=9999999999999999):
+    return random.randint(min, max)
+
 class MyUser(AbstractUser):
     
     profile_picture = models.ImageField(upload_to=upload_to, default=DEFAULT_IMAGE)
@@ -43,11 +49,13 @@ class MyUser(AbstractUser):
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
     friendlist = models.ManyToManyField('self', blank=True)
-    darkMode = models.BooleanField(default=False)
+    userSocialCode = models.BigIntegerField(unique=True, null=True, blank=True)
     
     def getJson(self):
         return {
+            'user_id': self.id,
             'username': self.username,
+            'usercode': self.userSocialCode,
             'email': self.email,
             'first_name': self.first_name,
             'last_name': self.last_name,
@@ -56,9 +64,12 @@ class MyUser(AbstractUser):
             'create_date': self.create_date,
             'update_date': self.update_date,
             'friendlist': [friend.username for friend in self.friendlist.all()]
+
         }
     
     def save(self, *args, **kwargs):
+        if(self.userSocialCode == None):
+            self.userSocialCode = RandomNumber(min=1000000000000000, max=9999999999999999)
         super().save(*args, **kwargs)
 
     def newImageUpdate(self, image):
@@ -73,7 +84,7 @@ class serverLogs(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     mehod = models.CharField(max_length=10, default='GET')
     path = models.CharField(max_length=100, default='/')
-    status = models.IntegerField()
+    status = models.BigIntegerField(default=0)
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
     def __str__(self):

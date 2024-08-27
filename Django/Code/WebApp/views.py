@@ -6,7 +6,8 @@ from .forms import LoginForm, RegistrationForm, ProfileForm
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login, logout as auth_logout
 import time
-
+from django.shortcuts import render
+from .forms import LoginForm, RegistrationForm
 
 def Menu(request):
     start_time = time.time()
@@ -20,8 +21,6 @@ def index(request):
     return render(request, 'index.html', {'user': request.user})
 
 
-from django.shortcuts import render
-from .forms import LoginForm, RegistrationForm
 
 def login_register_view(request):
     print(request.method)
@@ -78,8 +77,12 @@ def edit_profile(request):
         user.last_name = request.POST.get('last_name')
         user.about_me = request.POST.get('about_me')
         profile_picture = request.FILES.get('profile_picture')
+        # Validate profile picture
         if profile_picture:
-            user.profile_picture = profile_picture
+            valid_extensions = ['png', 'webp', 'gif']
+            extension = profile_picture.name.split('.')[-1].lower()
+            if extension not in valid_extensions:
+                return JsonResponse({'error': f'Unsupported file extension. Allowed extensions are: {", ".join(valid_extensions)}'}, status=400)
         user.save()
         return JsonResponse({'message': 'Profile updated successfully!'})
     return JsonResponse({'error': 'Invalid request'}, status=400)
