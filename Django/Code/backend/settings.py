@@ -51,12 +51,19 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     'https://localhost',
     'https://127.0.0.1',
-    'https://192.168.43.129'
+    'https://192.168.43.129',
+    "https://148.63.55.136",  # Add this line
 ]
 
 CSRF_COOKIE_SECURE = True
 
-CSRF_TRUSTED_ORIGINS = ["https://localhost", "https://192.168.43.129"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost",
+    "https://192.168.43.129",
+    'https://127.0.0.1',
+    'https://192.168.43.129',
+    "https://148.63.55.136",  # Add this line
+]
 CORS_ALLOW_ALL_ORIGINS = True
 
 
