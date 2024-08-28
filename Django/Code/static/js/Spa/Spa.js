@@ -9,6 +9,11 @@ class Spa{
     #footer = null;
     #routes = [ "/", "/Profile/", "/Friends/", "/Login/", '/Logout/' ];
     #currentRoute = null;
+    #contentClass = {
+        "/": new Home("/", this),
+        "/Profile/": new Profile("/Profile/", this),
+        "/Friends/": new Friends("/Friends/", this),
+    }
 
     constructor(){
         // https://wallpapercave.com/wp/wp3837751.jpg
@@ -16,8 +21,8 @@ class Spa{
         this.#menu.render();
         this.#content = document.getElementById("root");
         this.#footer = document.getElementById("Footer");
+        
     }
-
 
     setTo(url){
         if(!this.#routes.includes(url)){
@@ -27,33 +32,23 @@ class Spa{
         if(this.#currentRoute){
             this.#currentRoute.destroy();
         }
-
         switch(url){
             case "/":
                 this.#updateUrl(url);
-                this.#currentRoute = new Home(url, this);
+                this.#currentRoute = this.#contentClass["/"];
                 break;
             case "/Profile/":
                 this.#updateUrl(url);
-                this.#currentRoute = new Profile(url, this);
+                this.#currentRoute = this.#contentClass["/Profile/"];
                 break;
             case "/Friends/":
                 this.#updateUrl(url);
-                this.#currentRoute = new Friends(url, this);
-                break;
-            case "/Login/":
-                this.#updateUrl(url);
-                this.#currentRoute = new Login(url, this);
-                break;
-            case "/Logout/":
-                this.#updateUrl(url);
-                this.#currentRoute = new Logout(url, this);
+                this.#currentRoute = this.#contentClass["/Friends/"];
                 break;
             default:
                 console.error("Invalid URL: ", url);
                 return;
         }
-
         this.#currentRoute.render();
     }
 

@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout as auth_logout
 import time
 from django.shortcuts import render
 from .forms import LoginForm, RegistrationForm
-
+from Auth.models import MyUser
 def Menu(request):
     start_time = time.time()
     response = render(request, 'Components/Menu.html')
@@ -109,3 +109,16 @@ def Friends(request):
     if(request.user.is_authenticated):
         return render(request, 'Friends.html')
     return redirect('/')
+
+
+# path('friendsList/', views.friends, name='friends'),
+
+
+def searchUser(request):
+    if request.method == 'GET':
+        # Assuming you're returning a list of friends for the logged-in user
+        friends = MyUser.objects.filter(userSocialCode=request.GET.get('user_code'))
+        friends_data = [friend.getJson() for friend in friends]
+        return JsonResponse({'friends': friends_data})
+    # If the method is not GET, return an error response
+    return JsonResponse({'error': 'Invalid request method'}, status=400)

@@ -37,7 +37,7 @@ class Message(models.Model):
     class Meta:
         ordering = ('-timestamp',)
 
-def RandomNumber(min=1000000000000000, max=9999999999999999):
+def RandomNumber(min=1000, max=9999):
     return random.randint(min, max)
 
 class MyUser(AbstractUser):
@@ -69,7 +69,7 @@ class MyUser(AbstractUser):
     
     def save(self, *args, **kwargs):
         if(self.userSocialCode == None):
-            self.userSocialCode = RandomNumber(min=1000000000000000, max=9999999999999999)
+            self.userSocialCode = RandomNumber(min=1000, max=9999)
         super().save(*args, **kwargs)
 
     def newImageUpdate(self, image):

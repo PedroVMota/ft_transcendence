@@ -1,77 +1,3 @@
-// document.addEventListener('DOMContentLoaded', function () {
-//     const profileForm = document.getElementById('profileForm');
-
-//     // Function to populate the form with user data
-//     function loadUserData() {
-//         fetch('/getUserData/', {
-//             method: 'GET',
-//             headers: {
-//                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-//             }
-//         })
-//         .then(response => {
-//             if (!response.ok) {
-//                 throw new Error('Network response was not ok');
-//             }
-//             return response.json();
-//         })
-//         .then(userData => {
-//             // Populate form fields with the user data
-//             document.getElementById('id_first_name').value = userData.user.first_name;
-//             document.getElementById('id_last_name').value = userData.user.last_name;
-//             document.getElementById('id_about_me').value = userData.user.about_me;
-//             document.getElementById('profilePicture').src = userData.user.profile_picture;
-//         })
-//         .catch(error => {
-//             console.error('Error fetching user data:', error);
-//             alert('An error occurred while loading your profile data. Please try again.');
-//         });
-//     }
-
-//     // Load user data when the page loads
-//     loadUserData();
-
-//     if (profileForm) {
-//         profileForm.addEventListener('submit', function (event) {
-//             event.preventDefault(); // Prevent the default form submission
-
-//             const formData = new FormData(profileForm);
-
-//             fetch('/Profile/', {
-//                 method: 'POST',
-//                 body: formData,
-//                 headers: {
-//                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-//                 }
-//             })
-//             .then(response => {
-//                 if (!response.ok) {
-//                     throw new Error('Network response was not ok');
-//                 }
-//                 return response.json();
-//             })
-//             .then(data => {
-//                 if (data.message) {
-//                     alert(data.message); // Display success message
-
-//                     // Optionally reload the updated user data
-//                     loadUserData();
-//                 } else if (data.error) {
-//                     alert('Error updating profile: ' + data.error); // Display error message
-//                 }
-//             })
-//             .catch(error => {
-//                 console.error('Error during fetch:', error);
-//                 alert('An error occurred. Please try again.');
-//             });
-//         });
-//     }
-// });
-
-
-// // forcing loading
-
-
 import AComponent from "../Spa/AComponent.js";
 import spa from "../Spa/Spa.js";
 import { getCookie, Requests } from "../Utils/Requests.js";
@@ -80,6 +6,8 @@ import { getCookie, Requests } from "../Utils/Requests.js";
 export default class Profile extends AComponent {
     #parentElement = null;
     #spaObject = null;
+    #cachedContent = null;
+    #cachedHead = null;
 
     constructor(url, spaObject) {
         super(url, spaObject);
@@ -88,38 +16,31 @@ export default class Profile extends AComponent {
     }
 
     render() {
+        if(this.#cachedContent){
+            document.head.innerHTML = this.#cachedHead;
+            this.#parentElement.innerHTML = this.#cachedContent;
+            document.getElementById('profileForm').addEventListener('submit', (event) => this.#updateProfile(event));
+            this.#loadData();
+            return;
+        }
         let url = this.getUrl();
         // Display pending message
         this.showSpinner();
-
         this._getHtml(url).then((html) => {
         let documentResponse = new DOMParser().parseFromString(html, 'text/html');
             let rootContentHtml = documentResponse.getElementById('root').innerHTML;
             if(!(!rootContentHtml)){
                 document.head.innerHTML = documentResponse.head.innerHTML;
-                
-
-
-                
-                
-                
-                
-
-
-
                 this.#parentElement.innerHTML = rootContentHtml;
                 document.getElementById('profileForm').addEventListener('submit', (event) => this.#updateProfile(event));
                 this.#loadData();
-
-
                 setTimeout(() => {
                     this.hideSpinner();
                 }, 1000);
-
-
+                this.#cachedContent = rootContentHtml;
+                this.#cachedHead = documentResponse.head.innerHTML;
             }
         }).catch((error) => {
-            
             console.error(error);
         });
     }
@@ -136,6 +57,7 @@ export default class Profile extends AComponent {
             document.getElementById('id_last_name').value = userData.user.last_name ? userData.user.last_name : 'Empty';
             document.getElementById('id_about_me').value = userData.user.about_me ? userData.user.about_me : 'Empty';
             document.getElementById('profilePicture').src = userData.user.profile_picture;
+            document.getElementById('id_user_code').value = userData.user.usercode;
         })
     }
 
