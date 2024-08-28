@@ -1,0 +1,83 @@
+/* position: relative;
+z-index: 1;
+background: rgba(255, 255, 255, 0.1);
+padding: 2rem;
+border-radius: 10px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+border: solid 1px #5d9ed68f;
+box-shadow: 0px 10px 20px 4px rgba(0, 0, 0, 0.308);
+width: 500px;
+height: auto;
+max-width: 90%;
+opacity: 1;
+transition: opacity 0.5s ease, transform 0.5s ease; */
+
+
+
+.card {
+    position: relative !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: solid 1px #5d9ed68f !important;
+    width: 100% !important;
+    box-shadow: 0px 10px 20px 4px rgba(0, 0, 0, 0.308);
+    color: white !important;
+}
+
+.card-header {
+    border-bottom: 1px solid #5a80a08b !important;
+}
+.form-label {
+    color: #a8ccebc8 !important;
+}
+
+.form-control {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid #5d9ed68f !important;
+    color: white !important;
+}
+
+/* Specific styling for file input text and button */
+.form-control[type="file"] {
+    color: white !important; /* Ensures the file input text is white */
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid #5d9ed68f !important;
+    overflow: hidden; /* Prevents overflow issues */
+    padding: 0.25rem; /* Adjust padding for consistency */
+}
+
+/* Style the file input button for WebKit browsers */
+.form-control[type="file"]::-webkit-file-upload-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #5d9ed68f;
+    color: white;
+    padding: 0.5rem 1rem; /* Add some padding for a nicer look */
+    border-radius: 5px; /* Make the button's corners rounded */
+    cursor: pointer; /* Change the cursor to pointer on hover */
+}
+
+/* Style the file input button for Firefox */
+.form-control[type="file"]::file-selector-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #5d9ed68f;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Hover effect for the file input button */
+.form-control[type="file"]::-webkit-file-upload-button:hover,
+.form-control[type="file"]::file-selector-button:hover {
+    background: rgba(255, 255, 255, 0.2); /* Slightly brighter on hover */
+}
+
+
+.img-thumbnail {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid #5d9ed68f !important;
+}

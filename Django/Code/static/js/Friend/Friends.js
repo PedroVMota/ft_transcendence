@@ -7,25 +7,28 @@ export default class Friends extends AComponent {
 
     constructor(url, spaObject) {
         super(url, spaObject);
-        console.log("Friend constructor");
         this.#parentElement = document.getElementById("root");
-        console.log(">>>> Spa Object: ", spaObject);
         this.#spaObject = spaObject;
-        console.trace({
-            "Parent Element": this.#parentElement
-        });
     }
 
     render() {
-        console.trace("Render Friends");
         let url = this.getUrl();
         // Display pending message
         this.#parentElement.innerHTML = '<span>Pending...</span>';
         this._getHtml(url).then((html) => {
-            this.#parentElement.innerHTML = html;
-        }).catch((error) => {
-            console.error(error);
-        });
+            let documentResponse = new DOMParser().parseFromString(html, 'text/html');
+                let rootContentHtml = documentResponse.getElementById('root').innerHTML;
+                if(!(!rootContentHtml)){
+                    document.head.innerHTML = documentResponse.head.innerHTML;
+                    this.#parentElement.innerHTML = rootContentHtml;
+                    setTimeout(() => {
+                        this.hideSpinner();
+                    }, 1000);
+                }
+            }).catch((error) => {
+                
+                console.error(error);
+            });
 
     }
 

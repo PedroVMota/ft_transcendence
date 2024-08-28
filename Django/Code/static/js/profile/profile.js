@@ -83,25 +83,43 @@ export default class Profile extends AComponent {
 
     constructor(url, spaObject) {
         super(url, spaObject);
-        console.log("Profile constructor");
         this.#parentElement = document.getElementById("root");
-        console.log(">>>> Spa Object: ", spaObject);
         this.#spaObject = spaObject;
-        console.trace({
-            "Parent Element": this.#parentElement
-        });
     }
 
     render() {
         let url = this.getUrl();
         // Display pending message
-        this.#parentElement.innerHTML = '<span>Pending...</span>';
+        this.showSpinner();
 
         this._getHtml(url).then((html) => {
-            this.#parentElement.innerHTML = html;
-            this.#loadData();
-            document.getElementById('profileForm').addEventListener('submit', (event) => this.#updateProfile(event));
+        let documentResponse = new DOMParser().parseFromString(html, 'text/html');
+            let rootContentHtml = documentResponse.getElementById('root').innerHTML;
+            if(!(!rootContentHtml)){
+                document.head.innerHTML = documentResponse.head.innerHTML;
+                
+
+
+                
+                
+                
+                
+
+
+
+                this.#parentElement.innerHTML = rootContentHtml;
+                document.getElementById('profileForm').addEventListener('submit', (event) => this.#updateProfile(event));
+                this.#loadData();
+
+
+                setTimeout(() => {
+                    this.hideSpinner();
+                }, 1000);
+
+
+            }
         }).catch((error) => {
+            
             console.error(error);
         });
     }
@@ -113,19 +131,11 @@ export default class Profile extends AComponent {
     #loadData() {
 
         Requests.get('/getUserData/').then((userData) => {
-            console.log(userData.user);
             // userData = userData.user;
             document.getElementById('id_first_name').value = userData.user.first_name ? userData.user.first_name : 'Empty';
             document.getElementById('id_last_name').value = userData.user.last_name ? userData.user.last_name : 'Empty';
             document.getElementById('id_about_me').value = userData.user.about_me ? userData.user.about_me : 'Empty';
             document.getElementById('profilePicture').src = userData.user.profile_picture;
-
-            console.trace({
-                "First Name": document.getElementById('id_first_name').value,
-                "Last Name": document.getElementById('id_last_name').value,
-                "About Me": document.getElementById('id_about_me').value,
-                "Profile Picture": document.getElementById('profilePicture').src
-            });
         })
     }
 

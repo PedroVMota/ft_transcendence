@@ -33,18 +33,23 @@ def login_register_view(request):
                 user = authenticate(request, username=username, password=password)
                 if user is not None:
                     login(request, user)
+                    print("Login successful")
                     return JsonResponse({'message': 'Login successful'})
                 else:
+                    print("Invalid username or password")
                     return JsonResponse({'error': 'Invalid username or password'}, status=400)
             return JsonResponse({'error': 'Invalid form data'}, status=400)
         elif 'register' in request.POST:
             register_form = RegistrationForm(request.POST)
             if register_form.is_valid():
                 if register_form.cleaned_data['password'] != register_form.cleaned_data['password_confirm']:
+                    print("Passwords do not match")
                     return JsonResponse({'error': 'Passwords do not match'}, status=400)
                 user = register_form.save(commit=False)
                 user.save()
+                print("Registration successful")
                 return JsonResponse({'message': 'Registration successful'})
+            print("Invalid form data")
             return JsonResponse({'error': 'Invalid form data'}, status=400)
     else:
         login_form = LoginForm()
@@ -71,18 +76,30 @@ def edit_profile(request):
     if request.method == 'GET':
         return render(request, 'Profile.html')
     if request.method == 'POST':
+        print(request.FILES)
+        if 'file' in request.FILES:
+            uploaded_file = request.FILES['file']
+            print(f"File name: {uploaded_file.name}")
+            print(f"File size: {uploaded_file.size} bytes")
+            print(f"Content type: {uploaded_file.content_type}")
+        else:
+            print("No file found in the request.")
         user = request.user
         # Directly update the fields on the user object
         user.first_name = request.POST.get('first_name')
         user.last_name = request.POST.get('last_name')
         user.about_me = request.POST.get('about_me')
-        profile_picture = request.FILES.get('profile_picture')
+
         # Validate profile picture
+        profile_picture = request.FILES.get('profile_picture')
         if profile_picture:
             valid_extensions = ['png', 'webp', 'gif']
             extension = profile_picture.name.split('.')[-1].lower()
             if extension not in valid_extensions:
                 return JsonResponse({'error': f'Unsupported file extension. Allowed extensions are: {", ".join(valid_extensions)}'}, status=400)
+            user.profile_picture = profile_picture;
+        
+        print(f"User Object: {user.getJson()}")
         user.save()
         return JsonResponse({'message': 'Profile updated successfully!'})
     return JsonResponse({'error': 'Invalid request'}, status=400)

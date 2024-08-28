@@ -7,29 +7,25 @@ class Menu extends AComponent {
 
     constructor(url, spaObject) {
         super(url, spaObject);
-        console.log("Menu constructor");
         this.#parentElement = document.getElementById("headerMenu");
-        console.log(">>>> Spa Object: ", spaObject);
         this.#spaObject = spaObject;
-        console.trace({
-            "Parent Element": this.#parentElement
-        });
     }
 
     render() {
         let url = this.getUrl();
-        // Display pending message
-        this.#parentElement.innerHTML = '<span>Pending...</span>';
-
         this._getHtml(url).then((html) => {
-            this.#parentElement.innerHTML = html;
-
-            let home = document.getElementById("nav-home");
+            // this.#parentElement.innerHTML = html;
+            // let home = document.getElementById("nav-home");
             let profile = document.getElementById("nav-profile");
             let friends = document.getElementById("nav-friends");
             let logout = document.getElementById("nav-logout");
+            // there are two elements with the same id to get the use all the elements with the same id
+            let home = document.querySelectorAll("#nav-home");
 
-            home.addEventListener("click", (e) => this.navigateTo(e, "/"));
+            // home.addEventListener("click", (e) => this.navigateTo(e, "/"));
+            home.forEach((element) => {
+                element.addEventListener("click", (e) => this.navigateTo(e, "/"));
+            });
             profile.addEventListener("click", (e) => this.navigateTo(e, "/Profile/"));
             friends.addEventListener("click", (e) => this.navigateTo(e, "/Friends/"));
             logout.addEventListener("click", (e) => this.#logout(e));

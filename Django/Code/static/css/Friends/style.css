@@ -1,0 +1,121 @@
+.acrylicStyle {
+    background: rgba(205, 205, 205, 0.1) !important;
+    border-radius: 5px !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+    border: solid 1px #5d9ed68f !important;
+    color: rgb(230, 230, 230) !important;
+}
+
+.friend-info .text-muted {
+    color: #a8ccebc8 !important;
+}
+
+
+.btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid #5d9ed68f !important;
+    color: white !important;
+    border-radius: 5;
+}
+
+
+.form-control {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid #5d9ed68f !important;
+    color: white !important;
+    border-radius: 5;
+}
+
+.form-control::placeholder {
+    color: #a8ccebc8 !important;
+}
+
+
+.friend-item {
+    margin: .25em 0;
+    display: flex;
+    flex-direction: row ;
+    align-items: center;
+    padding: 10px;
+    transition: background-color 0.3s ease;
+}
+
+
+.list-group {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.friend-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    position: relative;
+}
+
+.friend-status {
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    background-color: #28a745;
+    /* Default color */
+}
+
+.status-online {
+    background-color: #28a745;
+}
+
+.status-afk {
+    background-color: #ffc107;
+}
+
+.status-offline {
+    background-color: #6c757d;
+}
+
+.friend-status {
+    top: 0;
+    left: 0;
+    transform: translate(-25%, -25%);
+    /* Adjust the position on the top left corner of the profile picture */
+    border: 2px solid #ffffff;
+    /* Adding a white border to make it stand out */
+}
+
+.chat-area {
+    /* width: 100%; */
+    /* Ensure the chat area takes up the full width */
+    padding: 15px;
+}
+
+.chat-messages {
+    /* Gray background for the chat messages */
+    padding: 15px;
+    border-radius: 10px;
+    width: 100%;
+    /* Ensure the chat messages container takes up full width */
+    box-sizing: border-box;
+    /* Ensure padding is included in the width calculation */
+    margin-bottom: 15px;
+}
+
+.chat-message {
+    margin-bottom: 10px;
+}
+
+.input-group {
+    display: flex;      
+    flex-direction: row;  
+}
+
+.input-group {
+    width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+    .chat-area {
+        width: 100%;
+    }
+}

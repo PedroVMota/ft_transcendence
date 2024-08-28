@@ -1,18 +1,124 @@
-.dark {
-    background-color: black;
-    color: white;
+/* #root{
+    background: rgba(132, 178, 221, 0.1);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: solid 1px #5d9ed68f;
+    box-shadow: 0px 10px 20px 4px rgba(0, 0, 0, 0.308);
+    opacity: 1;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+} */
+body{
+    position: relative;
+    min-height: 100vh;
+    transition: all 0.5s ease;
+    padding-bottom: 5em;
 }
 
-.btn {
-    background-color: #4CAF50;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    cursor: pointer;
+.backgroundBody {
+    position: absolute;
+    background: linear-gradient(to bottom, #000428, #004e92);
+    color: #fff;
+    overflow: hidden;
+    min-height: 100%;
     width: 100%;
+    z-index: -1;
+    transition: filter 0.1s ease-out; /* Smooth transition for blur */
 }
 
-#teste {
-    color: #4CAF50;
+.backgroundBody::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://wallpapercave.com/wp/wp3837751.jpg');
+    opacity: 0.2;
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    background-size: 150%;
+    background-attachment: fixed;
+    z-index: 0;
+}
+
+/* Spinner overlay */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #004e92c5; /* Semi-transparent background */
+    backdrop-filter: blur(5px); /* Semi-transparent blur */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000000; /* Ensure it's on top of everything */
+}
+
+/* Spinner */
+.spinner {
+    border: 8px solid #173142; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+/* Spin animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media screen and (max-width: 1024px) {
+    .backgroundBody::before {
+        background-size: 200%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .backgroundBody::before {
+        background-size: 300%;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .backgroundBody::before {
+        background-size: 400%;
+    }
+}
+
+@media screen and (max-width: 320px) {
+    .backgroundBody::before {
+        background-size: 500%;
+    }
+}
+
+
+@media screen and (max-width: 250px) {
+    .backgroundBody::before {
+        background-size: 600%;
+    }
+}
+
+
+
+
+
+#root {
+
+    z-index: 2 !important;
+}
+
+#headerMenu {
+    z-index: 2 !important;
+}
+
+#footer {
+    z-index: 2 !important;
 }

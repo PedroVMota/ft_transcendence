@@ -28,4 +28,21 @@ export default class AComponent{
         throw new Error('You have to implement the method destroy!');
     }
 
+    showSpinner() {
+        // Create spinner element
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner-overlay';
+        spinner.innerHTML = `
+            <div class="spinner"></div>
+        `;
+        document.body.appendChild(spinner);
+    }
+
+    hideSpinner() {
+        const spinner = document.querySelector('.spinner-overlay');
+        if (spinner) {
+            spinner.remove();
+        }
+    }
+
 }

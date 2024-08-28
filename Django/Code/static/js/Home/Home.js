@@ -7,13 +7,8 @@ export default class Home extends AComponent {
 
     constructor(url, spaObject) {
         super(url, spaObject);
-        console.log("Home constructor");
         this.#parentElement = document.getElementById("root");
-        console.log(">>>> Spa Object: ", spaObject);
         this.#spaObject = spaObject;
-        console.trace({
-            "Parent Element": this.#parentElement
-        });
     }
 
     render() {
