@@ -49,25 +49,29 @@ ALLOWED_HOSTS = ['*']
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
+    "http://localhost:65535",    
+    "http://localhost:8000",    
     'https://localhost',
     'https://127.0.0.1',
     'https://192.168.43.129',
     "https://148.63.55.136",  # Add this line
+    "https://10.12.1.3:65535"
 ]
 
 CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
     "https://localhost",
     "https://192.168.43.129",
     'https://127.0.0.1',
     'https://192.168.43.129',
     "https://148.63.55.136",  # Add this line
+    'https://localhost:65535',
+    "https://10.12.1.3:65535"
 ]
+
 CORS_ALLOW_ALL_ORIGINS = True
-
-
-
 SESSION_COOKIE_SECURE = True
 CORS_ALLOW_CREDENTIALS = True
 

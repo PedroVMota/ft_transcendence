@@ -2,8 +2,6 @@ services:
   db:
     container_name: db
     image: postgres
-    ports:
-      - 5432:5432
     restart: always
     environment:
       POSTGRES_PASSWORD: example
@@ -14,19 +12,17 @@ services:
     container_name: redis-server
     command: redis-server
     image: redis
-    ports:
-      - 6379:6379
     networks:
       - default
-
   django:
-    container_name: Django
+    container_name: django
     build: ./Django
+    # command: bash -c "python manage.py makemigrations Auth && python manage.py makemigrations && python manage.py migrate && daphne -b 0.0.0.0 -p 8000 backend.asgi:application"
     command: bash -c "python manage.py makemigrations Auth && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./Django/Code/:/code/
-    ports:
-      - 8000:8000
+    environment:
+    - DJANGO_SETTINGS_MODULE=backend.settings
     depends_on:
       - db
       - redis-server
@@ -38,7 +34,7 @@ services:
     container_name: Nginx
     build: ./Nginx
     ports:
-      - 443:443
+      - 65535:443
     restart: always
     volumes:
       - ./Django/Code/static/:/static/

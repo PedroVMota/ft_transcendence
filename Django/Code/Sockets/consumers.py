@@ -2,8 +2,7 @@
 import json
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync, sync_to_async
-from .models import Room
-from .models import ShellColors
+
 
 
 
@@ -74,14 +73,70 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 
+
+# path('ws/general/', consumers.GeneralConsumer.as_asgi()),
+"""
+This websocket is used for general web funcionalities like:
+- Notifications
+- Friend requests
+
+
+It's completly separated from the game.
+"""
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+
 class GeneralConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.roomName = "general"
-        self.roomGroup = "generalChat"
-        # Use sync_to_async to perform the synchronous database query
-        try:
-            self.room = await sync_to_async(Room.objects.get)(roomName=self.roomName)
-        except Room.DoesNotExist:
-            # If the room doesn't exist, create a new one
-            self.room = await sync_to_async(Room.objects.create)(roomName=self.roomName)
-        
+        self.roomGroup = "chat_Room_with_%s" % self.scope["user"].username
+        await self.channel_layer.group_add(
+            self.roomGroup,
+            self.channel_name
+        )
+        await self.accept()
+        print("WebSocket connection accepted")
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
+            self.roomGroup,
+            self.channel_name
+        )
+        print("WebSocket connection closed")
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        print("Received data: %s" % data)
+        message_type = data.get('type')
+
+        if message_type == 'ping':
+            # Handle ping message
+            await self.send(text_data=json.dumps({'type': 'pong'}))
+            return
+
+        message = data.get('message')
+        username = self.scope["user"].username
+
+        if message and username:
+            print("UserData: %s" % username + ": " + message)
+            await self.channel_layer.group_send(
+                self.roomGroup,
+                {
+                    'type': 'chat_message',
+                    'message': message,
+                    'username': username
+                }
+            )
+
+    async def chat_message(self, event):
+        message = event['message']
+        username = event['username']
+
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'message': message,
+            'username': username
+        }))
+
+
+class friend_request_user(AsyncWebsocketConsumer):
+    

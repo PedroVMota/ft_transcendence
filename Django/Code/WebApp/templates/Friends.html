@@ -20,9 +20,8 @@
         {% include 'Components/Menu.html' %}
     </div>
     <div id="root" class="container-fluid">
-        <div class="row d-flex justify-content-center">
-            <!-- Friends Sidebar -->
-            <div class="col-md-4 p-0 friends-sidebar acrylicStyle">
+        <div class="d-flex justify-content-center flex-column flex-md-row">
+            <div class="friends-sidebar acrylicStyle">
                 <div class="p-3">
                     <div class="input-group mb-3">
                         <input type="text" class="form-control" placeholder="Search or add a friend..."
@@ -72,25 +71,14 @@
             </div>
 
             <!-- Chat Area -->
-            <div class="col-6 p-3 p-0 chat-area acrylicStyle">
+            <div class="chat-area acrylicStyle">
                 <div class="chat-messages">
-                    <div class="chat-message">
-                        <strong>Jane Smith:</strong> Hi there!
-                    </div>
-                    <div class="chat-message">
-                        <strong>You:</strong> Hello!
-                    </div>
-                    <div class="chat-message">
-                        <strong>Jane Smith:</strong> How are you doing?
-                    </div>
-                    <div class="chat-message">
-                        <strong>You:</strong> I'm doing great, thanks!
-                    </div>
+                    <!-- Messages will appear here -->
                 </div>
                 <div class="chat-input">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Type a message...">
-                        <button class="btn btn-primary" type="button">Send</button>
+                        <input type="text" class="form-control" placeholder="Type a message..." id="inputVal">
+                        <button class="btn btn-primary" type="button" id="sendMenssage">Send</button>
                     </div>
                 </div>
             </div>
