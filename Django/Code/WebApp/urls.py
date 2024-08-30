@@ -13,6 +13,12 @@ urlpatterns = [
     path('searchUser/', views.searchUser, name='searchUser'),
     path('Profile/', views.edit_profile, name='Profile'),
     path('Friends/', views.Friends, name='Friends'),
+
+    path('send_friend_request/', views.send_friend_request, name='send_friend_request'),
+    path('get_friend_requests/', views.get_friend_requests, name='get_friend_requests'),
+    path('manage_friend_request/', views.manage_friend_request, name='manage_friend_request'),
+    
+
 ] 
 
 
