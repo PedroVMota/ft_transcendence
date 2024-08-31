@@ -138,8 +138,8 @@ def handle_friend_request(request):
     async_to_sync(channel_layer.group_send)(
         f"user_{target_user.userSocialCode}",
         {
-            'type': 'send_notification',
-            'notifications': [{'message': notification.message}]
+            'type': 'Notification',
+            'notifications': f'{notification.message}'
         }
     )
 
@@ -167,6 +167,7 @@ def get_friend_requests(request):
 @login_required
 def manage_friend_request(request):
     if request.method != 'POST':
+        print(f"Invalid request method: {request.method}")
         return JsonResponse({'error': 'Invalid request method'}, status=405)
     data = json.loads(request.body)
     friend_request_id = data.get('friend_request_id')
@@ -174,11 +175,13 @@ def manage_friend_request(request):
     try:
         friend_request = FriendRequest.objects.get(id=friend_request_id, to_user=request.user)
     except FriendRequest.DoesNotExist:
+        print(f"Friend request not found: {friend_request_id}")
         return JsonResponse({'error': 'Friend request not found'}, status=404)
     if action == 'accept':
         return accept_friend_request(request, friend_request)
     elif action == 'reject':
         return reject_friend_request(friend_request)
+    print(f"Invalid action: {action}")
     return JsonResponse({'error': 'Invalid action'}, status=400)
 
 def accept_friend_request(request, friend_request):
@@ -188,6 +191,7 @@ def accept_friend_request(request, friend_request):
     friend_request.from_user.friendlist.add(request.user)
     request.user.save()
     friend_request.from_user.save()
+    print(f"Friend request accepted: {friend_request.id}")
     return JsonResponse({'message': 'Friend request accepted'})
 
 
@@ -201,4 +205,5 @@ def accept_friend_request(request, friend_request):
 def reject_friend_request(friend_request):
     friend_request.status = 'rejected'
     friend_request.save()
+    print(f"Friend request rejected: {friend_request.id}")
     return JsonResponse({'message': 'Friend request rejected'})
