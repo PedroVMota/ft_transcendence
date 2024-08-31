@@ -90,7 +90,7 @@ def handle_profile_update(request):
 
     profile_picture = request.FILES.get('profile_picture')
     if profile_picture:
-        valid_extensions = ['png', 'webp', 'gif']
+        valid_extensions = ['png', 'webp', 'gif', 'jpg', 'jpeg']
         extension = profile_picture.name.split('.')[-1].lower()
         if extension not in valid_extensions:
             return JsonResponse({'error': f'Unsupported file extension. Allowed extensions are: {", ".join(valid_extensions)}'}, status=400)
@@ -120,6 +120,8 @@ def send_friend_request(request):
 
 def handle_friend_request(request):
     TargetUserCode = json.loads(request.body)['user_code']
+    if TargetUserCode == request.user.userSocialCode:
+        return JsonResponse({'error': 'You cannot send a friend request to yourself'}, status=400)
     try:
         target_user = MyUser.objects.get(userSocialCode=TargetUserCode)
     except MyUser.DoesNotExist:
@@ -158,6 +160,8 @@ def get_friend_requests(request):
         'from_user_profile_picture': fr.from_user.profile_picture.url,
         'created_at': fr.created_at.strftime('%Y-%m-%d %H:%M:%S')
     } for fr in pending_requests]
+    print(f"Friend requests: {requests_data} From user: {request.user.username} to user: {request.user.username}")
+
     return JsonResponse({'friend_requests': requests_data})
 
 @login_required

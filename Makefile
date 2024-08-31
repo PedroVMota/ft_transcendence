@@ -1,27 +1,27 @@
 .PHONY: all stop start restart down Database Django Nginx fclean clean inside
 all:
-	docker-compose up --build
+	docker-compose up -d --build 
 
 stop:
 	docker-compose stop
 
 start:
-	docker-compose start
+	docker-compose start -d
 
-restart:
-	docker-compose restart
+restart: 
+	docker-compose restart -d
 
 down:
 	docker-compose down
 
 Database:
-	docker-compose up db 
+	docker-compose up -d db
 
 Django:
-	docker-compose up django
+	docker-compose up -d django
 
 Nginx:
-	docker-compose up web
+	docker-compose up -d web
 
 fclean:
 # Delete all the containers and images except the volumes

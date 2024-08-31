@@ -1,286 +1,273 @@
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model, authenticate, login, logout as auth_logout
-from .forms import LoginForm, RegistrationForm, ProfileForm
-from Auth.models import MyUser, Notification, FriendRequest
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-import json
-import time
-import os
+import AComponent from "../Spa/AComponent.js";
+import { Requests, getCookie } from "../Utils/Requests.js";
 
-def Menu(request):
-    """
-    Renders the Menu component and logs the processing time.
+/*
 
-    :param request: HttpRequest object
-    :return: HttpResponse object with the rendered Menu component
-    """
-    start_time = time.time()
-    response = render(request, 'Components/Menu.html')
-    end_time = time.time()
-    print(f"\n\n\n\n\nMenu view processing time: {end_time - start_time} seconds")
-    return response
+Notification Consumer:
 
-@login_required
-def index(request):
-    """
-    Renders the index page for authenticated users.
+class NotificationsConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        user = self.scope["user"]
+        print("WebSocket connection accepted")
+        print(f"User: {user.username} and Code: {user.userSocialCode}")
+        if user.is_anonymous:
+            await self.close()
+        else:
+            # Group the user by their userSocialCode
+            self.group_name = f"user_{user.userSocialCode}"
+            print("Group Name: ", self.group_name)
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
+            await self.accept()
+    async def disconnect(self, close_code):
+        # Remove the user from the group
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+    async def send_notification(self, event):
+        # Send notification data to the WebSocket
+        await self.send(text_data=json.dumps({
+            'notifications': event['notifications']
+        }))
 
-    :param request: HttpRequest object
-    :return: HttpResponse object with the rendered index page
-    """
-    return render(request, 'index.html', {'user': request.user})
 
-def login_register_view(request):
-    """
-    Handles login and registration requests. Renders the login and registration forms.
+    Object { friend_requests: (1) […] }
+    friend_requests: Array [ {…} ]
+        0: Object { request_id: 3, from_user: "pedro", from_user_profile_picture: "/media/Auth/defaultAssets/ProfilePicture.png", … }
+    length: 1
+    <prototype>: Array []
+    <prototype>: Object { … }
 
-    :param request: HttpRequest object
-    :return: JsonResponse object with the result of the login or registration attempt
-    """
-    if request.method == 'POST':
-        if 'login' in request.POST:
-            return handle_login(request)
-        elif 'register' in request.POST:
-            return handle_registration(request)
-    else:
-        login_form = LoginForm()
-        register_form = RegistrationForm()
-    return render(request, 'register.html', {'login_form': login_form, 'register_form': register_form})
+*/
 
-def handle_login(request):
-    """
-    Handles the login process.
+class Menu extends AComponent {
+    #parentElement = null;
+    #spaObject = null;
+    #numberofNotifications = 0;
+    #numberofMessages = 0;
+    #notificationSocket = null;
 
-    :param request: HttpRequest object
-    :return: JsonResponse object with the result of the login attempt
-    """
-    login_form = LoginForm(request.POST)
-    if login_form.is_valid():
-        username = login_form.cleaned_data['username']
-        password = login_form.cleaned_data['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return JsonResponse({'message': 'Login successful'})
-        return JsonResponse({'error': 'Invalid username or password'}, status=400)
-    return JsonResponse({'error': 'Invalid form data'}, status=400)
-
-def handle_registration(request):
-    """
-    Handles the registration process.
-
-    :param request: HttpRequest object
-    :return: JsonResponse object with the result of the registration attempt
-    """
-    register_form = RegistrationForm(request.POST)
-    if register_form.is_valid():
-        if register_form.cleaned_data['password'] != register_form.cleaned_data['password_confirm']:
-            return JsonResponse({'error': 'Passwords do not match'}, status=400)
-        user = register_form.save(commit=False)
-        user.save()
-        return JsonResponse({'message': 'Registration successful'})
-    return JsonResponse({'error': 'Invalid form data'}, status=400)
-
-@login_required
-def getUserData(request):
-    """
-    Retrieves the data of the authenticated user.
-
-    :param request: HttpRequest object
-    :return: JsonResponse object with the user data
-    """
-    if request.method == 'GET':
-        os.system('clear')
-        print(request.user.getJson())
-        return JsonResponse({'user': request.user.getJson()})
-
-def logout(request):
-    """
-    Logs out the authenticated user.
-
-    :param request: HttpRequest object
-    :return: JsonResponse object with the result of the logout attempt
-    """
-    if request.method == 'POST':
-        auth_logout(request)
-        return JsonResponse({'message': 'Logout successful'})
-
-@login_required
-def edit_profile(request):
-    """
-    Renders the profile edit page and handles profile updates.
-
-    :param request: HttpRequest object
-    :return: JsonResponse object with the result of the profile update attempt
-    """
-    if request.method == 'GET':
-        return render(request, 'Profile.html')
-    if request.method == 'POST':
-        return handle_profile_update(request)
-    return JsonResponse({'error': 'Invalid request'}, status=400)
-
-def handle_profile_update(request):
-    """
-    Handles the profile update process.
-
-    :param request: HttpRequest object
-    :return: JsonResponse object with the result of the profile update attempt
-    """
-    if 'file' in request.FILES:
-        uploaded_file = request.FILES['file']
-        print(f"File name: {uploaded_file.name}")
-        print(f"File size: {uploaded_file.size} bytes")
-        print(f"Content type: {uploaded_file.content_type}")
-    else:
-        print("No file found in the request.")
-    
-    user = request.user
-    user.first_name = request.POST.get('first_name')
-    user.last_name = request.POST.get('last_name')
-    user.about_me = request.POST.get('about_me')
-
-    profile_picture = request.FILES.get('profile_picture')
-    if profile_picture:
-        valid_extensions = ['png', 'webp', 'gif']
-        extension = profile_picture.name.split('.')[-1].lower()
-        if extension not in valid_extensions:
-            return JsonResponse({'error': f'Unsupported file extension. Allowed extensions are: {", ".join(valid_extensions)}'}, status=400)
-        user.profile_picture = profile_picture
-    
-    user.save()
-    return JsonResponse({'message': 'Profile updated successfully!'})
-
-@login_required
-def Friends(request):
-    """
-    Renders the Friends page for authenticated users.
-
-    :param request: HttpRequest object
-    :return: HttpResponse object with the rendered Friends page
-    """
-    if request.user.is_authenticated:
-        return render(request, 'Friends.html')
-    return redirect('/')
-
-def searchUser(request):
-    """
-    Searches for users by their social code.
-
-    :param request: HttpRequest object
-    :return: JsonResponse object with the search results
-    """
-    if request.method == 'GET':
-        friends = MyUser.objects.filter(userSocialCode=request.GET.get('user_code'))
-        friends_data = [friend.getJson() for friend in friends]
-        return JsonResponse({'friends': friends_data})
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
-
-@login_required
-def send_friend_request(request):
-    """
-    Sends a friend request to another user.
-
-    :param request: HttpRequest object
-    :return: JsonResponse object with the result of the friend request attempt
-    """
-    if request.method == 'POST':
-        return handle_friend_request(request)
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-def handle_friend_request(request):
-    """
-    Handles the friend request process.
-
-    :param request: HttpRequest object
-    :return: JsonResponse object with the result of the friend request attempt
-    """
-    TargetUserCode = json.loads(request.body)['user_code']
-    try:
-        target_user = MyUser.objects.get(userSocialCode=TargetUserCode)
-    except MyUser.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)
-
-    from_user = request.user
-    if FriendRequest.objects.filter(from_user=from_user, to_user=target_user, status='pending').exists():
-        return JsonResponse({'error': 'Friend request already sent'}, status=400)
-
-    friend_request = FriendRequest.objects.create(from_user=from_user, to_user=target_user)
-    notification = Notification.objects.create(user=target_user, message=f"{from_user.username} sent you a friend request.")
-
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        f"user_{target_user.userSocialCode}",
-        {
-            'type': 'send_notification',
-            'notifications': [{'message': notification.message}]
+    // Increase the number of notifications or messages
+    Increase = (Target, event) => {
+        if (event === "notification") {
+            this.#numberofNotifications += 1;
+        } else if (event === "message") {
+            this.#numberofMessages += 1;
         }
-    )
+        this.#decoratorToggle();
+    }
 
-    return JsonResponse({'message': 'Friend request sent successfully!'})
+    // Decrease the number of notifications or messages
+    Decrease = (Target, event) => {
+        if (event === "notification") {
+            this.#numberofNotifications -= 1;
+        } else if (event === "message") {
+            this.#numberofMessages -= 1;
+        }
+        this.#decoratorToggle();
+    }
 
-@login_required
-def get_notifications(request):
-    """
-    Retrieves unread notifications for the authenticated user.
+    // Check if the element has the class
+    #doesHtmlHasClass = (element, className) => {
+        return element.classList.contains(className);
+    }
 
-    :param request: HttpRequest object
-    :return: JsonResponse object with the unread notifications
-    """
-    notifications = Notification.objects.filter(user=request.user, is_read=False)
-    notifications_data = [{'message': notification.message} for notification in notifications]
-    return JsonResponse({'notifications': notifications_data})
+    // Decorator to toggle the notification badge
+    #decoratorToggle() {
+        let notificationBadge = document.getElementById("notificationBadge");
+        let messagesBadge = document.getElementById("messagesBadge");
+        let displayOffClass = "d-none";
 
-@login_required
-def get_friend_requests(request):
-    """
-    Retrieves pending friend requests for the authenticated user.
+        if (this.#numberofNotifications > 0) {
+            if (this.#doesHtmlHasClass(notificationBadge, displayOffClass)) {
+                notificationBadge.classList.remove(displayOffClass);
+            }
+            notificationBadge.innerText = this.#numberofNotifications;
+        } else {
+            if (!this.#doesHtmlHasClass(notificationBadge, displayOffClass)) {
+                notificationBadge.classList.add(displayOffClass);
+            }
+        }
 
-    :param request: HttpRequest object
-    :return: JsonResponse object with the pending friend requests
-    """
-    pending_requests = FriendRequest.objects.filter(to_user=request.user, status='pending')
-    requests_data = [{
-        'request_id': fr.id,
-        'from_user': fr.from_user.username,
-        'from_user_profile_picture': fr.from_user.profile_picture.url,
-        'created_at': fr.created_at.strftime('%Y-%m-%d %H:%M:%S')
-    } for fr in pending_requests]
-    return JsonResponse({'friend_requests': requests_data})
+        if (this.#numberofMessages > 0) {
+            if (this.#doesHtmlHasClass(messagesBadge, displayOffClass)) {
+                messagesBadge.classList.remove(displayOffClass);
+            }
+            messagesBadge.innerText = this.#numberofMessages;
+        } else {
+            if (!this.#doesHtmlHasClass(messagesBadge, displayOffClass)) {
+                messagesBadge.classList.add(displayOffClass);
+            }
+        }
+    }
 
-@login_required
-def manage_friend_request(request):
-    """
-    Manages friend requests (accept or reject).
+    constructor(url, spaObject) {
+        super(url, spaObject);
+        this.#parentElement = document.getElementById("headerMenu");
+        this.#spaObject = spaObject;
+        this.#decoratorToggle();
 
-    :param request: HttpRequest object
-    :return: JsonResponse object with the result of the friend request management
-    """
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
-    data = json.loads(request.body)
-    friend_request_id = data.get('friend_request_id')
-    action = data.get('action')
-    try:
-        friend_request = FriendRequest.objects.get(id=friend_request_id, to_user=request.user)
-    except FriendRequest.DoesNotExist:
-        return JsonResponse({'error': 'Friend request not found'}, status=404)
-    if action == 'accept':
-        return accept_friend_request(request, friend_request)
-    elif action == 'reject':
-        return reject_friend_request(friend_request)
-    return JsonResponse({'error': 'Invalid action'}, status=400)
+        let protocol = window.location.protocol === "https:" ? "wss" : "ws";
+        this.#notificationSocket = new WebSocket(`${protocol}://${window.location.host}/ws/notifications/`);
+        this.#notificationSocket.onmessage = (e) => {
+            let data = JSON.parse(e.data);
+            console.log("Notification: ", data);
+            if (data.notifications) {
+                data.notifications.forEach((notification) => {
+                    console.log("Notification: ", notification);
+                    if (notification.message === "admin sent you a friend request.") {
+                        this.Increase("notification", "notification");
+                    } else if (notification.message === "admin sent you a message.") {
+                        this.Increase("message", "message");
+                    }
+                });
+            }
+        };
+        this.#notificationSocket.onclose = (e) => {
+            console.log("WebSocket closed: ", e);
+        };
+        this.#notificationSocket.onerror = (e) => {
+            console.log("WebSocket error: ", e);
+        };
+    }
 
-def accept_friend_request(request, friend_request):
-    """
-    Accepts a friend request.
+    render() {
+        let url = this.getUrl();
+        this._getHtml(url).then((html) => {
+            // this.#parentElement.innerHTML = html;
+            // let home = document.getElementById("nav-home");
+            let profile = document.getElementById("nav-profile");
+            let friends = document.getElementById("nav-friends");
+            let logout = document.getElementById("nav-logout");
+            // there are two elements with the same id to get the use all the elements with the same id
+            let home = document.querySelectorAll("#nav-home");
+            let notificationsDropdown = document.getElementById("notificationsDropdown");
 
-    :param request: HttpRequest object
-    :param friend_request: FriendRequest object to be accepted
-    :return: JsonResponse object with the result of the acceptance
-    """
-    friend_request.status = 'accepted'
-    friend_request.save()
-    request.user.friendlist.add(friend
+            // home.addEventListener("click", (e) => this.navigateTo(e, "/"));
+            home.forEach((element) => {
+                element.addEventListener("click", (e) => this.navigateTo(e, "/"));
+            });
+            profile.addEventListener("click", (e) => this.navigateTo(e, "/Profile/"));
+            friends.addEventListener("click", (e) => this.navigateTo(e, "/Friends/"));
+            logout.addEventListener("click", (e) => this.#logout(e));
+            notificationsDropdown.addEventListener("click", (e) => {
+                this.#numberofNotifications = 0;
+                this.#decoratorToggle();
+                fetch('/get_friend_requests/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                }).then((response) => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Something went wrong');
+                    }
+                }).then((data) => {
+                    console.log(data);
+                    let notificationsList = document.getElementById("notificationsMenu");
+                    notificationsList.innerHTML = '';
+                    if (data.friend_requests && data.friend_requests.length > 0) {
+                        data.friend_requests.forEach((friendRequest) => {
+                            let notification = document.createElement('a');
+                            notification.classList.add('dropdown-item');
+                            notification.href = '#';
+                            notification.innerHTML = `
+                                <div class="d-flex align-items-center" data-idrequest="${friendRequest.id}">
+                                    <div class="py-1 px-1">
+                                        <img class="rounded-circle" src="${friendRequest.from_user_profile_picture}" width="50" height="50" alt="Profile Picture">
+                                    </div>
+                                    <div class="flex-grow-1 px-1">
+                                        <div class="font-weight-bold">${friendRequest.from_user}</div>
+                                        <div class="text-muted small">sent you a friend request.</div>
+                                        <div class="mt-2">
+                                            <button class="btn btn-success btn-sm mr-2" id="acceptRequest">Accept</button>
+                                            <button class="btn btn-danger btn-sm" id="denyRequest">Deny</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            notificationsList.appendChild(notification);
+                            document.getElementById("acceptRequest").addEventListener("click", (e) => {
+                                e.preventDefault();
+                                console.log("Accept request");
+                                fetch('/manage_friend_request/', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': getCookie('csrftoken')
+                                    },
+                                    body: JSON.stringify({
+                                        friend_request_id: friendRequest.request_id,
+                                        action: 'accept'
+                                    })
+                                }).then((response) => {
+                                    if (response.ok) {
+                                        return response.json();
+                                    } else {
+                                        throw new Error('Something went wrong');
+                                    }
+                                }).then((data) => {
+                                    console.log(data);
+                                }).catch((error) => {
+                                    console.error(error);
+                                });
+                            });
+
+                            document.getElementById("denyRequest").addEventListener("click", (e) => {
+                                e.preventDefault();
+                                console.log("Deny request");
+                                fetch('/deny_friend_request/', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': getCookie('csrftoken')
+                                    },
+                                    body: JSON.stringify({ 
+                                        friend_request_id: friendRequest.request_id,
+                                        action: 'deny'
+                                    })
+                                }).then((response) => {
+                                    if (response.ok) {
+                                        return response.json();
+                                    } else {
+                                        throw new Error('Something went wrong');
+                                    }
+                                }).then((data) => {
+                                    console.log(data);
+                                }).catch((error) => {
+                                    console.error(error);
+                                });
+                            });
+                        });
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                });
+            });
+        });
+    }
+
+    destroy() {
+        this.#parentElement.innerHTML = '';
+    }
+
+    async #logout(e) {
+        e.preventDefault();
+        const Header = {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        };
+        const rep = await Requests.post('/Logout/', {}, Header);
+        console.log(rep);
+        // window.location.href = '/';
+    }
+
+    navigateTo(e, url) {
+        e.preventDefault();
+        console.log("Navigate to: ", url);
+        console.log("SPA Object: ", this.#spaObject);
+        this.#spaObject.setTo(url);
+    }
+}
+
+export default Menu;

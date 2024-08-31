@@ -51,12 +51,15 @@ services:
       - 5050:80
     depends_on:
       - db
+    volumes:
+      - pgadmin:/root/.pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin@pgadmin.org
       PGADMIN_DEFAULT_PASSWORD: pgadmin
 
 volumes:
   static_volume:
+  pgadmin:
 
 
 

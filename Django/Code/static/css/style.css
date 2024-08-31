@@ -77,19 +77,19 @@ body{
 
 @media screen and (max-width: 1024px) {
     .backgroundBody::before {
-        background-size: 200%;
+        background-size: 300%;
     }
 }
 
 @media screen and (max-width: 768px) {
     .backgroundBody::before {
-        background-size: 300%;
+        background-size: 400%;
     }
 }
 
 @media screen and (max-width: 500px) {
     .backgroundBody::before {
-        background-size: 400%;
+        background-size: 500%;
     }
 }
 
