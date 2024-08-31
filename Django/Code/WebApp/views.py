@@ -9,6 +9,8 @@ import time
 from django.shortcuts import render
 from .forms import LoginForm, RegistrationForm
 from Auth.models import MyUser
+
+
 def Menu(request):
     start_time = time.time()
     response = render(request, 'Components/Menu.html')
@@ -110,7 +112,10 @@ def Friends(request):
         return render(request, 'Friends.html')
     return redirect('/')
 
-
+def Game(request):
+    if(request.user.is_authenticated):
+        return render(request, 'Game.html')
+    return redirect('/')
 # path('friendsList/', views.friends, name='friends'),
 
 

@@ -13,7 +13,5 @@ urlpatterns = [
     path('searchUser/', views.searchUser, name='searchUser'),
     path('Profile/', views.edit_profile, name='Profile'),
     path('Friends/', views.Friends, name='Friends'),
-] 
-
-
-
+    path('Game/', views.Game, name='Game'),
+]

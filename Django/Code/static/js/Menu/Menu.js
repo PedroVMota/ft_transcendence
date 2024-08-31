@@ -19,6 +19,7 @@ class Menu extends AComponent {
             let profile = document.getElementById("nav-profile");
             let friends = document.getElementById("nav-friends");
             let logout = document.getElementById("nav-logout");
+            let game = document.getElementById("nav-game");
             // there are two elements with the same id to get the use all the elements with the same id
             let home = document.querySelectorAll("#nav-home");
 
@@ -26,6 +27,7 @@ class Menu extends AComponent {
             home.forEach((element) => {
                 element.addEventListener("click", (e) => this.navigateTo(e, "/"));
             });
+            game.addEventListener("click", (e) => this.navigateTo(e, "/Game/"));
             profile.addEventListener("click", (e) => this.navigateTo(e, "/Profile/"));
             friends.addEventListener("click", (e) => this.navigateTo(e, "/Friends/"));
             logout.addEventListener("click", (e) => this.#logout(e));

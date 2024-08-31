@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
-
+from django.utils.deprecation import MiddlewareMixin
+from django.middleware.csrf import CsrfViewMiddleware
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,26 +47,17 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    'https://localhost',
-    'https://127.0.0.1',
-    'https://192.168.43.129',
-    "https://148.63.55.136",  # Add this line
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://localhost",
+    "https://localhost:3000",
+    "https://127.0.0.1",
     "https://192.168.43.129",
-    'https://127.0.0.1',
-    'https://192.168.43.129',
-    "https://148.63.55.136",  # Add this line
+    "https://148.63.55.136",
+    "https://10.12.1.7:3000"
 ]
-CORS_ALLOW_ALL_ORIGINS = True
-
 
 
 SESSION_COOKIE_SECURE = True
@@ -117,17 +109,28 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
 }
 
+class AllowAllCsrfMiddleware(CsrfViewMiddleware):
+    def _accept(self, request):
+        # Aceita qualquer origem
+        return True
+
 MIDDLEWARE = [
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'backend.middleware.LoggingMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',  # Certifique-se de que está ativado
+    'backend.middleware.AllowAllCsrfMiddleware',  # Se você estiver usando isso
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+CORS_ALLOW_CREDENTIALS = True
+
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
 
 ROOT_URLCONF = 'backend.urls'
 

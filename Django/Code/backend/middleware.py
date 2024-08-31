@@ -1,6 +1,7 @@
 # backend/middleware.py
 from django.utils.deprecation import MiddlewareMixin
 from Auth.models import serverLogs
+from django.middleware.csrf import CsrfViewMiddleware
 
 
 class LoggingMiddleware(MiddlewareMixin):
@@ -12,3 +13,9 @@ class LoggingMiddleware(MiddlewareMixin):
             status=response.status_code
         )
         return response
+
+
+class AllowAllCsrfMiddleware(CsrfViewMiddleware):
+    def _accept(self, request):
+        # Aceita qualquer origem
+        return None

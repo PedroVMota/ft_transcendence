@@ -2,17 +2,19 @@ import Menu from "../Menu/Menu.js";
 import Home from "../Home/Home.js";
 import Friends from "../Friend/Friends.js";
 import Profile from "../profile/profile.js";
+import Game from "../Game/Game.js";
 
 class Spa{
     #menu = null;
     #content = null;
     #footer = null;
-    #routes = [ "/", "/Profile/", "/Friends/", "/Login/", '/Logout/' ];
+    #routes = [ "/", "/Profile/", "/Friends/", "/Login/", '/Logout/', '/Game/' ];
     #currentRoute = null;
     #contentClass = {
         "/": new Home("/", this),
         "/Profile/": new Profile("/Profile/", this),
         "/Friends/": new Friends("/Friends/", this),
+        "/Game/": new Game("/Game/", this),
     }
 
     constructor(){
@@ -44,6 +46,10 @@ class Spa{
             case "/Friends/":
                 this.#updateUrl(url);
                 this.#currentRoute = this.#contentClass["/Friends/"];
+                break;
+            case "/Game/":
+                this.#updateUrl(url);
+                this.#currentRoute = this.#contentClass["/Game/"];
                 break;
             default:
                 console.error("Invalid URL: ", url);
