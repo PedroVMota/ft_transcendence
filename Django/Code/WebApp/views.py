@@ -106,19 +106,20 @@ def edit_profile(request):
         return JsonResponse({'message': 'Profile updated successfully!'})
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
-    
+@login_required    
 def Friends(request):
     if(request.user.is_authenticated):
         return render(request, 'Friends.html')
     return redirect('/')
 
+@login_required
 def Game(request):
     if(request.user.is_authenticated):
         return render(request, 'Game.html')
     return redirect('/')
 # path('friendsList/', views.friends, name='friends'),
 
-
+@login_required
 def searchUser(request):
     if request.method == 'GET':
         # Assuming you're returning a list of friends for the logged-in user

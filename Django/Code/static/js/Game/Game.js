@@ -1,12 +1,54 @@
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js';
 import AComponent from "../Spa/AComponent.js";
 import spa from "../Spa/Spa.js";
 import { getCookie, Requests } from "../Utils/Requests.js";
 
+class Paddle {
+    constructor(positionY, color = 0x00ff00) {
+        this.geometry = new THREE.BoxGeometry(1, 0.2, 0.1);
+        this.material = new THREE.MeshBasicMaterial({ color: color });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.position.y = positionY;
+    }
+
+    move(direction) {
+        this.mesh.position.x += direction * 0.1;
+    }
+}
+
+class Ball {
+    constructor() {
+        this.geometry = new THREE.SphereGeometry(0.1, 32, 32);
+        this.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.speed = { x: 0.05, y: 0.05 };
+    }
+
+    update() {
+        this.mesh.position.x += this.speed.x;
+        this.mesh.position.y += this.speed.y;
+
+        if (this.mesh.position.x > 4.5 || this.mesh.position.x < -4.5) {
+            this.speed.x = -this.speed.x;
+        }
+        if (this.mesh.position.y > 2.5 || this.mesh.position.y < -2.5) {
+            this.speed.y = -this.speed.y;
+        }
+    }
+
+    checkCollision(paddle) {
+        if (this.mesh.position.y - 0.1 <= paddle.mesh.position.y + 0.1 &&
+            this.mesh.position.y + 0.1 >= paddle.mesh.position.y - 0.1 &&
+            this.mesh.position.x + 0.1 >= paddle.mesh.position.x - 0.5 &&
+            this.mesh.position.x - 0.1 <= paddle.mesh.position.x + 0.5) {
+            this.speed.y = -this.speed.y;
+        }
+    }
+}
+
 export default class Game extends AComponent {
     #parentElement = null;
     #spaObject = null;
-    #cachedContent = null;
-    #cachedHead = null;
 
     constructor(url, spaObject) {
         super(url, spaObject);
@@ -15,7 +57,7 @@ export default class Game extends AComponent {
     }
 
     render() {
-        let url = this.getUrl();   
+        let url = this.getUrl();
         this.#parentElement.innerHTML = '<span>Pending...</span>';
 
         this._getHtml(url).then((html) => {
@@ -36,14 +78,10 @@ export default class Game extends AComponent {
     }
 
     initializeGame() {
-        // Código do jogo Pong utilizando three.js
         let scene, camera, renderer;
         let paddle1, paddle2, ball;
-        let paddle1Speed = 0, paddle2Speed = 0;
-        let ballSpeedX = 0.05, ballSpeedY = 0.05;
 
-        // Inicialização da cena e objetos do jogo
-        function init() {
+        const init = () => {
             scene = new THREE.Scene();
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -51,63 +89,48 @@ export default class Game extends AComponent {
 
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            document.getElementById('root').appendChild(renderer.domElement); // Anexa o canvas ao elemento root
+            this.#parentElement.appendChild(renderer.domElement); // Anexa o canvas ao elemento root
 
-            let paddleGeometry = new THREE.BoxGeometry(1, 0.2, 0.1);
-            let paddleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            // Criação das raquetes e da bola
+            paddle1 = new Paddle(-2.5);
+            paddle2 = new Paddle(2.5, 0xff0000);
+            ball = new Ball();
 
-            paddle1 = new THREE.Mesh(paddleGeometry, paddleMaterial);
-            paddle1.position.y = -2.5;
-            scene.add(paddle1);
-
-            paddle2 = new THREE.Mesh(paddleGeometry, paddleMaterial);
-            paddle2.position.y = 2.5;
-            scene.add(paddle2);
-
-            let ballGeometry = new THREE.SphereGeometry(0.1, 32, 32);
-            let ballMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            ball = new THREE.Mesh(ballGeometry, ballMaterial);
-            scene.add(ball);
+            // Adicionando à cena
+            scene.add(paddle1.mesh);
+            scene.add(paddle2.mesh);
+            scene.add(ball.mesh);
 
             animate();
         }
 
-        function animate() {
+        const animate = () => {
             requestAnimationFrame(animate);
 
-            paddle1.position.x += paddle1Speed;
-            paddle2.position.x += paddle2Speed;
-
-            ball.position.x += ballSpeedX;
-            ball.position.y += ballSpeedY;
-
-            if (ball.position.x > 4.5 || ball.position.x < -4.5) {
-                ballSpeedX = -ballSpeedX;
-            }
-            if (ball.position.y > 2.5 || ball.position.y < -2.5) {
-                ballSpeedY = -ballSpeedY;
-            }
+            ball.update();
+            ball.checkCollision(paddle1);
+            ball.checkCollision(paddle2);
 
             renderer.render(scene, camera);
         }
 
-        function movePaddle1(direction) {
-            paddle1Speed = direction * 0.1;
+        const movePaddle1 = (direction) => {
+            paddle1.move(direction);
         }
 
-        function movePaddle2(direction) {
-            paddle2Speed = direction * 0.1;
+        const movePaddle2 = (direction) => {
+            paddle2.move(direction);
         }
 
         // Controles das raquetes
-        window.addEventListener('keydown', function (event) {
+        window.addEventListener('keydown', (event) => {
             if (event.key === 'ArrowLeft') movePaddle1(-1);
             if (event.key === 'ArrowRight') movePaddle1(1);
             if (event.key === 'a') movePaddle2(-1);
             if (event.key === 'd') movePaddle2(1);
         });
 
-        window.addEventListener('keyup', function (event) {
+        window.addEventListener('keyup', (event) => {
             if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') movePaddle1(0);
             if (event.key === 'a' || event.key === 'd') movePaddle2(0);
         });
@@ -115,7 +138,7 @@ export default class Game extends AComponent {
         init(); // Inicializa o jogo
     }
 
-    destroy(){
+    destroy() {
         this.#parentElement.innerHTML = "";
     }
 }

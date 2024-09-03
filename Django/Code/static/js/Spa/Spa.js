@@ -100,6 +100,11 @@ document.addEventListener('scroll', () => {
         }
     `;
 
+    document.addEventListener('DOMContentLoaded', () => {
+        const game = new Game();
+        game.start();
+    });
+
     console.log(styleElement.textContent);
 
     document.head.appendChild(styleElement);
