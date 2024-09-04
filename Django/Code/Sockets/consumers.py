@@ -2,76 +2,10 @@
 import json
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync, sync_to_async
-
-
-
-
-    
-class GameConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.roomName = self.scope['url_route']['kwargs']['room_name']
-        self.roomGroup = "pong_%s" % self.roomName
-        # Use sync_to_async to perform the synchronous database query
-        try:
-            self.room = await sync_to_async(Room.objects.get)(roomName=self.roomName)
-        except Room.DoesNotExist:
-            # If the room doesn't exist, create a new one
-            self.room = await sync_to_async(Room.objects.create)(roomName=self.roomName)
-# 
-        await sync_to_async(self.room.addPlayer)(self.scope["user"].username)
-
-        self.room_group_name = 'pong_%s' % self.roomName
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-
-        await self.accept()
-        print(ShellColors.BOLD, ("Connected to room: %s" % self.roomName), ShellColors.ENDC)
-        await sync_to_async(self.room.save)()
-
-        self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'Type': 'Join',
-                'message': 'Player joined the room'
-            }
-        )
-
-
-
-    async def disconnect(self, close_code):
-        print(ShellColors.RED, ("Player removed from room: %s" % self.roomName), ShellColors.ENDC)
-        await sync_to_async(self.room.removePlayer)(self.scope["user"].username)
-        if(len(self.room.players) == 0):
-            print(ShellColors.RED, ("Room deleted: %s" % self.roomName), ShellColors.ENDC)
-            await sync_to_async(self.room.delete)()
-        else:
-            await sync_to_async(self.room.save)()  # Save the room after removing the player
-        await self.channel_layer.group_discard(
-        self.room_group_name,
-        self.channel_name
-    )
-
-    async def receive(self, text_data=None, bytes_data=None):
-        print(ShellColors.YELLOW, ("Received data: %s" % text_data), ShellColors.ENDC)
-        self.room = await sync_to_async(Room.objects.get)(roomName=self.roomName)
-        print(self.room.Detail())
-        # text_data_json = json.loads(text_data)
-        # Type = text_data_json['Type']
-        # message = text_data_json['message']
-
-        # if Type == "Join":
-            # await self.channel_layer.group_send(
-                # self.room_group_name,
-                # {
-                    # 'Type': 'Join',
-                    # 'message': message
-                # }
-            # )
-
-
-
+import json
+from Auth.models import Conversation, currentChat
+from channels.db import database_sync_to_async
+from django.utils import timezone
 
 
 # path('ws/general/', consumers.GeneralConsumer.as_asgi()),
@@ -83,62 +17,58 @@ This websocket is used for general web funcionalities like:
 
 It's completly separated from the game.
 """
-import json
-from channels.generic.websocket import AsyncWebsocketConsumer
 
-class GeneralConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.roomGroup = "chat_Room_with_%s" % self.scope["user"].username
-        await self.channel_layer.group_add(
-            self.roomGroup,
-            self.channel_name
-        )
-        await self.accept()
-        print("WebSocket connection accepted")
+# class GeneralConsumer(AsyncWebsocketConsumer):
+#     async def connect(self):
+#         self.roomGroup = "chat_Room_with_%s" % self.scope["user"].username
+#         await self.channel_layer.group_add(
+#             self.roomGroup,
+#             self.channel_name
+#         )
+#         await self.accept()
+#         print("WebSocket connection accepted")
 
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
-            self.roomGroup,
-            self.channel_name
-        )
-        print("WebSocket connection closed")
+#     async def disconnect(self, close_code):
+#         await self.channel_layer.group_discard(
+#             self.roomGroup,
+#             self.channel_name
+#         )
+#         print("WebSocket connection closed")
 
-    async def receive(self, text_data):
-        data = json.loads(text_data)
-        print("Received data: %s" % data)
-        message_type = data.get('type')
+#     async def receive(self, text_data):
+#         data = json.loads(text_data)
+#         print("Received data: %s" % data)
+#         message_type = data.get('type')
 
-        if message_type == 'ping':
-            # Handle ping message
-            await self.send(text_data=json.dumps({'type': 'pong'}))
-            return
+#         if message_type == 'ping':
+#             # Handle ping message
+#             await self.send(text_data=json.dumps({'type': 'pong'}))
+#             return
 
-        message = data.get('message')
-        username = self.scope["user"].username
+#         message = data.get('message')
+#         username = self.scope["user"].username
 
-        if message and username:
-            print("UserData: %s" % username + ": " + message)
-            await self.channel_layer.group_send(
-                self.roomGroup,
-                {
-                    'type': 'chat_message',
-                    'message': message,
-                    'username': username
-                }
-            )
+#         if message and username:
+#             print("UserData: %s" % username + ": " + message)
+#             await self.channel_layer.group_send(
+#                 self.roomGroup,
+#                 {
+#                     'type': 'chat_message',
+#                     'message': message,
+#                     'username': username
+#                 }
+#             )
 
-    async def chat_message(self, event):
-        message = event['message']
-        username = event['username']
+#     async def chat_message(self, event):
+#         message = event['message']
+#         username = event['username']
 
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({
-            'message': message,
-            'username': username
-        }))
+#         # Send message to WebSocket
+#         await self.send(text_data=json.dumps({
+#             'message': message,
+#             'username': username
+#         }))
 
-from channels.generic.websocket import AsyncWebsocketConsumer
-import json
 
 class NotificationsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -161,3 +91,72 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'notifications': event['notifications']
         }))
+
+
+class PrivateChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user = self.scope['user']
+        self.room_name = self.scope['url_route']['kwargs']['uuid']
+        self.room_group_name = f'privchat_{self.room_name}'
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
+
+        # Fetch previous messages
+        previous_messages = await self.get_previous_messages(self.room_name)
+
+        # Send previous messages to the client
+        for message in previous_messages:
+            await self.send(text_data=json.dumps({
+                'message': message['Message'],
+                'user': message['AuthorOfTheMessage__username'],
+                'create_date': message['create_date'].strftime('%Y-%m-%d %H:%M:%S')
+            }))
+
+        # Join the room group
+
+    async def disconnect(self, close_code):
+        # Leave the room group
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        message = data['message']
+
+        # Save the new message to the database
+        await self.save_message(self.user, self.room_name, message)
+
+        # Send the message to the room group
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'chat_message',
+                'message': message,
+                'user': self.user.username,
+                'create_date': timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
+        )
+
+    async def chat_message(self, event):
+        message = event['message']
+        user = event['user']
+
+        # Send the message to the WebSocket client
+        await self.send(text_data=json.dumps({
+            'message': message,
+            'user': user,
+            'create_date': event['create_date']
+        }))
+
+    @sync_to_async
+    def save_message(self, user, room_name, message):
+        # Save message to the database
+        chat_group = currentChat.objects.get(unique_id=room_name)
+        new_message = Conversation.objects.create(AuthorOfTheMessage=user, Message=message, create_date=timezone.now())
+        chat_group.currentMessage.add(new_message)
+
+    @sync_to_async
+    def get_previous_messages(self, room_name):
+        # Retrieve the last 50 messages from the database for the current chat room
+        return Conversation.objects.filter(currentchat__unique_id=room_name).values(
+            'Message', 'AuthorOfTheMessage__username', 'create_date'
+        ).order_by('-create_date')[:50][::-1]  # Fetch the last 50 messages and reverse the order

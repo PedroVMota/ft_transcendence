@@ -1,6 +1,6 @@
 import AComponent from "../Spa/AComponent.js";
 import { Requests } from "../Utils/Requests.js";
-import AWebChat from "../Utils/ASocket.js";
+import WebSocketClient from "./NotificationSocket.js";
 
 // Helper function to get the CSRF token
 function getCookie(name) {
@@ -18,196 +18,237 @@ function getCookie(name) {
     return cookieValue;
 }
 
-class WebSocketClient extends AWebChat {
-    constructor(url) {
-        super(url);
-        this.connect();
-    }
-
-    connect() {
-        this._ws.onopen = this.onOpen.bind(this);
-        this._ws.onmessage = this.onMessage.bind(this);
-        this._ws.onclose = this.onClose.bind(this);
-        this._ws.onerror = this.onError.bind(this);
-    }
-
-    sendMessage(data) {
-        this._ws.send(data);
-    }
-
-    onMessage(event) {
-        console.log('WebSocket message received:', event.data);
-        this.#addMessageToChat(event.data);
-    }
-
-    onOpen() {
-        console.log('WebSocket connection opened');
-    }
-
-    onClose() {
-        console.log('WebSocket connection closed');
-    }
-
-    onError(error) {
-        console.error('WebSocket error:', error);
-    }
-
-    #addMessageToChat(data) {
-        const chatMessages = document.querySelector('.chat-messages');
-        const messageData = JSON.parse(data);
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('chat-message');
-        messageElement.innerHTML = `<strong>${messageData.username}:</strong> ${messageData.message}`;
-        chatMessages.appendChild(messageElement);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    bindSendButton() {
-        document.getElementById('sendMenssage').addEventListener('click', () => {
-            console.log('Button clicked');
-            const input = document.getElementById('inputVal');
-            const message = input.value;
-            if (message) {
-                const username = 'You'; // Replace with dynamic username if needed
-                const data = JSON.stringify({ username, message });
-                this._ws.send(data);
-                input.value = '';
-            }
-        });
-    }
-}
-
 export default class Friends extends AComponent {
     #parentElement = null;
     #spaObject = null;
     #socket = null;
+    #activeChatId = null;  // Track the active chat
 
     constructor(url, spaObject) {
         super(url, spaObject);
         this.#parentElement = document.getElementById("root");
         this.#spaObject = spaObject;
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const hostname = window.location.hostname;
-        const port = window.location.port ? `:${window.location.port}` : '';
-        const wsUrl = `${protocol}//${hostname}${port}/ws/general/`;
-        this.#socket = new WebSocketClient(wsUrl);
+    }
+
+    #getChat() {
+        let listGroup = document.getElementById('friends-list');
+
+        Requests.get('/get_chat_user/', {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }).then((response) => {
+            let chats = response.chats;
+            if (chats.length > 0) {
+                listGroup.innerHTML = ''; // Clear existing content
+                chats.forEach((chat) => {
+                    let friendItem = document.createElement('a');
+                    friendItem.href = 'javascript:void(0);';
+                    friendItem.className = 'list-group-item list-group-item-action d-flex friend-item acrylicStyle';
+                    friendItem.id = chat.unique_id;
+                    friendItem.dataset.id = chat.unique_id;
+                    friendItem.innerHTML = `
+                        <div class="position-relative">
+                            <img src="${chat.profile_picture}" alt="${chat.username}">
+                            <span class="friend-status status-online position-absolute"></span>
+                        </div>
+                        <div class="friend-info">
+                            <div>${chat.username}</div>
+                        </div>
+                    `;
+                    listGroup.appendChild(friendItem);
+
+                    // Check if the chat is already active, don't reconnect if so
+                    friendItem.addEventListener('click', () => {
+                        if (this.#activeChatId !== chat.unique_id) {
+                            this.#connectToChat(chat.unique_id);
+                        } else {
+                            console.log('Chat is already active.');
+                        }
+                    });
+                });
+            } else {
+                listGroup.innerHTML = '<p>No chats available.</p>';
+            }
+        }).catch((error) => {
+            console.error('Error fetching chat data:', error);
+            listGroup.innerHTML = '<p>Error fetching chat data.</p>';
+        });
+    }
+
+    #connectToChat(chatId) {
+        // If the chat is already active, don't reconnect
+        if (this.#activeChatId === chatId) {
+            console.log('Chat is already active, not reconnecting.');
+            return;
+        }
+
+        // Close the previous socket if there was one
+        if (this.#socket) {
+            this.#socket.close();
+        }
+
+        // Create a new WebSocket connection
+        this.#socket = new WebSocket(`wss://${window.location.host}/ws/privchat/${chatId}/`);
+
+        // Mark the chat as active
+        this.#activeChatId = chatId;
+
+        // Open WebSocket connection
+        this.#socket.onopen = () => {
+            console.log('WebSocket connection established');
+            document.getElementById('target_chat').dataset.uuid = chatId;
+        };
+
+        // Handle incoming messages (both previous and new ones)
+        this.#socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            this.#displayMessage(data.message, data.user, data.create_date);
+        };
+
+        // Handle WebSocket close event
+        this.#socket.onclose = (event) => {
+            console.log('WebSocket connection closed', event);
+            // If the connection is closed, reset the active chat ID
+            this.#activeChatId = null;
+        };
+
+        // Handle WebSocket errors
+        this.#socket.onerror = (error) => {
+            console.error('WebSocket error', error);
+        };
+
+        // Send a message when the form is submitted
+        const sendMessageForm = document.getElementById('sendMenssage');
+        sendMessageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputVal = document.getElementById('inputVal').value;
+            if (inputVal) {
+                this.#socket.send(JSON.stringify({
+                    'message': inputVal
+                }));
+                document.getElementById('inputVal').value = '';
+            }
+        });
+    }
+
+    #displayMessage(message, user, createDate) {
+        const chatMessages = document.getElementById('target_chat');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+        messageElement.innerHTML = `<strong>${user} (${createDate}):</strong> ${message}`;
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the latest message
     }
 
     render() {
-        let url = this.getUrl();
-        this.#parentElement.innerHTML = '<span>Pending...</span>';
+        const url = this.getUrl();
+        this.#parentElement.innerHTML = '<span>Loading...</span>';
 
         this._getHtml(url).then((html) => {
-            let documentResponse = new DOMParser().parseFromString(html, 'text/html');
-            let rootContentHtml = documentResponse.getElementById('root').innerHTML;
+            const documentResponse = new DOMParser().parseFromString(html, 'text/html');
+            const rootContentHtml = documentResponse.getElementById('root').innerHTML;
             if (rootContentHtml) {
                 document.head.innerHTML = documentResponse.head.innerHTML;
                 this.#parentElement.innerHTML = rootContentHtml;
 
                 // Initialize search user events
-                this.#renderOnChange();
-
-                setTimeout(() => {
-                    this.hideSpinner();
-                }, 1000);
-
-                this.#socket.bindSendButton();
+                this.#initializeSearchEvents();
+                this.#getChat();
             }
         }).catch((error) => {
-            console.error(error);
+            console.error('Error fetching HTML:', error);
         });
-
     }
 
     destroy() {
         this.#parentElement.innerHTML = '';
     }
 
-    
-    #renderOnChange() {
+    #initializeSearchEvents() {
         const searchInput = document.querySelector('.form-control[placeholder="Search or add a friend..."]');
-        const searchButton = document.querySelector('.btn[type="button"]');
         const searchResultsList = document.getElementById('search-results-list');
-        console.log(searchInput, searchButton, searchResultsList);
 
-        if (searchButton && searchInput) {
-            searchInput.addEventListener('input', () => {
-                const userCode = searchInput.value.trim();
-                if (userCode === "") {
-                    return;
-                }
-                searchResultsList.innerHTML = '';
-                const searchQuery = `/searchUser?user_code=${encodeURIComponent(userCode)}`;
-                fetch(searchQuery, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Search results:', data);
-                        if (data.friends && data.friends.length > 0) {
-                            data.friends.forEach(friend => {
-                                const friendItem = document.createElement('a');
-                                friendItem.href = '#';
-                                friendItem.className = 'list-group-item list-group-item-action d-flex friend-item acrylicStyle';
-
-                                friendItem.innerHTML = `
-                                    <div class="position-relative">
-                                        <img src="${friend.profile_picture}" alt="${friend.username}">
-                                        <span class="friend-status status-online position-absolute"></span>
-                                    </div>
-                                    <div class="friend-info">
-                                        <div>${friend.username}</div>
-                                        <div class="text-muted small">${friend.email}</div>
-                                    </div>
-                                    <button class="btn btn-primary add-friend-btn" data-username="${friend.username}">Add Friend</button>
-                                `;
-
-                                searchResultsList.appendChild(friendItem);
-
-                                friendItem.querySelector('.add-friend-btn').addEventListener('click', function(e) {
-                                    e.preventDefault();
-                                    const userCode = searchInput.value.trim();
-                                    console.log('Sending friend request to:', userCode);
-                                    fetch('/send_friend_request/', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-CSRFToken': getCookie('csrftoken')
-                                        },
-                                        body: JSON.stringify({ user_code: userCode })
-                                    }).then(response => {
-                                        console.log('Friend request sent:', response);
-                                        return response.json();
-                                    }).then(data => {
-                                        alert(data.message);
-                                    }).catch(error => {
-                                        console.error('Error sending friend request:', error);
-                                    });
-                                });
-                            });
-                        } else if (data.error) {
-                            const errorItem = document.createElement('div');
-                            errorItem.className = 'text-danger';
-                            errorItem.textContent = data.error;
-                            searchResultsList.appendChild(errorItem);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error during search:', error);
-                        alert('An error occurred while searching. Please try again.');
-                    });
-            });
+        if (searchInput) {
+            searchInput.addEventListener('input', () => this.#handleSearchInput(searchInput, searchResultsList));
         } else {
-            console.error('Search input or button not found');
+            console.error('Search input not found');
         }
+    }
+
+    #handleSearchInput(searchInput, searchResultsList) {
+        const userCode = searchInput.value.trim();
+        if (userCode === "") {
+            return;
+        }
+        searchResultsList.innerHTML = '';
+        const searchQuery = `/searchUser?user_code=${encodeURIComponent(userCode)}`;
+        fetch(searchQuery, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => this.#renderSearchResults(data, searchResultsList, searchInput))
+        .catch(error => {
+            console.error('Error during search:', error);
+            alert('An error occurred while searching. Please try again.');
+        });
+    }
+
+    #renderSearchResults(data, searchResultsList, searchInput) {
+        if (data.friends && data.friends.length > 0) {
+            data.friends.forEach(friend => {
+                const friendItem = this.#createFriendItem(friend);
+                searchResultsList.appendChild(friendItem);
+
+                friendItem.querySelector('.add-friend-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.#sendFriendRequest(searchInput.value.trim());
+                });
+            });
+        } else if (data.error) {
+            const errorItem = document.createElement('div');
+            errorItem.className = 'text-danger';
+            errorItem.textContent = data.error;
+            searchResultsList.appendChild(errorItem);
+        }
+    }
+
+    #createFriendItem(friend) {
+        const friendItem = document.createElement('a');
+        friendItem.href = '#';
+        friendItem.className = 'list-group-item list-group-item-action d-flex friend-item acrylicStyle';
+        friendItem.innerHTML = `
+            <div class="position-relative">
+                <img src="${friend.profile_picture}" alt="${friend.username}">
+                <span class="friend-status status-online position-absolute"></span>
+            </div>
+            <div class="friend-info">
+                <div>${friend.username}</div>
+                <div class="text-muted small">${friend.email}</div>
+            </div>
+            <button class="btn btn-primary add-friend-btn" data-username="${friend.username}">Add Friend</button>
+        `;
+        return friendItem;
+    }
+
+    #sendFriendRequest(userCode) {
+        fetch('/send_friend_request/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ user_code: userCode })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+        })
+        .catch(error => {
+            console.error('Error sending friend request:', error);
+        });
     }
 }

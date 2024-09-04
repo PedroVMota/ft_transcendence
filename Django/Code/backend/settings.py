@@ -60,6 +60,10 @@ CSRF_TRUSTED_ORIGINS = [
     "https://10.12.1.3:65535",
     "https://10.12.2.8:65535",  # Include any other required origins here
     "https://10.12.1.7:65535",
+    "https://10.12.4.8:65535",
+    "https://10.12.3.7:65535",
+    # 10.12.4.3
+    "https://10.12.4.3:65535",
 ]
 
 # Enable CORS headers middleware (already set in your file)

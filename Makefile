@@ -21,6 +21,10 @@ Django:
 Nginx:
 	docker-compose up web
 
+
+removeVolumes:
+	docker-compose down -v
+
 fclean:
 # Delete all the containers and images except the volumes
 	- docker rm $$(docker ps -a -q)

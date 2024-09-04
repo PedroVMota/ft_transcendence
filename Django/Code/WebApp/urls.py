@@ -17,6 +17,13 @@ urlpatterns = [
     path('send_friend_request/', views.send_friend_request, name='send_friend_request'),
     path('get_friend_requests/', views.get_friend_requests, name='get_friend_requests'),
     path('manage_friend_request/', views.manage_friend_request, name='manage_friend_request'),
+
+
+
+    path('get_chat_user/', views.get_chat_user, name='get_chat_user'),
+
+
+    path('test/', views.test, name='test'),
     
 
 ] 

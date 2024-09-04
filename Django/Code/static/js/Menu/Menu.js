@@ -160,6 +160,7 @@ class Menu extends AComponent {
         this.#notificationSocket.onerror = (e) => {
             console.log("WebSocket error: ", e);
         };
+
     }
 
     render() {
@@ -184,6 +185,7 @@ class Menu extends AComponent {
                     console.log(data);
                     let notificationsList = document.getElementById("notificationsMenu");
                     notificationsList.innerHTML = '';
+        
                     this.#renderFriendRequests(data);
                 }).catch((error) => {
                     console.error(error);
@@ -214,6 +216,8 @@ class Menu extends AComponent {
         console.log("SPA Object: ", this.#spaObject);
         this.#spaObject.setTo(url);
     }
+
+
 }
 
 export default Menu;

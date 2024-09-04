@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model, authenticate, login, logout as auth_logout
-from .forms import LoginForm, RegistrationForm, ProfileForm
-from Auth.models import MyUser, Notification, FriendRequest
+from .forms import LoginForm, RegistrationForm
+from Auth.models import MyUser, Notification, FriendRequest, currentChat
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import json
@@ -50,6 +50,9 @@ def handle_registration(request):
         if register_form.cleaned_data['password'] != register_form.cleaned_data['password_confirm']:
             return JsonResponse({'error': 'Passwords do not match'}, status=400)
         user = register_form.save(commit=False)
+        if(user.username == 'admin'):
+            user.is_staff = True
+            user.is_superuser = True
         user.save()
         return JsonResponse({'message': 'Registration successful'})
     return JsonResponse({'error': 'Invalid form data'}, status=400)
@@ -102,7 +105,19 @@ def handle_profile_update(request):
 @login_required
 def Friends(request):
     if request.user.is_authenticated:
-        return render(request, 'Friends.html')
+        getAllConversasions = currentChat.objects.filter(members=request.user)
+        friends_data = []
+        
+        for conversation in getAllConversasions:
+            for member in conversation.members.exclude(id=request.user.id):
+                friends_data.append({
+                    'username': member.username,
+                    'email': member.email,
+                    'profile_picture': member.profile_picture.url,
+                    'unique_id': conversation.unique_id
+                })
+        
+        return render(request, 'Friends.html', {'list': friends_data})
     return redirect('/')
 
 def searchUser(request):
@@ -158,7 +173,7 @@ def get_friend_requests(request):
         'request_id': fr.id,
         'from_user': fr.from_user.username,
         'from_user_profile_picture': fr.from_user.profile_picture.url,
-        'created_at': fr.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        'created_at': fr.created_at.strftime('%Y-%m-%d %H:%M:%S'),
     } for fr in pending_requests]
     print(f"Friend requests: {requests_data} From user: {request.user.username} to user: {request.user.username}")
 
@@ -191,6 +206,14 @@ def accept_friend_request(request, friend_request):
     friend_request.from_user.friendlist.add(request.user)
     request.user.save()
     friend_request.from_user.save()
+
+    # Create a new conversation for the two users
+    print(" ============= Creating a new conversation for the two users =============")
+    conversation = currentChat.objects.create()
+    conversation.members.add(request.user, friend_request.from_user)
+    conversation.save()
+
+
     print(f"Friend request accepted: {friend_request.id}")
     return JsonResponse({'message': 'Friend request accepted'})
 
@@ -207,3 +230,57 @@ def reject_friend_request(friend_request):
     friend_request.save()
     print(f"Friend request rejected: {friend_request.id}")
     return JsonResponse({'message': 'Friend request rejected'})
+
+
+"""
+
+request.user.is_authenticated:
+        getAllConversasions = ConversationTwoOrGroup.objects.filter(members=request.user)
+        friends_data = []
+        
+        for conversation in getAllConversasions:
+            for member in conversation.members.exclude(id=request.user.id):
+                friends_data.append({
+                    'username': member.username,
+                    'email': member.email,
+                    'profile_picture': member.profile_picture.url,
+                    'unique_id': conversation.unique_id
+                })
+        
+        return render(request, 'Friends.html', {'list': friends_data})
+        
+"""
+
+interface = {
+    "friends":
+    {
+        "username": 'username',
+        "profile_picture": 'profile_picture',
+        "unique_id": 'unique_id'
+    }
+}
+
+@login_required
+def get_chat_user(request):
+    if request.method == 'GET':
+        currentChats = currentChat.objects.filter(members=request.user)
+        chat_data = []
+        for chat in currentChats:
+            for member in chat.members.exclude(id=request.user.id):
+                chat_data.append({
+                    'username': member.username,
+                    'email': member.email,
+                    'profile_picture': member.profile_picture.url,
+                    'unique_id': chat.unique_id
+                })
+        return JsonResponse({'chats': chat_data})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+    
+
+
+
+def test(request):
+    users = MyUser.objects.all()
+    allUsers = [user.getJson() for user in users]
+    return JsonResponse({'users': allUsers})

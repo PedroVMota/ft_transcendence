@@ -27,6 +27,7 @@ export default class Profile extends AComponent {
         // Display pending message
         this.showSpinner();
         this._getHtml(url).then((html) => {
+            console.log('=> Profile: ', html);
         let documentResponse = new DOMParser().parseFromString(html, 'text/html');
             let rootContentHtml = documentResponse.getElementById('root').innerHTML;
             if(!(!rootContentHtml)){
