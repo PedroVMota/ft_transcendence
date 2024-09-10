@@ -85,29 +85,34 @@
 }
 
 .chat-area {
-    /* width: 100%; */
-    /* Ensure the chat area takes up the full width */
     padding: 15px;
+    height: 70vh; /* Set a fixed height for the chat area */
+    overflow: hidden; /* Ensure the chat area does not overflow */
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
 }
-
 .chat-messages {
-    /* Gray background for the chat messages */
     padding: 15px;
     border-radius: 10px;
     width: 100%;
-    /* Ensure the chat messages container takes up full width */
     box-sizing: border-box;
-    /* Ensure padding is included in the width calculation */
     margin-bottom: 15px;
+    background-color: rgba(0, 0, 0, 0.1); /* Optional: Add background for better visibility */
+    height: 100%; /* Fill the available space */
+    overflow-y: auto; /* Enable scrolling if the content overflows */
+    flex-grow: 1; /* Allow the chat-messages container to grow and fill available space */
 }
 
 .chat-message {
     margin-bottom: 10px;
+    word-wrap: break-word; /* Ensure long words or links wrap to the next line */
 }
 
 .input-group {
     display: flex;      
     flex-direction: row;  
+    width: 100%;
+    flex-shrink: 0; /* Prevent shrinking */
 }
 
 .input-group {
