@@ -157,6 +157,7 @@ def handle_friend_request(request):
             'notifications': f'{notification.message}'
         }
     )
+    print(f"Data Json: {notification.message}")
 
     return JsonResponse({'message': 'Friend request sent successfully!'})
 

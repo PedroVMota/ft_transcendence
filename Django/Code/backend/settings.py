@@ -50,20 +50,12 @@ ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
 
 # CSRF settings
+CORS_ALLOW_ALL_ORIGINS = True
+
+# CSRF settings
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "https://localhost",
-    "https://127.0.0.1",
-    "https://192.168.43.129",
-    "https://148.63.55.136",  
-    'https://localhost:65535',
-    "https://10.12.1.3:65535",
-    "https://10.12.2.8:65535",  # Include any other required origins here
-    "https://10.12.1.7:65535",
-    "https://10.12.4.8:65535",
-    "https://10.12.3.7:65535",
-    # 10.12.4.3
-    "https://10.12.4.3:65535",
+    "https://localhost:65535",
+    "https://10.19.246.249:65535",
 ]
 
 # Enable CORS headers middleware (already set in your file)
