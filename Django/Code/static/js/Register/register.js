@@ -1,3 +1,6 @@
+
+import Alert from "../Spa/Alert.js";
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -72,10 +75,13 @@ document.getElementById('loginForm').addEventListener('submit', function (event)
         }
     }).then(data => {
         console.log('Login successful:', data.message);
+        Alert.ShowAlert('Login successful', 'alert alert-success alert-dismissible fade show');
         window.location.replace('/');
         // Handle successful login (e.g., redirect to a different page)
+        alert
     }).catch(error => {
         console.error('Error:', error.message);
+        Alert.ShowAlert(`Login failed. ${error.message}`, 'alert alert-danger alert-dismissible fade show');
         // Handle errors (e.g., display an error message)
     });
 });
@@ -113,10 +119,13 @@ document.getElementById('registerForm').addEventListener('submit', function (eve
         return response.json();
     }).then(data => {
         ToggleRegisterToLogin(); // Alterna para o formulário de login após o registro bem-sucedido
-        showAlert('Registration successful. Please log in.', 1500);
+        Alert.ShowAlert('Registration went sucessfully', 'alert alert-success alert-dismissible fade show');
+        // showAlert('Registration successful. Please log in.', 1500);
+
     }).catch(error => {
         console.error('Error:', error.message);
-        showAlert('Registration failed. Please try again.', 1500);
+        Alert.ShowAlert(`Registration failed. ${error.message}`, 'alert alert-danger alert-dismissible fade show');
+        // showAlert('Registration failed. Please try again.', 1500);
     });
 });
 
