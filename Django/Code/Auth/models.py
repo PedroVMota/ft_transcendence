@@ -10,6 +10,18 @@ import os
 
 DEFAULT_IMAGE = 'Auth/defaultAssets/ProfilePicture.png'
 
+USERSTATES = (
+    (1, 'Online'),
+    (2, 'Offline'),
+)
+
+GameStates = (
+    (1, 'In Progress'),
+    (2, 'Not Started'),
+    (3, 'Completed'),
+)
+
+
 def upload_to(instance, filename):
     extension = filename.split('.')[-1]
     new_filename = f'profile_{instance.username}.{extension}'
@@ -27,9 +39,6 @@ class Conversation(models.Model):
 
     def __str__(self):
         return f"Conversation {self.id}"
-
-
-
 class currentChat(models.Model):
     id = models.AutoField(primary_key=True)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True)
@@ -41,11 +50,6 @@ class currentChat(models.Model):
 
     def __str__(self):
         return f"Conversation {self.id}"
-    
-USERSTATES = (
-    (1, 'Online'),
-    (2, 'Offline'),
-)
 
 class MyUser(AbstractUser):
     profile_picture = models.ImageField(upload_to=upload_to, default=DEFAULT_IMAGE)
@@ -119,3 +123,167 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message}"
+
+
+class GameRoom(models.Model):
+    """
+    GameRoom Model
+    
+    This model represents a room where a game takes place between two players, with an option for spectators.
+    It tracks the game's name, state (e.g., in progress, not started, completed), and associated chat for the game.
+
+    Attributes:
+    ----------
+    id : AutoField
+        Auto-incremented unique identifier for the game room.
+    
+    GameName : CharField
+        The name of the game, which can be set to identify different types of games or sessions.
+
+    GameStates : IntegerField
+        Represents the current state of the game with predefined choices:
+        - 1: In Progress
+        - 2: Not Started (default)
+        - 3: Completed
+
+    PlayerOne : ForeignKey
+        A foreign key to the first player (user model) who participates in the game. Can be `None` initially, which means the game is open for player joining.
+
+    PlayerTwo : ForeignKey
+        A foreign key to the second player (user model) in the game. Can also be `None` if only one player has joined.
+
+    GameChat : ForeignKey
+        Represents a chat room specifically for this game session. This is an instance of the `currentChat` model, allowing players to communicate during the game. 
+        If no chat exists at the time of room creation, a chat is created automatically upon saving.
+
+    Spectators : ManyToManyField
+        A many-to-many relationship allowing additional users to join as spectators. Spectators can watch the game without actively participating as players.
+
+    Methods:
+    -------
+    add_user_to_spectators(user):
+        Adds a user to the spectators of the game room.
+        
+    remove_user_from_spectators(user):
+        Removes a user from the spectators of the game room.
+        
+    join_player(user):
+        Adds a user to the game as a player if there's an available slot. If both player slots are filled, the user will be added as a spectator.
+        
+    leave_player(user):
+        Removes the user from the game if they are one of the players or removes them from the spectators if they are a spectator.
+        
+    validate_players():
+        Ensures that `PlayerOne` and `PlayerTwo` are not the same user. If they are, raises a `ValueError`.
+        
+    save(*args, **kwargs):
+        Custom save method that validates players and, if no `GameChat` exists, creates one and adds both players (if present) to the chat.
+    """
+
+    GAME_STATES = [
+        (1, 'In Progress'),
+        (2, 'Not Started'),
+        (3, 'Completed'),
+    ]
+
+    id = models.AutoField(primary_key=True)
+    GameName = models.CharField(max_length=255)  # Name of the game
+    GameStates = models.IntegerField(choices=GAME_STATES, default=2)  # Game state
+
+    PlayerOne = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='player_one_games',
+        blank=True, null=True  # Allow PlayerOne to be null initially
+    )
+    PlayerTwo = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='player_two_games',
+        blank=True, null=True  # Allow PlayerTwo to be null initially
+    )
+
+    GameChat = models.ForeignKey(
+        currentChat, 
+        on_delete=models.CASCADE, 
+        blank=True, null=True  # Allow the chat to be created dynamically
+    )
+
+    Spectators = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, 
+        related_name='spectated_games', 
+        blank=True  # Spectators are optional
+    )
+
+    def add_user_to_spectators(self, user):
+        """
+        Adds the given user to the Spectators list of the game room.
+        Calls `save` to persist the change.
+        """
+        self.Spectators.add(user)
+        self.save()
+
+    def remove_user_from_spectators(self, user):
+        """
+        Removes the given user from the Spectators list of the game room.
+        Calls `save` to persist the change.
+        """
+        self.Spectators.remove(user)
+        self.save()
+
+    def join_player(self, user):
+        """
+        Attempts to add the user to the game as a player.
+        - If `PlayerOne` is not set, assigns `PlayerOne` to the user.
+        - If `PlayerTwo` is not set and `PlayerOne` is a different user, assigns `PlayerTwo` to the user.
+        - If both player slots are filled, the user is added as a spectator.
+        Calls `save` to persist the change.
+        """
+        if not self.PlayerOne:
+            self.PlayerOne = user
+        elif not self.PlayerTwo and self.PlayerOne != user:
+            self.PlayerTwo = user
+        else:
+            self.add_user_to_spectators(user)
+        self.save()
+
+    def leave_player(self, user):
+        """
+        Removes the user from the game as a player or spectator.
+        - If the user is `PlayerOne`, they are removed from the game.
+        - If the user is `PlayerTwo`, they are removed from the game.
+        - Otherwise, the user is removed from the spectators list.
+        Calls `save` to persist the change.
+        """
+        if self.PlayerOne == user:
+            self.PlayerOne = None
+        elif self.PlayerTwo == user:
+            self.PlayerTwo = None
+        else:
+            self.remove_user_from_spectators(user)
+        self.save()
+
+    def validate_players(self):
+        """
+        Validates that `PlayerOne` and `PlayerTwo` are not the same user.
+        If they are, raises a `ValueError`.
+        """
+        if self.PlayerOne and self.PlayerOne == self.PlayerTwo:
+            raise ValueError("PlayerOne and PlayerTwo cannot be the same user")
+
+    def save(self, *args, **kwargs):
+        """
+        Custom save method.
+        - Validates that `PlayerOne` and `PlayerTwo` are different users.
+        - If no `GameChat` exists, creates a new chat and assigns `PlayerOne` and `PlayerTwo` to it (if they exist).
+        - Calls the parent class's `save` method to persist changes to the database.
+        """
+        self.validate_players()  # Ensure the players are valid
+        if not self.GameChat:
+            chat = currentChat.objects.create()
+            if self.PlayerOne:
+                chat.members.add(self.PlayerOne)
+            if self.PlayerTwo:
+                chat.members.add(self.PlayerTwo)
+            self.GameChat = chat
+        super().save(*args, **kwargs)
