@@ -13,63 +13,16 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
-from django.utils.deprecation import MiddlewareMixin
-from django.middleware.csrf import CsrfViewMiddleware
 
+# Base Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-LOGIN_URL = '/Login/'
-
-
-
+# Security Settings
 SECRET_KEY = "@1_zs)rtcfb+3!8x(1+i1ue5swaa-9jltt6utcuk^h=u2kxl75"
-AUTH_USER_MODEL = 'Auth.MyUser'
-
-ASGI_APPLICATION = 'backend.asgi.application'
-WSGI_APPLICATION = 'backend.wsgi.application'
-
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 * 3 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760 * 3 
-
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 DEBUG = True
-
 ALLOWED_HOSTS = ['*']
 
-CORS_ALLOW_ALL_ORIGINS = True
-
-CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = [
-    "https://localhost:3000",
-    "https://127.0.0.1",
-    "https://192.168.43.129",
-    "https://148.63.55.136",
-    "https://10.12.1.7:3000"
-    "https://localhost:65535",
-    "https://10.19.246.249:65535",
-]
-
-MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'backend.middleware.LoggingMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-CSRF_COOKIE_SECURE = True
-CORS_ALLOW_CREDENTIALS = True
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = 'None'
-
-
+# Application Definition
 INSTALLED_APPS = [
     'WebApp.apps.WebappConfig',
     'channels',
@@ -84,42 +37,17 @@ INSTALLED_APPS = [
     'Sockets.apps.SocketsConfig',
 ]
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('redis-server', 6379)],
-        },
-    },
-}
-
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-}
-
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware', 
-    'backend.middleware.AllowAllCsrfMiddleware', 
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'backend.middleware.AllowAllCsrfMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-
-
-CORS_ALLOW_CREDENTIALS = True
-
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = 'None'
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -140,62 +68,76 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+ASGI_APPLICATION = 'backend.asgi.application'
 
-
-
-
-
-
+# Database Configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres', 
-        'USER': 'postgres', 
-        'PASSWORD': 'example', 
-        'HOST': 'db', 
-        'PORT': '5432', 
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'example',
+        'HOST': 'db',
+        'PORT': '5432',
     },
-
-
-
-
-
-
-
-
 }
 
+# Authentication and Authorization
+AUTH_USER_MODEL = 'Auth.MyUser'
+AUTH_PASSWORD_VALIDATORS = []
 
-
-AUTH_PASSWORD_VALIDATORS = [
-
-
-
-
-
-
-
-
-
-
-
-
-]
-
-
-
+# Internationalization
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-
+# Static and Media Files
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
+# Default Primary Key Field Type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# File Upload Settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760 * 3
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760 * 3
+
+# Login URL
+LOGIN_URL = '/Login/'
+
+# CORS and CSRF Settings
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost:3000",
+    "https://127.0.0.1",
+    "https://192.168.43.129",
+    "https://148.63.55.136",
+    "https://10.12.1.7:3000",
+    "https://localhost:65535",
+    "https://10.19.246.249:65535",
+]
+
+# Channels Configuration
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis-server', 6379)],
+        },
+    },
+}
+
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
