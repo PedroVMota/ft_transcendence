@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
-
+from django.utils.deprecation import MiddlewareMixin
+from django.middleware.csrf import CsrfViewMiddleware
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,9 +52,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # CSRF settings
 CORS_ALLOW_ALL_ORIGINS = True
-
 # CSRF settings
 CSRF_TRUSTED_ORIGINS = [
+    "https://localhost:3000",
+    "https://127.0.0.1",
+    "https://192.168.43.129",
+    "https://148.63.55.136",
+    "https://10.12.1.7:3000"
     "https://localhost:65535",
     "https://10.19.246.249:65535",
 ]
@@ -121,6 +126,18 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
 }
 
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',  # Certifique-se de que está ativado
+    'backend.middleware.AllowAllCsrfMiddleware',  # Se você estiver usando isso
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+=======
 # MIDDLEWARE = [
 #     'django.middleware.csrf.CsrfViewMiddleware',
 #     'backend.middleware.LoggingMiddleware',
@@ -132,6 +149,12 @@ SIMPLE_JWT = {
 #     'django.contrib.messages.middleware.MessageMiddleware',
 #     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 # ]
+
+
+CORS_ALLOW_CREDENTIALS = True
+
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
 
 ROOT_URLCONF = 'backend.urls'
 

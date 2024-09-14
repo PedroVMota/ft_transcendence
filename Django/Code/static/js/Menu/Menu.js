@@ -169,12 +169,14 @@ class Menu extends AComponent {
             let profile = document.getElementById("nav-profile");
             let friends = document.getElementById("nav-friends");
             let logout = document.getElementById("nav-logout");
+            let game = document.getElementById("nav-game");
             let home = document.querySelectorAll("#nav-home");
             let notificationsDropdown = document.getElementById("notificationsDropdown");
 
             home.forEach((element) => {
                 element.addEventListener("click", (e) => this.navigateTo(e, "/"));
             });
+            game.addEventListener("click", (e) => this.navigateTo(e, "/Game/"));
             profile.addEventListener("click", (e) => this.navigateTo(e, "/Profile/"));
             friends.addEventListener("click", (e) => this.navigateTo(e, "/Friends/"));
             logout.addEventListener("click", (e) => this.#logout(e));

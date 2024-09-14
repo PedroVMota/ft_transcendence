@@ -9,6 +9,7 @@ from asgiref.sync import async_to_sync
 import json
 import time
 import os
+from Auth.models import MyUser
 
 def Menu(request):
     start_time = time.time()
@@ -119,7 +120,7 @@ def Friends(request):
         
         return render(request, 'Friends.html', {'list': friends_data})
     return redirect('/')
-
+ 
 def searchUser(request):
     if request.method == 'GET':
         friends = MyUser.objects.filter(userSocialCode=request.GET.get('user_code'))
@@ -278,7 +279,17 @@ def get_chat_user(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
     
+@login_required    
+def Friends(request):
+    if(request.user.is_authenticated):
+        return render(request, 'Friends.html')
+    return redirect('/')
 
+@login_required
+def Game(request):
+    if(request.user.is_authenticated):
+        return render(request, 'Game.html')
+    return redirect('/')
 
 
 def test(request):

@@ -2,14 +2,7 @@ import Menu from "../Menu/Menu.js";
 import Home from "../Home/Home.js";
 import Friends from "../Friend/Friends.js";
 import Profile from "../profile/profile.js";
-
-
-
-
-
-
-
-
+import Game from "../Game/Game.js";
 
 
 
@@ -17,12 +10,13 @@ class Spa{
     #menu = null;
     #content = null;
     #footer = null;
-    #routes = [ "/", "/Profile/", "/Friends/", "/Login/", '/Logout/' ];
+    #routes = [ "/", "/Profile/", "/Friends/", "/Login/", '/Logout/', '/Game/' ];
     #currentRoute = null;
     #contentClass = {
         "/": new Home("/", this),
         "/Profile/": new Profile("/Profile/", this),
         "/Friends/": new Friends("/Friends/", this),
+        "/Game/": new Game("/Game/", this),
     }
 
     constructor(){
@@ -55,6 +49,10 @@ class Spa{
                 this.#updateUrl(url);
                 this.#currentRoute = this.#contentClass["/Friends/"];
                 break;
+            case "/Game/":
+                this.#updateUrl(url);
+                this.#currentRoute = this.#contentClass["/Game/"];
+                break;
             default:
                 console.error("Invalid URL: ", url);
                 return;
@@ -63,7 +61,7 @@ class Spa{
     }
 
     loadPage(){
-        console.log("Load Page");
+        console.log("Load Page teste pedro");
         let url = window.location.pathname;
         this.setTo(url);
     }
@@ -74,9 +72,5 @@ class Spa{
 }
 
 const spa = new Spa();
-
-
-spa.loadPage();
-
 
 export { spa as default}
