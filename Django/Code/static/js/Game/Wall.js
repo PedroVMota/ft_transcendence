@@ -1,5 +1,6 @@
 //dependencies
-import * as THREE from 'three';
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js';
+
 
 export default class Wall {
     constructor(positionY, width = 10, height = 0.1, color = 0xffffff) {

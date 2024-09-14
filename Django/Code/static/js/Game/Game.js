@@ -91,11 +91,22 @@ export default class Game extends AComponent {
     
         // Controles das raquetes
         window.addEventListener('keydown', (event) => {
-            if (event.key === 'ArrowUp') movePaddle1(1);
-            if (event.key === 'ArrowDown') movePaddle1(-1);
-            if (event.key === 'w' || event.key === 'W') movePaddle2(1);
-            if (event.key === 's' || event.key === 'S') movePaddle2(-1);
+            if (event.key === 'ArrowUp') {
+                movePaddle1(1);
+                event.preventDefault(); // Impede o comportamento padrão da seta (scroll)
+            }
+            if (event.key === 'ArrowDown') {
+                movePaddle1(-1);
+                event.preventDefault(); // Impede o comportamento padrão da seta (scroll)
+            }
+            if (event.key === 'w' || event.key === 'W') {
+                movePaddle2(1);
+            }
+            if (event.key === 's' || event.key === 'S') {
+                movePaddle2(-1);
+            }
         });
+        
     
         init(); // Inicializa o jogo
     }
