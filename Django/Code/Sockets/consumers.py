@@ -7,67 +7,121 @@ from Auth.models import Conversation, currentChat
 from channels.db import database_sync_to_async
 from django.utils import timezone
 
-
-# path('ws/general/', consumers.GeneralConsumer.as_asgi()),
 """
-This websocket is used for general web funcionalities like:
-- Notifications
-- Friend requests
-
-
-It's completly separated from the game.
+[
+    {
+        "PlayerOne": {
+            "xPercent": 0.5
+        },
+        "PlayerTwo": {
+            "xPercent": 0.5
+        },
+        "Ball": {
+            "xPercent": 0.5,
+            "yPercent": 0.5
+        },
+        "Score": {
+            "PlayerOne": 0,
+            "PlayerTwo": 0
+        },
+        "GameState": {
+            "GameRunning": true
+        }
+    },
+    {
+        "GameEvent": {
+            "PlayerOneScored": {
+                "Event": [ "Up", "Down"]
+            },
+            "PlayerTwoScored": {
+                "Event": [ "Up", "Down"]
+            },
+            "Event": [
+                "PlayerOneScored",
+                "PlayerTwoScored",
+                "PlayerOneWon",
+                "PlayerTwoWon",
+                "GamePaused",
+                "GameResumed"
+            ]
+        }
+    }
+]
 """
 
-# class GeneralConsumer(AsyncWebsocketConsumer):
-#     async def connect(self):
-#         self.roomGroup = "chat_Room_with_%s" % self.scope["user"].username
-#         await self.channel_layer.group_add(
-#             self.roomGroup,
-#             self.channel_name
-#         )
-#         await self.accept()
-#         print("WebSocket connection accepted")
+class PongGameConsumer(AsyncWebsocketConsumer):
 
-#     async def disconnect(self, close_code):
-#         await self.channel_layer.group_discard(
-#             self.roomGroup,
-#             self.channel_name
-#         )
-#         print("WebSocket connection closed")
+    async def connect(self):
+        # Get the room name from the URL route (passed in the websocket route)
+        print("All The Scope: ", self.scope)
+        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_group_name = f'pong_{self.room_name}'
+        print(f"New connection: {self.channel_name} to room {self.room_group_name}")
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
 
-#     async def receive(self, text_data):
-#         data = json.loads(text_data)
-#         print("Received data: %s" % data)
-#         message_type = data.get('type')
+        # Accept the WebSocket connection
+        await self.accept()
 
-#         if message_type == 'ping':
-#             # Handle ping message
-#             await self.send(text_data=json.dumps({'type': 'pong'}))
-#             return
+        # You could send a message or acknowledge that the connection was successful
+        await self.send(text_data=json.dumps({
+            'message': f'You have connected to room {self.room_group_name}'
+        }))
 
-#         message = data.get('message')
-#         username = self.scope["user"].username
+    async def disconnect(self, close_code):
+        # Print disconnection information
+        print(f"Disconnection: {self.channel_name} from room {self.room_group_name}")
 
-#         if message and username:
-#             print("UserData: %s" % username + ": " + message)
-#             await self.channel_layer.group_send(
-#                 self.roomGroup,
-#                 {
-#                     'type': 'chat_message',
-#                     'message': message,
-#                     'username': username
-#                 }
-#             )
+        # Remove the WebSocket connection from the group (room)
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
 
-#     async def chat_message(self, event):
-#         message = event['message']
-#         username = event['username']
+    
+    async def receive(self, text_data):
+        # Load the received text data into a Python dictionary
+        data = json.loads(text_data)
 
-#         # Send message to WebSocket
-#         await self.send(text_data=json.dumps({
-#             'message': message,
-#             'username': username
-#         }))
+        # Print the data received from the client
+        print("Received Data: ", json.dumps(data, indent=4))
+
+        # Print the current channel name (which uniquely identifies the WebSocket connection)
+        print(f"Sending to all users in channel group: {self.room_group_name}, current channel: {self.channel_name}")
+
+        # Send the data to all users in the room group
+        await self.channel_layer.group_send(
+            self.room_group_name,  # The WebSocket room the users are part of
+            {
+                'type': 'game_update',  # The function name that will handle the event in each WebSocket
+                'data': data  # The data to be sent to all clients in the room
+            }
+        )
+
+    async def game_update(self, event):
+        # This dictionary represents possible game events
+        GameEvent: dict = {
+            "PlayerOneScored": {
+                "Event": ["Up", "Down"]
+            },
+            "PlayerTwoScored": {
+                "Event": ["Up", "Down"]
+            },
+            "Event": [
+                "PlayerOneScored",
+                "PlayerTwoScored",
+                "PlayerOneWon",
+                "PlayerTwoWon",
+                "GamePaused",
+                "GameResumed"
+            ]
+        }
+        # Print the GameEvent JSON before sending it
+        print("Sending GameEvent to client:", json.dumps(GameEvent, indent=4))
+        # Send only the GameEvent JSON to the WebSocket client
+        await self.send(text_data=json.dumps(GameEvent))
 
 
 class NotificationsConsumer(AsyncWebsocketConsumer):

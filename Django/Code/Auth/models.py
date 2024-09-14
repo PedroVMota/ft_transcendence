@@ -27,7 +27,7 @@ class Conversation(models.Model):
 
     def __str__(self):
         return f"Conversation {self.id}"
-    
+
 
 
 class currentChat(models.Model):
@@ -58,6 +58,7 @@ class MyUser(AbstractUser):
     userSocialCode = models.BigIntegerField(unique=True, null=True, blank=True)
     allChat = models.ManyToManyField(currentChat, blank=True)
     state = models.IntegerField(choices=USERSTATES, default=2)
+    walletCoins = models.IntegerField(default=0)
     
     def getJson(self):
         return {
@@ -85,6 +86,7 @@ class MyUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
 
 class serverLogs(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)

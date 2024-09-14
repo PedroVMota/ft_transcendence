@@ -252,6 +252,52 @@ The Transcendence project is structured as follows:
 - **static**: Contains static assets like CSS and JavaScript files.
 - **WebApp**: Contains the core web application logic, including models, views, templates, and
 
+- **GameComunication**: Contains the logic for handling game communication
+
+```json
+[
+    //Output \/
+    {
+        "PlayerOne": {
+            "xPercent": 0.5
+        },
+        "PlayerTwo": {
+            "xPercent": 0.5
+        },
+        "Ball": {
+            "xPercent": 0.5,
+            "yPercent": 0.5
+        },
+        "Score": {
+            "PlayerOne": 0,
+            "PlayerTwo": 0
+        },
+        "GameState": {
+            "GameRunning": true
+        }
+    },
+    //Input \/
+    {
+        "GameEvent": {
+            "PlayerOneScored": {
+                "Event": [ "Up", "Down"]
+            },
+            "PlayerTwoScored": {
+                "Event": [ "Up", "Down"]
+            },
+            "Event": [
+                "PlayerOneScored",
+                "PlayerTwoScored",
+                "PlayerOneWon",
+                "PlayerTwoWon",
+                "GamePaused",
+                "GameResumed"
+            ]
+        }
+    }
+]
+```
+
  migrations.
 - **Nginx**: Contains configuration files and Docker setup for the Nginx server.
 - **compose.yml**: Docker Compose configuration for managing multi-container Docker applications.
