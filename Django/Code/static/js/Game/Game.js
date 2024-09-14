@@ -72,6 +72,9 @@ class Ball {
                 
                 // Inverte a direção da bola no eixo X (rebatida)
                 this.speed.x *= -1;
+                // Aumenta a velocidade da bola quando há contacto com o padle
+                this.speed.x += this.speed.x > 0 ? 0.01 : -0.01;
+                this.speed.y += this.speed.y > 0 ? 0.01 : -0.01;
                 return true;
             }
         }
