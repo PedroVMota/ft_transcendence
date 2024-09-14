@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('Auth.urls')),
     path('', include('WebApp.urls')),
+    path('game/', include('game_api.urls')),
 ]
