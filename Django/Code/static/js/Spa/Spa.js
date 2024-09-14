@@ -59,7 +59,7 @@ class Spa{
     }
 
     loadPage(){
-        console.log("Load Page");
+        console.log("Load Page teste pedro");
         let url = window.location.pathname;
         this.setTo(url);
     }

@@ -16,6 +16,9 @@ class Paddle {
     }
 }
 
+/* class Wall(){
+    constructor(){}
+} */
 class Ball {
     constructor() {
         this.geometry = new THREE.SphereGeometry(0.1, 32, 32);
