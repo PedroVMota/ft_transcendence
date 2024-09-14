@@ -75,6 +75,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         user = self.scope["user"]
         print("WebSocket connection accepted")
         print(f"User: {user.username} and Code: {user.userSocialCode}")
+        
         if user.is_anonymous:
             await self.close()
         else:

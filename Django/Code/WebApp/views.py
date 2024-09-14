@@ -276,11 +276,3 @@ def get_chat_user(request):
         return JsonResponse({'chats': chat_data})
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
-    
-
-
-
-def test(request):
-    users = MyUser.objects.all()
-    allUsers = [user.getJson() for user in users]
-    return JsonResponse({'users': allUsers})
