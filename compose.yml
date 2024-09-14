@@ -14,13 +14,15 @@ services:
     image: redis
     networks:
       - default
-
   django:
-    container_name: Django
+    container_name: django
     build: ./Django
+    # command: bash -c "python manage.py makemigrations Auth && python manage.py makemigrations && python manage.py migrate && daphne -b 0.0.0.0 -p 8000 backend.asgi:application"
     command: bash -c "python manage.py makemigrations Auth && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./Django/Code/:/code/
+    environment:
+    - DJANGO_SETTINGS_MODULE=backend.settings
     depends_on:
       - db
       - redis-server
@@ -33,6 +35,7 @@ services:
     build: ./Nginx
     ports:
       - 3000:443
+      - 65535:443
     restart: always
     volumes:
       - ./Django/Code/static/:/static/
@@ -49,12 +52,16 @@ services:
       - 5050:80
     depends_on:
       - db
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+      
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin@pgadmin.org
       PGADMIN_DEFAULT_PASSWORD: pgadmin
 
 volumes:
   static_volume:
+  pgadmin:
 
 
 

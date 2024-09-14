@@ -44,25 +44,42 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEBUG = True
 
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.43.129']
+# Allow all hosts (already set in your file)
 ALLOWED_HOSTS = ['*']
 
-
+# Allow all CORS origins (already set in your file)
 CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_COOKIE_SECURE = True
-
+# CSRF settings
+CORS_ALLOW_ALL_ORIGINS = True
+# CSRF settings
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost:3000",
     "https://127.0.0.1",
     "https://192.168.43.129",
     "https://148.63.55.136",
     "https://10.12.1.7:3000"
+    "https://localhost:65535",
+    "https://10.19.246.249:65535",
 ]
 
+# Enable CORS headers middleware (already set in your file)
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'backend.middleware.LoggingMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
-SESSION_COOKIE_SECURE = True
+# Ensure cookies are secure and same-site policy is handled appropriately
+CSRF_COOKIE_SECURE = True
 CORS_ALLOW_CREDENTIALS = True
-
+SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'None'
 
 
@@ -109,11 +126,6 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
 }
 
-class AllowAllCsrfMiddleware(CsrfViewMiddleware):
-    def _accept(self, request):
-        # Aceita qualquer origem
-        return True
-
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  
     'django.middleware.security.SecurityMiddleware',
@@ -125,6 +137,18 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+=======
+# MIDDLEWARE = [
+#     'django.middleware.csrf.CsrfViewMiddleware',
+#     'backend.middleware.LoggingMiddleware',
+#     'corsheaders.middleware.CorsMiddleware',
+#     'django.middleware.security.SecurityMiddleware',
+#     'django.contrib.sessions.middleware.SessionMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+#     'django.contrib.auth.middleware.AuthenticationMiddleware',
+#     'django.contrib.messages.middleware.MessageMiddleware',
+#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+# ]
 
 
 CORS_ALLOW_CREDENTIALS = True

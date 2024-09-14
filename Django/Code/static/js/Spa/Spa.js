@@ -4,6 +4,8 @@ import Friends from "../Friend/Friends.js";
 import Profile from "../profile/profile.js";
 import Game from "../Game/Game.js";
 
+
+
 class Spa{
     #menu = null;
     #content = null;
@@ -67,66 +69,8 @@ class Spa{
     #updateUrl(url){
         window.history.pushState({}, url, window.location.origin + url);
     }
-
-    #isPageReloaded() {
-        const [navigationEntry] = performance.getEntriesByType('navigation');
-        return navigationEntry && navigationEntry.type === 'reload';
-    }
-
-    
 }
 
 const spa = new Spa();
-
-
-
-let isScrolling;
-
-document.addEventListener('scroll', () => {
-    const scrollTop = window.scrollY;
-    const scrollFactor = scrollTop / (document.body.scrollHeight - window.innerHeight);
-
-    const backgroundPositionY = scrollFactor * 2; // Adjust for desired parallax effect
-
-    const styleElement = document.querySelector('#dynamic-style') || document.createElement('style');
-    styleElement.id = 'dynamic-style';
-
-    // Add blur while scrolling
-    styleElement.textContent = `
-        .backgroundBody::before {
-            background-position-y: ${backgroundPositionY}%;
-            filter: blur(3px); /* Apply blur when scrolling */
-            transition: filter 0.3s ease-out; /* Smooth transition for removing blur */
-        }
-    `;
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const game = new Game();
-        game.start();
-    });
-
-    console.log(styleElement.textContent);
-
-    document.head.appendChild(styleElement);
-
-    // Clear the timeout if it's already set
-    window.clearTimeout(isScrolling);
-
-    // Set a timeout to remove the blur class after scrolling has stopped
-    isScrolling = setTimeout(() => {
-        styleElement.textContent = `
-            .backgroundBody::before {
-                background-position-y: ${backgroundPositionY}%;
-                filter: blur(0px); /* Remove blur after scrolling stops */
-                transition: filter 0.3s ease-out; /* Smooth transition */
-            }
-        `;
-        document.head.appendChild(styleElement);
-    }, 150); // Adjust this timeout to control how quickly the blur is removed after scrolling stops
-});
-
-
-spa.loadPage();
-
 
 export { spa as default}

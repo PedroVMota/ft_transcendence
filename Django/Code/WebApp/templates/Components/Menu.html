@@ -25,10 +25,19 @@
         <li class="nav-item">
           <a class="nav-link mx-sm-1 position-relative" href="javascript:void(0)" id="nav-friends">
             <img src="{% static '/svg/Peo.svg' %}" alt="menu" class="saturate" />
-            <span class="badge bg-danger text-white position-absolute translate-middle">
+            <span class="badge bg-danger text-white position-absolute translate-middle" id="messagesBadge">
               3
             </span>
           </a>
+        </li>
+        <li class="nav-item dropdown" id="notificationsDropdown">
+          <a class="nav-link mx-sm-1 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="{% static '/svg/bell.svg' %}" alt="Notifications" class="icon" />
+            <span id="notificationBadge" class="badge bg-danger text-white position-absolute translate-middle">0</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" id="notificationsMenu">
+            <li><span class="dropdown-item-text">No new notifications</span></li>
+          </ul>
         </li>
         <li class="nav-item">
           <a class="nav-link mx-sm-1" href="javascript:void(0)" id="nav-game">
