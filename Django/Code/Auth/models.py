@@ -1,4 +1,3 @@
-#Auth/models.py
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
@@ -6,52 +5,186 @@ import uuid
 import random
 import os
 
-# Create your models here.
-
+# Default profile image
 DEFAULT_IMAGE = 'Auth/defaultAssets/ProfilePicture.png'
 
+# User states for online/offline tracking
 USERSTATES = (
     (1, 'Online'),
     (2, 'Offline'),
 )
 
+# Game states to represent the progress of the game
 GameStates = (
     (1, 'In Progress'),
     (2, 'Not Started'),
     (3, 'Completed'),
 )
 
-
+# Helper function to upload profile images to a dynamic path
 def upload_to(instance, filename):
+    """
+    Generates a unique file path for user profile images.
+
+    Parameters:
+    ----------
+    instance : MyUser
+        The instance of the user uploading the profile image.
+    
+    filename : str
+        The original name of the file being uploaded.
+
+    Returns:
+    -------
+    str
+        A dynamic path for storing the profile image, unique to the user's username.
+    """
     extension = filename.split('.')[-1]
     new_filename = f'profile_{instance.username}.{extension}'
     return os.path.join('Auth', instance.username, new_filename)
 
-
+# Helper function to generate random numbers for user social codes
 def RandomNumber(min=1000, max=9999):
+    """
+    Generates a random number between the specified range.
+
+    Parameters:
+    ----------
+    min : int
+        Minimum value for the random number (default 1000).
+    
+    max : int
+        Maximum value for the random number (default 9999).
+
+    Returns:
+    -------
+    int
+        A randomly generated number within the specified range.
+    """
     return random.randint(min, max)
 
 class Conversation(models.Model):
+    """
+    Conversation Model
+
+    Represents a single message within a chat. Each conversation has an author, 
+    a message, and a timestamp for when the message was created.
+
+    Attributes:
+    ----------
+    id : AutoField
+        Unique identifier for the conversation.
+
+    AuthorOfTheMessage : ForeignKey
+        A foreign key to the user who sent the message.
+
+    Message : TextField
+        The content of the message.
+
+    create_date : DateTimeField
+        The timestamp for when the message was created, automatically set.
+
+    Methods:
+    -------
+    __str__():
+        Returns a string representation of the conversation.
+    """
     id = models.AutoField(primary_key=True)
-    AuthorOfTheMessage = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='AuthorOfTheMessage')
+    AuthorOfTheMessage = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='AuthorOfTheMessage'
+    )
     Message = models.TextField()
     create_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Conversation {self.id}"
+
 class currentChat(models.Model):
+    """
+    currentChat Model
+
+    Represents a chat session that can include multiple users. Each chat has a unique ID,
+    can be a group or individual chat, and contains multiple conversations.
+
+    Attributes:
+    ----------
+    id : AutoField
+        Unique identifier for the chat.
+
+    members : ManyToManyField
+        A many-to-many relationship with users, representing the participants of the chat.
+
+    is_group : BooleanField
+        Indicates whether the chat is a group chat (default is False).
+
+    currentMessage : ManyToManyField
+        A relationship with Conversation, representing all messages within the chat.
+
+    unique_id : UUIDField
+        A unique UUID for each chat session.
+
+    Methods:
+    -------
+    __str__():
+        Returns a string representation of the chat.
+    """
     id = models.AutoField(primary_key=True)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True)
     is_group = models.BooleanField(default=False)
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
     currentMessage = models.ManyToManyField(Conversation, blank=True)
-    unique_id = models.UUIDField(default=uuid.uuid4, editable=False)  # Remove unique=True for now
+    unique_id = models.UUIDField(default=uuid.uuid4, editable=False)
 
     def __str__(self):
         return f"Conversation {self.id}"
 
 class MyUser(AbstractUser):
+    """
+    MyUser Model
+
+    Custom user model that extends Django's AbstractUser to include additional fields like profile picture,
+    social code, friend list, and chat history.
+
+    Attributes:
+    ----------
+    profile_picture : ImageField
+        The user's profile picture, with a default image path.
+
+    about_me : TextField
+        A brief biography about the user, optional.
+
+    friendlist : ManyToManyField
+        A many-to-many relationship representing the user's list of friends.
+
+    userSocialCode : BigIntegerField
+        A unique code for identifying users in social interactions.
+
+    allChat : ManyToManyField
+        A relationship with the currentChat model, representing all chat rooms the user is involved in.
+
+    state : IntegerField
+        Indicates whether the user is online or offline (default is offline).
+
+    walletCoins : IntegerField
+        A virtual currency counter for the user (default is 0).
+
+    Methods:
+    -------
+    getJson():
+        Returns a JSON-friendly representation of the user.
+        
+    save(*args, **kwargs):
+        Overridden save method to ensure the userSocialCode is generated if not present.
+        
+    newImageUpdate(image):
+        Updates the user's profile picture with the provided image.
+
+    __str__():
+        Returns the username of the user.
+    """
     profile_picture = models.ImageField(upload_to=upload_to, default=DEFAULT_IMAGE)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
@@ -65,6 +198,15 @@ class MyUser(AbstractUser):
     walletCoins = models.IntegerField(default=0)
     
     def getJson(self):
+        """
+        Returns a JSON-friendly representation of the user, including details like
+        username, email, profile picture URL, and friend list.
+
+        Returns:
+        -------
+        dict
+            A dictionary representing the user's information.
+        """
         return {
             'user_id': self.id,
             'username': self.username,
@@ -80,32 +222,97 @@ class MyUser(AbstractUser):
         }
     
     def save(self, *args, **kwargs):
+        """
+        Overridden save method to generate a user social code if it's not already assigned.
+        """
         if self.userSocialCode is None:
             self.userSocialCode = RandomNumber(min=1000, max=9999)
         super().save(*args, **kwargs)
 
     def newImageUpdate(self, image):
+        """
+        Updates the profile picture of the user and saves the change.
+
+        Parameters:
+        ----------
+        image : ImageFile
+            The new image to be set as the user's profile picture.
+        """
         self.profile_picture = image
         self.save()
 
     def __str__(self):
         return self.username
-    
 
 class serverLogs(models.Model):
+    """
+    serverLogs Model
+
+    Tracks server requests, including the user who made the request, the HTTP method, and the request status.
+
+    Attributes:
+    ----------
+    user : ForeignKey
+        The user who made the request (optional).
+
+    mehod : CharField
+        The HTTP method used (GET, POST, etc.).
+
+    path : CharField
+        The path of the request.
+
+    status : BigIntegerField
+        The HTTP status code of the response.
+
+    create_date : DateTimeField
+        Timestamp for when the log was created.
+
+    update_date : DateTimeField
+        Timestamp for when the log was last updated.
+
+    Methods:
+    -------
+    __str__():
+        Returns the username associated with the log.
+    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     mehod = models.CharField(max_length=10, default='GET')
     path = models.CharField(max_length=100, default='/')
     status = models.BigIntegerField(default=0)
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
+
     def __str__(self):
-        return self.user.username
-
-
-
+        return self.user.username if self.user else 'Anonymous'
 
 class FriendRequest(models.Model):
+    """
+    FriendRequest Model
+
+    Represents a friend request between two users. Tracks the status of the request (pending, accepted, rejected).
+
+    Attributes:
+    ----------
+    from_user : ForeignKey
+        The user who sent the friend request.
+
+    to_user : ForeignKey
+        The user who received the friend request.
+
+    status : CharField
+        Indicates the status of the friend request (pending, accepted, rejected).
+
+    created_at : DateTimeField
+        Timestamp for when the friend request was created.
+
+    updated_at : DateTimeField
+        Timestamp for when the friend request was last updated.
+
+    Methods:
+    -------
+    __str__():
+        Returns a string representation of the friend request.
+    """
     from_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='from_user')
     to_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='to_user')
     created_at = models.DateTimeField(auto_now_add=True)
