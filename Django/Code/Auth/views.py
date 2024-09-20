@@ -92,17 +92,3 @@ class CloseSession(APIView):
             return Response({'message': 'Session closed'})
         else:
             return Response({'message': 'No active session'})
-
-
-class UserDetailView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request):
-        user = request.user
-        return Response({'user': user})
-
-
-class HomeView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request):
-        content = {'message': 'Hello, World!'}
-        return Response(content)
