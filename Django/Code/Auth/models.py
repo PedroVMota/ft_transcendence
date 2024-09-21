@@ -64,8 +64,6 @@ class MyUser(AbstractUser):
     state = models.IntegerField(choices=USERSTATES, default=2)
     walletCoins = models.IntegerField(default=0)
     email = models.EmailField(blank=True, unique=False, null=True)
-
-    REQUIRED_FIELDS = []
     
     def getJson(self):
         return {

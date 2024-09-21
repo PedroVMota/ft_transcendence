@@ -58,7 +58,7 @@ class UserRegistrationView(View):
             password = data.get('password')
             password_confirm = data.get('password2')
 
-            if not username or not password or not email:
+            if not username or not password:
                 print("Validation Error: Missing fields")  # Log validation failure
                 return JsonResponse({'error': 'All fields are required'}, status=400)
             if password != password_confirm:
@@ -67,10 +67,19 @@ class UserRegistrationView(View):
             if User.objects.filter(username=username).exists():
                 print("Validation Error: Username already exists")  # Log validation failure
                 return JsonResponse({'error': 'Username already exists'}, status=400)
+            
+            # Split username into first and last name if it contains a space
+            if ' ' in username:
+                first, last = username.split(' ', 1)  # Split on first space only
+            else:
+                first = last = username  # Use username as both first and last name
+
+            # Create the user (email can be None)
             user = User.objects.create(
                 username=username,
                 password=make_password(password),
-                email=None
+                first_name=first,
+                last_name=last,
             )
             return JsonResponse({'message': 'Registration successful'}, status=201)
         except json.JSONDecodeError:

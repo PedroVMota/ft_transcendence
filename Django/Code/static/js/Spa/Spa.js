@@ -73,4 +73,6 @@ class Spa{
 
 const spa = new Spa();
 
+spa.loadPage();
+
 export { spa as default}
