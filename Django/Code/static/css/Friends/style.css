@@ -153,3 +153,9 @@
 .mr-1{
     margin-right: 1em !important;
 }
+
+.profile-photo{
+    object-fit: cover;
+    width: 50px;
+    height: 50px;
+}

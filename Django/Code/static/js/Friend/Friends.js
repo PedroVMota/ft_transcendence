@@ -50,15 +50,12 @@ export default class Friends extends AComponent {
                     friendItem.dataset.id = chat.unique_id;
                     friendItem.innerHTML = `
                         <div class="friend-info">
-                            <img src="${chat.profile_picture}"
-                                width="50"
-                                height="50"
-                                class="rounded-circle m-3 friend-control">
+                            <img src="${chat.profile_picture}" class="rounded-circle m-3 friend-control profile-photo">
                             <span>${chat.username}</span>
                         </div>
                         <div class="friend-controls d-flex flex-column acrylicStyle p-1">
                             <button class="btn block-friend icon-centered" id="remove_${chat.unique_id}">
-                                <img src="/static/svg/userDelete.svg" width="25">
+                                <img src="/static/svg/userDelete.svg" width="25" height="25" >
                             </button>
                             <button class="btn remove-friend icon-centered" id="block_${chat.unique_id}">
                                 <img src="/static/svg/userBlock.svg" width="25">
@@ -217,7 +214,7 @@ export default class Friends extends AComponent {
                     <div class="message-text">${message}</div>
                 </div>
                 <div class="profile-photo">
-                    <img src="${profile_picture.includes('/media/') ? profile_picture : '/media/' + profile_picture}" width="50" class="ml-1 rounded-circle" />
+                     <img src="${profile_picture.includes('/media/') ? profile_picture : '/media/' + profile_picture}" class="mr-1 rounded-circle profile-photo" />
                 </div>
             `;
         } else {
@@ -226,7 +223,7 @@ export default class Friends extends AComponent {
             messageElement.className += ' d-flex justify-content-start';  // Add 'd-flex' for proper flexbox layout
             messageElement.innerHTML = `
                 <div class="profile-photo">
-                    <img src="${profile_picture.includes('/media/') ? profile_picture : '/media/' + profile_picture}" width="50" class="mr-1 rounded-circle" />
+                    <img src="${profile_picture.includes('/media/') ? profile_picture : '/media/' + profile_picture}" class="mr-1 rounded-circle profile-photo" />
                 </div>
                 <div class="message-content text-white p-2 rounded ml-2">
                     <span class="font-weight-bold"><b>${user}</b></span>
@@ -322,7 +319,7 @@ export default class Friends extends AComponent {
         friendItem.className = 'list-group-item list-group-item-action p-0 friend-item acrylicStyle'
         friendItem.innerHTML = `
             <div class="friend-info">
-                <img src="${friend.profile_picture}" alt="${friend.username}" class="rounded-circle m-2" width="50" height="50">
+                <img src="${friend.profile_picture}" alt="${friend.username}" class="rounded-circle m-2 profile-photo">
                 <div class="d-flex flex-column">
                     <div class="friend-username font-weight-bold">${friend.username}</div>
                 </div>
