@@ -99,7 +99,6 @@ document.getElementById('registerForm').addEventListener('submit', function (eve
 
     let data = {
         "username": document.getElementById('registerUser').value,
-        "email": document.getElementById('registerEmail').value,
         "password": pass,
         "password2": pass2
     };

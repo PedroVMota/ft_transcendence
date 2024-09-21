@@ -57,7 +57,6 @@ class UserRegistrationView(View):
             username = data.get('username')
             password = data.get('password')
             password_confirm = data.get('password2')
-            email = data.get('email')
 
             if not username or not password or not email:
                 print("Validation Error: Missing fields")  # Log validation failure
@@ -68,13 +67,10 @@ class UserRegistrationView(View):
             if User.objects.filter(username=username).exists():
                 print("Validation Error: Username already exists")  # Log validation failure
                 return JsonResponse({'error': 'Username already exists'}, status=400)
-            if User.objects.filter(email=email).exists():
-                print("Validation Error: Email already exists")  # Log validation failure
-                return JsonResponse({'error': 'Email already exists'}, status=400)
             user = User.objects.create(
                 username=username,
                 password=make_password(password),
-                email=email
+                email=None
             )
             return JsonResponse({'message': 'Registration successful'}, status=201)
         except json.JSONDecodeError:

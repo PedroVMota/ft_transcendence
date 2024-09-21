@@ -15,7 +15,7 @@ help: ## Display this help message
 # Build and run the entire Docker Compose environment
 all: ## Build and run the entire Docker Compose environment
 	@echo -e "$(BLUE)Starting all services...$(NC)"
-	docker-compose up --build
+	docker-compose up -d --build
 
 # Stop running containers
 stop: ## Stop running containers
@@ -40,17 +40,17 @@ down: ## Bring down the Docker Compose environment
 # Bring up only the database container
 db: ## Bring up only the database container
 	@echo -e "$(BLUE)Starting database service...$(NC)"
-	docker-compose up db
+	docker-compose up -d db
 
 # Bring up only the Django container
 django: ## Bring up only the Django container
 	@echo -e "$(BLUE)Starting Django service...$(NC)"
-	docker-compose up django
+	docker-compose up -d django
 
 # Bring up only the Nginx (web) container
 nginx: ## Bring up only the Nginx (web) container
 	@echo -e "$(BLUE)Starting Nginx service...$(NC)"
-	docker-compose up web
+	docker-compose up -d web
 
 # Remove all containers and images, but keep volumes
 fclean: ## Remove all containers and images, but keep volumes

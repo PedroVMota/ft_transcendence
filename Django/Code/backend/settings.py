@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Auth.apps.AuthConfig',
-    'Sockets.apps.SocketsConfig',
     'game_api.apps.GameApiConfig',
 ]
 
