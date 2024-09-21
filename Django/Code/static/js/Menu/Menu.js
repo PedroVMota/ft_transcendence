@@ -114,7 +114,7 @@ class Menu extends AComponent {
                 document.getElementById(`denyRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
                     e.preventDefault();
                     console.log("Deny request");
-                    Requests.post('/deny_friend_request/', {
+                    Requests.post('/manage_friend_request/', {
                         friend_request_id: friendRequest.request_id,  // Changed to friendRequest.request_id
                         action: 'deny'
                     }, this.#defaultHeader).then((data) => {

@@ -59,6 +59,7 @@ class MyUser(AbstractUser):
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
     friendlist = models.ManyToManyField('self', blank=True)
+    blocked_users = models.ManyToManyField('self', blank=True, related_name='blocked_by')  # New field for blocking users
     userSocialCode = models.BigIntegerField(unique=True, null=True, blank=True)
     allChat = models.ManyToManyField(currentChat, blank=True)
     state = models.IntegerField(choices=USERSTATES, default=2)
@@ -77,7 +78,8 @@ class MyUser(AbstractUser):
             'about_me': self.about_me,
             'create_date': self.create_date,
             'update_date': self.update_date,
-            'friendlist': [friend.username for friend in self.friendlist.all()]
+            'friendlist': [friend.username for friend in self.friendlist.all()],
+            'blocked_users': [user.username for user in self.blocked_users.all()]  # Include blocked users in JSON
         }
     
     def save(self, *args, **kwargs):

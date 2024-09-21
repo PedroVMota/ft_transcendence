@@ -7,12 +7,7 @@
     color: rgb(230, 230, 230) !important;
 }
 
-.friend-info .text-muted {
-    color: #a8ccebc8 !important;
-}
-
-
-.btn {
+.btn-acrilic {
     background: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid #5d9ed68f !important;
     color: white !important;
@@ -32,65 +27,61 @@
 }
 
 
-.friend-item {
-    margin: .25em 0;
+
+/* Each user friend */
+.friend-item{
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between;
+}
+
+.friend-info{
     display: flex;
-    flex-direction: row ;
+    justify-content: center;
     align-items: center;
-    padding: 10px;
-    transition: background-color 0.3s ease;
+}
+
+.friend-control{
+    display: flex !important;
+    justify-content: end !important;
+    align-items: center !important;
 }
 
 
-.list-group {
-    max-height: 70vh;
-    overflow-y: auto;
+.icon-centered{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+.icon-centered button{
+    width: 100%;
+    height: 100%;
+}
+/* Each user friend */
 
-.friend-item img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-    position: relative;
-}
-
-.friend-status {
-    width: 1em;
-    height: 1em;
-    border-radius: 50%;
-    background-color: #28a745;
-    /* Default color */
-}
-
-.status-online {
-    background-color: #28a745;
-}
-
-.status-afk {
-    background-color: #ffc107;
-}
-
-.status-offline {
-    background-color: #6c757d;
-}
-
-.friend-status {
-    top: 0;
-    left: 0;
-    transform: translate(-25%, -25%);
-    /* Adjust the position on the top left corner of the profile picture */
-    border: 2px solid #ffffff;
-    /* Adding a white border to make it stand out */
-}
 
 .chat-area {
     padding: 15px;
-    height: 70vh; /* Set a fixed height for the chat area */
+    height: 50vh; /* Set a fixed height for larger screens */
     overflow: hidden; /* Ensure the chat area does not overflow */
     display: flex;
     flex-direction: column; /* Stack children vertically */
 }
+
+/* .chat-messages {
+    padding: 15px;
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    background-color: rgba(0, 0, 0, 0.1); /* Optional: Add background for better visibility */
+    /* height: 50%; Fill the available space */
+    /* overflow-y: auto; Enable scrolling if the content overflows */
+    /* flex-grow: 1; Allow the chat-messages container to grow and fill available space */
+    /* overflow-x: none; */
+/* } */ 
+
+
 .chat-messages {
     padding: 15px;
     border-radius: 10px;
@@ -98,15 +89,25 @@
     box-sizing: border-box;
     margin-bottom: 15px;
     background-color: rgba(0, 0, 0, 0.1); /* Optional: Add background for better visibility */
-    height: 100%; /* Fill the available space */
+    height: 50%; /* Fill the available space */
     overflow-y: auto; /* Enable scrolling if the content overflows */
     flex-grow: 1; /* Allow the chat-messages container to grow and fill available space */
+    overflow-x: hidden; /* Hide any horizontal overflow */
 }
 
 .chat-message {
     margin-bottom: 10px;
     word-wrap: break-word; /* Ensure long words or links wrap to the next line */
 }
+
+
+/* Ensure text inside the chat breaks properly */
+.chat-messages div {
+    word-wrap: break-word; /* Break long words onto the next line */
+    word-break: break-word; /* Break long words as needed */
+    white-space: normal; /* Ensure normal text wrapping */
+}
+
 
 .input-group {
     display: flex;      
@@ -119,8 +120,36 @@
     width: 100%;
 }
 
+
+/* Media query for smartphones (screens smaller than 768px) */
 @media screen and (max-width: 768px) {
     .chat-area {
-        width: 100%;
+        height: 50vh; /* Reduce height to 50% of the viewport on small screens */
+        padding: 10px; /* Optionally reduce padding on small screens */
     }
+
+    .chat-messages {
+        height: 40%; /* Adjust height of the chat messages to fit the reduced chat area */
+        overflow-y: auto; /* Keep scrolling enabled if the content overflows */
+    }
+
+    .input-group {
+        flex-shrink: 0;
+        margin-top: 5px; /* Add some margin to the input form */
+    }
+}
+
+.selected{
+    background: rgba(89, 127, 161, 0.705) !important;
+}
+
+/* Utils */
+.min-w-25 {
+    min-width: 25%; /* You can customize this value */
+}
+/* Utils */
+
+
+.mr-1{
+    margin-right: 1em !important;
 }

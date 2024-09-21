@@ -125,6 +125,7 @@ def searchUser(request):
     if request.method == 'GET':
         friends = MyUser.objects.filter(userSocialCode=request.GET.get('user_code'))
         friends_data = [friend.getJson() for friend in friends]
+        print(friends_data);
         return JsonResponse({'friends': friends_data})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
@@ -291,8 +292,28 @@ def Game(request):
         return render(request, 'Game.html')
     return redirect('/')
 
+@login_required
+def block_user(request, unique_id):
+    target_user = get_object_or_404(MyUser, userSocialCode=unique_id)
+    
+    if request.user == target_user:
+        return JsonResponse({'error': 'You cannot block yourself'}, status=400)
+    
+    request.user.blocked_users.add(target_user)
+    request.user.save()
+    
+    return JsonResponse({'message': f'User {target_user.username} blocked successfully'})
 
-def test(request):
-    users = MyUser.objects.all()
-    allUsers = [user.getJson() for user in users]
-    return JsonResponse({'users': allUsers})
+@login_required
+def remove_friend(request, unique_id):
+    target_user = get_object_or_404(MyUser, userSocialCode=unique_id)
+    
+    if request.user == target_user:
+        return JsonResponse({'error': 'You cannot remove yourself'}, status=400)
+    
+    request.user.friendlist.remove(target_user)
+    target_user.friendlist.remove(request.user)  # Remove the reverse relationship as well
+    request.user.save()
+    target_user.save()
+    
+    return JsonResponse({'message': f'User {target_user.username} removed successfully'})
