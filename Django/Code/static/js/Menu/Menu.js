@@ -69,19 +69,21 @@ class Menu extends AComponent {
     }
 
     #renderFriendRequests = (data) => {
+        console.log(".....", data);
         let notificationsList = document.getElementById("notificationsMenu");
         let notificationBadge = document.getElementById("notificationBadge");
 
         if (data.friend_requests === undefined || data.friend_requests.length === 0) {
-
             notificationsList.innerHTML = `<li><span class="dropdown-item-text">No new notifications</span></li>`;
             notificationBadge.textContent = '0';
-
+            print("Condition 1: ", data.friend_requests);
+            print("Condition 2: ", data.friend_requests.length);
         } else {
             notificationBadge.textContent = data.friend_requests.length;
             data.friend_requests.forEach((friendRequest) => {
                 let notification = document.createElement('a');
                 notification.classList.add('dropdown-item');
+                console.log("Friend Request: ", friendRequest);
                 notification.href = '#';
                 notification.innerHTML = `
                     <div class="d-flex align-items-center" data-idrequest="${friendRequest.request_id}">
@@ -102,7 +104,7 @@ class Menu extends AComponent {
                 document.getElementById(`acceptRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
                     e.preventDefault();
                     console.log("Accept request");
-                    Requests.post('/manage_friend_request/', {
+                    Requests.post('/auth/token/friend/request/manage/', {
                         friend_request_id: friendRequest.request_id,  // Changed to request_id
                         action: 'accept'
                     }, this.#defaultHeader).then((data) => {
@@ -183,8 +185,9 @@ class Menu extends AComponent {
             notificationsDropdown.addEventListener("click", (e) => {
                 this.#numberofNotifications = 0;
                 this.#decoratorToggle();
-                Requests.get('/get_friend_requests/', this.#defaultHeader).then((data) => {
-                    console.log(data);
+                Requests.get('/auth/token/friend/request/get/', this.#defaultHeader).then((data) => {
+
+                    console.warn("Friend Requests: ", data);
                     let notificationsList = document.getElementById("notificationsMenu");
                     notificationsList.innerHTML = '';
         

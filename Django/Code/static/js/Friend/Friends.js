@@ -34,12 +34,18 @@ export default class Friends extends AComponent {
 
     #getChat() {
         let listGroup = document.getElementById('friends-list');
-
-        Requests.get('/get_chat_user/', {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': this.csrftoken
-        }).then((response) => {
-            let chats = response.chats;
+    
+        fetch('/auth/token/chat_details/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            let chats = data.chats;
             if (chats.length > 0) {
                 listGroup.innerHTML = ''; // Clear existing content
                 chats.forEach((chat) => {
@@ -48,6 +54,7 @@ export default class Friends extends AComponent {
                     friendItem.className = 'list-group-item list-group-item-action p-0 my-1 friend-item acrylicStyle';
                     friendItem.id = chat.unique_id;
                     friendItem.dataset.id = chat.unique_id;
+                    console.log(chat);
                     friendItem.innerHTML = `
                         <div class="friend-info">
                             <img src="${chat.profile_picture}"
@@ -57,20 +64,23 @@ export default class Friends extends AComponent {
                             <span>${chat.username}</span>
                         </div>
                         <div class="friend-controls d-flex flex-column acrylicStyle p-1">
-                            <button class="btn block-friend icon-centered" id="remove_${chat.unique_id}">
+                            <button class="btn block-friend icon-centered" id="remove_${chat.targetUserUUID}">
                                 <img src="/static/svg/userDelete.svg" width="25">
                             </button>
-                            <button class="btn remove-friend icon-centered" id="block_${chat.unique_id}">
+                            <button class="btn remove-friend icon-centered" id="block_${chat.targetUserUUID}">
                                 <img src="/static/svg/userBlock.svg" width="25">
                             </button>
                         </div>
                     `;
                     listGroup.appendChild(friendItem);
-
+    
                     friendItem.addEventListener('click', () => {
                         // Check if the chat is already active
                         if (this.#activeChatId !== chat.unique_id) {
-                            this.#connectToChat(chat.unique_id);
+
+                            if (this.#activeChatId !== friendItem.id) {
+                                this.#connectToChat(chat.unique_id);
+                            }
                         
                             // Update the "selected" class for the clicked friend item
                             if (this.selectedFriendItem) {
@@ -87,38 +97,37 @@ export default class Friends extends AComponent {
                             console.log('Chat is already active.');
                         }
                     });
-        
-
+    
                     // Block user button event listener
-                    const blockButton = document.getElementById(`block_${chat.unique_id}`);
+                    const blockButton = document.getElementById(`block_${chat.targetUserUUID}`);
                     blockButton.addEventListener('click', (e) => {
                         e.stopPropagation();  // Prevent triggering the chat open event
-                        console.log(`user_${chat.unique_id} blocked`);
-
+                        console.log(`user_${chat.targetUserUUID} blocked`);
+    
                         // AJAX request to block the user
-                        fetch(`/manage/block/${chat.unique_id}/`, {
+                        fetch(`/manage/block/${chat.targetUserUUID}/`, {
                             method: 'POST',
                             headers: {
-                                'X-CSRFToken': this.csrftoken,  // Use CSRF token
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
                             }
                         }).then(response => response.json())
                             .then(data => console.log(data.message))
                             .catch(error => console.error('Error blocking user:', error));
                     });
-
+    
                     // Remove friend button event listener
-                    const removeButton = document.getElementById(`remove_${chat.unique_id}`);
+                    const removeButton = document.getElementById(`remove_${chat.targetUserUUID}`);
                     removeButton.addEventListener('click', (e) => {
                         e.stopPropagation();  // Prevent triggering the chat open event
-                        console.log(`user_${chat.unique_id} removed`);
-
+                        console.log(`user_${chat.targetUserUUID} removed`);
+    
                         // AJAX request to remove the friend
-                        fetch(`/manage/remove/${chat.unique_id}/`, {
+                        fetch(`/manage/remove/${chat.targetUserUUID}/`, {
                             method: 'POST',
                             headers: {
-                                'X-CSRFToken': this.csrftoken,  // Use CSRF token
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
                             }
                         }).then(response => response.json())
                             .then(data => console.log(data.message))
@@ -128,7 +137,8 @@ export default class Friends extends AComponent {
             } else {
                 listGroup.innerHTML = '<p>No chats available.</p>';
             }
-        }).catch((error) => {
+        })
+        .catch((error) => {
             console.error('Error fetching chat data:', error);
             listGroup.innerHTML = '<p>Error fetching chat data.</p>';
         });
@@ -338,7 +348,7 @@ export default class Friends extends AComponent {
     }
 
     #sendFriendRequest(userCode) {
-        fetch('/send_friend_request/', {
+        fetch('/auth/token/friend/request/send/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

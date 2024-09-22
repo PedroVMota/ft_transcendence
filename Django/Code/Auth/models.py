@@ -59,12 +59,31 @@ class MyUser(AbstractUser):
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
     friendlist = models.ManyToManyField('self', blank=True)
-    blocked_users = models.ManyToManyField('self', blank=True, related_name='blocked_by')  # New field for blocking users
+    blocked_users = models.ManyToManyField('self', blank=True)  # New field for blocking users
     userSocialCode = models.BigIntegerField(unique=True, null=True, blank=True)
     allChat = models.ManyToManyField(currentChat, blank=True)
     state = models.IntegerField(choices=USERSTATES, default=2)
     walletCoins = models.IntegerField(default=0)
     email = models.EmailField(blank=True, unique=False, null=True)
+
+    def removeFriend(self, user: 'MyUser'):
+        self.friendlist.remove(user)
+        self.save()
+
+    def blockUser(self, user: 'MyUser'):
+        self.blocked_users.add(user)
+        user.removeFriend(self)
+        self.save()
+
+    def getBlockedUsers(self, user):
+        return [user.username for user in self.blocked_users]
+
+    def getFriendList(self):
+        return [friend.username for friend in self.friendlist.all()]
+    
+    def allChats(self):
+        return [chat.unique_id for chat in self.allChat.all()]
+    
     
     def getJson(self):
         return {
