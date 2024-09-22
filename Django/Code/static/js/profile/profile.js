@@ -27,7 +27,6 @@ export default class Profile extends AComponent {
         // Display pending message
         this.showSpinner();
         this._getHtml(url).then((html) => {
-            console.log('=> Profile: ', html);
         let documentResponse = new DOMParser().parseFromString(html, 'text/html');
             let rootContentHtml = documentResponse.getElementById('root').innerHTML;
             if(!(!rootContentHtml)){
@@ -51,15 +50,33 @@ export default class Profile extends AComponent {
     }
 
     #loadData() {
+        console.log('Loading user data...');
+        console.log('csrftoken:', getCookie('csrftoken'));
 
-        Requests.get('/getUserData/').then((userData) => {
-            // userData = userData.user;
-            document.getElementById('id_first_name').value = userData.user.first_name ? userData.user.first_name : 'Empty';
-            document.getElementById('id_last_name').value = userData.user.last_name ? userData.user.last_name : 'Empty';
-            document.getElementById('id_about_me').value = userData.user.about_me ? userData.user.about_me : 'Empty';
-            document.getElementById('profilePicture').src = userData.user.profile_picture;
-            document.getElementById('id_user_code').value = userData.user.usercode;
+        fetch('/auth/token/user/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
         })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(userData => {
+            console.log('User data:', userData);
+            document.getElementById('id_first_name').value = userData.first_name ? userData.first_name : 'Empty';
+            document.getElementById('id_last_name').value = userData.last_name ? userData.last_name : 'Empty';
+            document.getElementById('id_about_me').value = userData.about_me ? userData.about_me : 'Empty';
+            document.getElementById('profilePicture').src = userData.profile_picture;
+            document.getElementById('id_user_code').value = userData.usercode;
+        })
+        .catch(error => {
+            console.error('Error fetching user data:', error);
+        });
     }
 
     #updateProfile(event) {
