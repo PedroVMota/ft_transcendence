@@ -1,7 +1,7 @@
 import Menu from "../Menu/Menu.js";
 import Home from "../Home/Home.js";
 import Friends from "../Friend/Friends.js";
-import Profile from "../profile/profile.js";
+import Profile from "../Profile/Profile.js";
 import Game from "../Game/Game.js";
 
 

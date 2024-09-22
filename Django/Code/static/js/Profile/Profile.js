@@ -83,7 +83,7 @@ export default class Profile extends AComponent {
                     alert(data.message);
                     this.#loadData();
                 } else if (data.error) {
-                    alert('Error updating profile: ' + data.error);
+                    alert('Error updating Profile: ' + data.error);
                 }
             })
             .catch(error => {

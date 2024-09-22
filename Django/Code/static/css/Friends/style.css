@@ -79,7 +79,7 @@
     top: 0;
     left: 0;
     transform: translate(-25%, -25%);
-    /* Adjust the position on the top left corner of the profile picture */
+    /* Adjust the position on the top left corner of the Profile picture */
     border: 2px solid #ffffff;
     /* Adding a white border to make it stand out */
 }

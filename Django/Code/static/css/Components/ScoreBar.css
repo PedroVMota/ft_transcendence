@@ -1,0 +1,22 @@
+
+.score-bar-wrapper
+{
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+}
+
+.score-bar-element
+{
+    color: #ffffff;
+    font-size: 1.6em;
+    margin-left: 3.0em;
+    margin-right: 3.0em;
+}
+
+#vs-icon
+{
+    width: 3.0em;
+    height: 3.0em;
+}

@@ -166,7 +166,7 @@ class Menu extends AComponent {
     render() {
         let url = this.getUrl();
         this._getHtml(url).then((html) => {
-            let profile = document.getElementById("nav-profile");
+            let profile = document.getElementById("nav-Profile");
             let friends = document.getElementById("nav-friends");
             let logout = document.getElementById("nav-logout");
             let game = document.getElementById("nav-game");
