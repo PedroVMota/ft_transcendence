@@ -25,6 +25,8 @@ ALLOWED_HOSTS = ['*']
 # Application Definition
 INSTALLED_APPS = [
     'WebApp.apps.WebappConfig',
+    'Chat.apps.ChatConfig',
+    'Notification.apps.NotificationConfig',
     'channels',
     'corsheaders',
     'django.contrib.admin',
@@ -34,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Auth.apps.AuthConfig',
-    'game_api.apps.GameApiConfig',
+    'Game.apps.GameConfig',
 ]
 
 MIDDLEWARE = [

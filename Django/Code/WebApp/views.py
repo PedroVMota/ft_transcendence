@@ -1,22 +1,13 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model, authenticate, login, logout as auth_logout
+from django.contrib.auth import authenticate, login, logout as auth_logout
 from .forms import LoginForm, RegistrationForm
-from Auth.models import MyUser, Notification, FriendRequest, currentChat
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-import json
-import time
-import os
 from Auth.models import MyUser
-from django.shortcuts import get_object_or_404
+from Auth.models import MyUser
 
 def Menu(request):
-    start_time = time.time()
     response = render(request, 'Components/Menu.html')
-    end_time = time.time()
-    print(f"\n\n\n\n\nMenu view processing time: {end_time - start_time} seconds")
     return response
 
 @login_required
@@ -67,7 +58,20 @@ def logout(request):
 @login_required
 def edit_profile(request):
     if request.method == 'GET':
-        return render(request, 'Profile.html')
+        print(" ====  GET REQUEST ====")
+        userData: MyUser = request.user
+        friendList = [friend.getJson() for friend in userData.friendlist.all()]
+
+        blocked_users = [blocked_user.getJson() for blocked_user in userData.blocked_users.all()]
+
+        if not blocked_users:
+            blocked_users = None
+        
+        if not friendList:
+            friendList = None
+
+        print(userData)
+        return render(request, 'Profile.html', {'user': userData, 'friendList': friendList, 'blocked_users': blocked_users})
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @login_required
@@ -79,15 +83,9 @@ def Friends(request):
 def searchUser(request):
     if request.method == 'GET':
         friends = MyUser.objects.filter(userSocialCode=request.GET.get('user_code'))
-        friends_data = [friend.getJson() for friend in friends]
+        friends_data = [friend.getDict() for friend in friends]
         return JsonResponse({'friends': friends_data})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
-
-@login_required    
-def Friends(request):
-    if(request.user.is_authenticated):
-        return render(request, 'Friends.html')
-    return redirect('/')
 
 @login_required
 def Game(request):

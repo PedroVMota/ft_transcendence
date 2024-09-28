@@ -9,73 +9,225 @@
     <link rel="stylesheet" href="{% static '/css/Profile/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    
     <title>Edit Profile</title>
 </head>
 
-<body>
+<body class="bg-dark TranscendanceThemeBackground">
     <div class="backgroundBody"></div>
-    <!-- Menu will be rendered here -->
+
     <div id="headerMenu">
         {% include 'Components/Menu.html' %}
     </div>
 
-    <!-- Main content area for SPA -->
-    <div id="root" class="container-fluid">
-        
-        <!-- Profile form goes here when loaded directly -->
-        <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-sm-10">
-                <div class="card shadow-sm p-2 text-white">
-                    <div class="card-header text-center ">
-                        <h3 class="mb-0">Edit Profile</h3>
+    <div id="root" class="px-0 relative">
+        <div class="body acrylicStyle border-0 w-100">
+            <div class="container-lg position-relative">
+                <!-- Banner Cover -->
+                <div class="banner-cover d-flex justify-content-center align-items-center bg-centered-fixed pic-filter-theme rounded-5 z-n1"
+                    style="width: 100%; height: 450px; background-image: url('/media/{{ user.profile_banner }}'); background-size: cover; background-position: center;">
+                </div>
+
+                <!-- User Information -->
+                <div style="width: 90%; margin: 0 auto;"
+                    class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                    <!-- User Profile Picture -->
+                    <div class="d-flex flex-column flex-md-row justify-content-center z-0" style="margin-top: -2em;">
+                        <img src="/media/{{ user.profile_picture }}" alt="Profile Picture"
+                            class="profile-picture rounded-circle m-2 me-3" style="width: 100px; height: 100px;">
+                        <div
+                            class="d-flex flex-column justify-content-center align-items-center align-items-md-start mt-lg-4">
+                            <span class="text-white fs-4">{{ user.first_name }} {{ user.last_name }}</span>
+                            <span class="text-white text-md-center fs-6">{{ user.userSocialCode }}</span>
+                        </div>
                     </div>
-                    <div class="card-body p-4">
-                        <form id="profileForm">
-                            <div class="mb-3 text-center">
-                                <img id="profilePicture" src="" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px; border-radius: 100%; object-fit: cover;">
+
+                    <!-- Button to edit the profile -->
+                    <button class="btn acrylicStyle-button text-white" data-bs-toggle="modal"
+                        data-bs-target="#editProfileModal">
+                        Edit Profile
+                    </button>
+                </div>
+
+                <div class="container-lg" style="width: 90%; margin: 0 auto;">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <!-- Existing Completed Games Table -->
+                            <div class="card bg-transparent border-0 p-3">
+                                <h5 class="mb-3 text-white">Completed Games</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-custom table-dark">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-white" scope="col">Players</th>
+                                                <th class="text-white" scope="col">Result</th>
+                                                <th class="text-white" scope="col">Accuracy</th>
+                                                <th class="text-white" scope="col">Moves</th>
+                                                <th class="text-white" scope="col">Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Example Game Row -->
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex flex-column">
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="text-white fw-bold">PedroMotaPT</span>
+                                                            <span class="badge">(443)</span>
+                                                            <span class="ms-2">🇵🇹</span>
+                                                        </div>
+                                                        <div class="d-flex align-items-center mt-1">
+                                                            <span class="text-white fw-bold">devarasai9</span>
+                                                            <span class="badge">(493)</span>
+                                                            <span class="ms-2">🇮🇳</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column">
+                                                        <div>0 <span class="text-danger">🔴</span></div>
+                                                        <div>1 <span class="text-success">🟢</span></div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-white">65.8 - 85.1</td>
+                                                <td class="text-white">13</td>
+                                                <td class="text-white">Sep 16, 2024</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="id_profile_picture" class="form-label">Profile Picture</label>
-                                <input type="file" class="form-control text-dark" id="id_profile_picture" name="profile_picture">
+                        </div>
+
+                        <!-- Stats Column for "Rapid" -->
+                        <div class="col-lg-4">
+                            <div class="card bg-transparent border-0 p-3 text-white">
+                                <h5 class="mb-3">Stats</h5>
+                                <div class="d-flex justify-content-between">
+                                    <span>Rapid</span>
+                                    <span>443</span>
+                                </div>
+                                <p>Highest: <span class="text-success-ligher">{{ user.HigherRank }}</span> {{ user.DateOfHigherRank }} </p>    
+                                <p>Games: {{ user.TotalOfGames }}</p>
+                                <p>W/L: <span class="text-success-ligher"> {{ user.NumberOfWins }} </span> <span class="text-danger-ligher"> {{ user.NumberOfLosses }} </span> </p>
                             </div>
-                            <div class="mb-3">
-                                <label for="id_user_code" class="form-label">Your Code</label>
-                                <input type="text" class="form-control form-control-lg disable fw-bolder" id="id_user_code" name="user_code" required disabled>
-                            </div>
-                            <div class="mb-3">
-                                <label for="id_first_name" class="form-label">First Name</label>
-                                <input type="text" class="form-control form-control-lg" id="id_first_name" name="first_name" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="id_last_name" class="form-label">Last Name</label>
-                                <input type="text" class="form-control form-control-lg" id="id_last_name" name="last_name" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="id_about_me" class="form-label">About Me</label>
-                                <textarea class="form-control form-control-lg" id="id_about_me" name="about_me" rows="4" required></textarea>
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-dark btn-lg">Save Changes</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal Structure -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog ">
+            <div class="modal-content bg-dark">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                    <button type="button" class="btn-close btn-light invert" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" enctype="multipart/form-data" id="profileUpdateForm">
+                        {% csrf_token %}
+                        <!-- First Name Input -->
+                        <div class="floating-label-group">
+                            <input type="text" id="firstName" name="first_name" class="form-control bg-dark"
+                                placeholder=" " value="{{ user.first_name }}"/>
+                            <label class="bg-dark" for="firstName">First Name</label>
+                        </div>
+
+                        <!-- Last Name Input -->
+                        <div class="floating-label-group">
+                            <input type="text" id="lastName" name="last_name" class="form-control bg-dark"
+                                placeholder=" " value="{{ user.last_name }}"/>
+                            <label class="bg-dark" for="lastName">Last Name</label>
+                        </div>
+
+                        <!-- Profile Banner Input -->
+                        <div class="mb-3">
+                            <label for="profileBanner" class="form-label text-white">Profile Banner</label>
+                            <div class="file-input">
+                                <label class="file-input-label" for="profileBanner">
+                                    <i class="fas fa-upload"></i>
+                                    <span>Choose Profile Banner</span>
+                                </label>
+                                <input type="file" id="profileBanner" name="profile_banner">
+                            </div>
+                        </div>
+
+                        <!-- Profile Picture Input -->
+                        <div class="mb-3">
+                            <label for="profilePicture" class="form-label text-white">Profile Picture</label>
+                            <div class="file-input">
+                                <label class="file-input-label" for="profilePicture">
+                                    <i class="fas fa-upload"></i>
+                                    <span>Choose Profile Picture</span>
+                                </label>
+                                <input type="file" id="profilePicture" name="profile_picture">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn acrylicStyle-button position-relative" data-bs-dismiss="modal">
+                        <div class="move-down"></div>
+                        <div class="move-up"></div>
+                        Close
+                    </button>
+                    <button type="submit" form="profileUpdateForm" class="btn acrylicStyle-button" id="saveChanges">
+                        <div class="move-down"></div>
+                        <div class="move-up"></div>
+                        Save Changes
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
     </div>
 
-    <!-- Footer will be rendered here -->
     <div id="footer"></div>
-
-    <!-- <script type="module" src="{% static 'js/Spa/Spa.js' %}"></script> -->
-    <!-- <script type="module" src="{% static 'js/profile/profile.js' %}"></script> -->
-
-    <script type="module" src="{% static 'js/Spa/Spa.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script type="module" src="{% static '/js/Spa/Spa.js' %}"></script>
 </body>
+
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script> 
+    document.getElementById('saveChanges').addEventListener('click', (e) => {
+        e.preventDefault();
+        let form = document.getElementById('profileUpdateForm');
+        let formData = new FormData(form);
+
+        fetch("{% url 'update_user' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': form.querySelector('input[name="csrfmiddlewaretoken"]').value
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Profile updated successfully!');
+                } else {
+                    console.log(data.errors);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+
+
+
+</script>
+
+
 
 </html>

@@ -1,4 +1,4 @@
-.PHONY: all stop start restart down db django nginx fclean clean inside removeVolumes help logs
+.PHONY: all stop start restart down db django nginx fclean clean inside removeVolumes help logs removeAll
 
 # Color Codes
 GREEN  := \033[1;32m
@@ -104,3 +104,8 @@ logs: ## View logs of containers in real time (Usage: make logs [service=service
 		echo -e "$(BLUE)Displaying logs from $(YELLOW)$(service)$(NC) service...$(NC)"; \
 		docker-compose logs -f $(service); \
 	fi
+
+# Remove all Docker Compose content related to this project
+removeAll: ## Remove all Docker Compose content related to this project
+	@echo -e "$(BLUE)Removing all Docker Compose content...$(NC)"
+	docker-compose down -v --remove-orphans

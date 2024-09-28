@@ -16,33 +16,33 @@ export default class Profile extends AComponent {
     }
 
     render() {
-        if(this.#cachedContent){
-            document.head.innerHTML = this.#cachedHead;
-            this.#parentElement.innerHTML = this.#cachedContent;
-            document.getElementById('profileForm').addEventListener('submit', (event) => this.#updateProfile(event));
-            this.#loadData();
-            return;
-        }
-        let url = this.getUrl();
-        // Display pending message
-        this.showSpinner();
-        this._getHtml(url).then((html) => {
-        let documentResponse = new DOMParser().parseFromString(html, 'text/html');
-            let rootContentHtml = documentResponse.getElementById('root').innerHTML;
-            if(!(!rootContentHtml)){
-                document.head.innerHTML = documentResponse.head.innerHTML;
-                this.#parentElement.innerHTML = rootContentHtml;
-                document.getElementById('profileForm').addEventListener('submit', (event) => this.#updateProfile(event));
-                this.#loadData();
-                setTimeout(() => {
-                    this.hideSpinner();
-                }, 1000);
-                this.#cachedContent = rootContentHtml;
-                this.#cachedHead = documentResponse.head.innerHTML;
-            }
-        }).catch((error) => {
-            console.error(error);
-        });
+        // if(this.#cachedContent){
+        //     document.head.innerHTML = this.#cachedHead;
+        //     this.#parentElement.innerHTML = this.#cachedContent;
+        //     document.getElementById('profileForm').addEventListener('submit', (event) => this.#updateProfile(event));
+        //     this.#loadData();
+        //     return;
+        // }
+        // let url = this.getUrl();
+        // // Display pending message
+        // this.showSpinner();
+        // this._getHtml(url).then((html) => {
+        // let documentResponse = new DOMParser().parseFromString(html, 'text/html');
+        //     let rootContentHtml = documentResponse.getElementById('root').innerHTML;
+        //     if(!(!rootContentHtml)){
+        //         document.head.innerHTML = documentResponse.head.innerHTML;
+        //         this.#parentElement.innerHTML = rootContentHtml;
+        //         document.getElementById('profileForm').addEventListener('submit', (event) => this.#updateProfile(event));
+        //         this.#loadData();
+        //         setTimeout(() => {
+        //             this.hideSpinner();
+        //         }, 1000);
+        //         this.#cachedContent = rootContentHtml;
+        //         this.#cachedHead = documentResponse.head.innerHTML;
+        //     }
+        // }).catch((error) => {
+        //     console.error(error);
+        // });
     }
 
     destroy() {

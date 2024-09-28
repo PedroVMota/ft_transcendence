@@ -1,11 +1,10 @@
 from django.contrib.auth import login
-from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from django.views.generic import View
 from django.http import JsonResponse
+from rest_framework import status
 from django.contrib.auth import authenticate, logout
-from WebApp.forms import LoginForm
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -13,14 +12,9 @@ from django.contrib.auth import get_user_model
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 import json
-from Auth.models import MyUser, currentChat, FriendRequest, Notification
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-from django.shortcuts import get_object_or_404
-
-
-
-
+from Auth.models import MyUser
+from django.contrib.auth.decorators import login_required
+from .forms import ProfileUpdateForm
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserLoginAPIView(View):
@@ -101,230 +95,52 @@ class CloseSession(APIView):
         else:
             return Response({'message': 'No active session'})
 
-@csrf_exempt
 def user_data(request):
     if request.user.is_authenticated:
         user: MyUser = request.user
-        return JsonResponse(user.getJson(), status=200)
+        return JsonResponse(user.getDict(), status=200)
     else:
         return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
     
+
+
+@login_required
 def update_user(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
-
+    user = request.user
+    if 'profile_picture' in request.FILES:
+        user.profile_picture = request.FILES['profile_picture']
+    if 'profile_banner' in request.FILES:
+        user.profile_banner = request.FILES['profile_banner']
+    if 'first_name' in request.POST and request.POST['first_name']:
+        user.first_name = request.POST['first_name']
+    if 'last_name' in request.POST and request.POST['last_name']:
+        user.last_name = request.POST['last_name']
     try:
-        user = request.user
-        data = json.loads(request.body)
-    except (json.JSONDecodeError, AttributeError) as e:
-        return JsonResponse({'error': 'Invalid data format.'}, status=400)
-
-    user.first_name = data.get('first_name', user.first_name)
-    user.last_name = data.get('last_name', user.last_name)
-    user.about_me = data.get('about_me', user.about_me)
-
-    profile_picture = request.FILES.get('profile_picture')
-    if profile_picture:
-        valid_extensions = ['png', 'webp', 'gif', 'jpg', 'jpeg']
-        extension = profile_picture.name.split('.')[-1].lower()
-        if extension not in valid_extensions:
-            return JsonResponse({'error': f'Unsupported file extension. Allowed extensions are: {", ".join(valid_extensions)}'}, status=400)
-        user.profile_picture = profile_picture
-
-    try:
-        user.save()
+        user.save()  # Save only after checking all fields
+        return JsonResponse({'message': 'User updated successfully.'}, status=200)
     except Exception as e:
-        return JsonResponse({'error': 'Failed to update profile.'}, status=500)
+        return JsonResponse({'error': f'Failed to update user. Reason: {e}'}, status=500)
 
-    return JsonResponse({'message': 'Profile updated successfully!'})
-
-
-
-@csrf_exempt
-def FriendChat(request):
-    if request.user.is_authenticated:
-        currentChats = currentChat.objects.filter(members=request.user)
-        chat_data = []
-        for chat in currentChats:
-            for member in chat.members.exclude(id=request.user.id):
-                chat_data.append({
-                    'username': member.username,
-                    'email': member.email,
-                    'profile_picture': member.profile_picture.url,
-                    'unique_id': chat.unique_id,
-                    'targetUserUUID': member.userSocialCode
-                })
-        return JsonResponse({'chats': chat_data})
-    else:
-        return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-
-@csrf_exempt
 def block_list(request):
     if request.user.is_authenticated:
         user: MyUser = request.user
         return JsonResponse(user.getBlockedUsers(), status=200)
     else:
         return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-@csrf_exempt
+    
 def block_user(request, socialCode):
-    if request.user.is_authenticated:
+    """View to block a user."""
+    if request.method == "POST":
         user: MyUser = request.user
-        try:
-            friend = MyUser.objects.get(userSocialCode=socialCode)
-            user.blockUser(friend)
-            return Response({'message': 'User blocked'}, status=200)
-        except MyUser.DoesNotExist:
-            return Response({'error': 'User not found'}, status=404)
-    else:
-        return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+        targetUser = MyUser.objects.get(userSocialCode=socialCode)
+        user.blockUser(targetUser)
+        return JsonResponse({'status': 'success', 'message': f'User {targetUser.username} blocked successfully.'})
 
-@csrf_exempt
-def remove(request, socialCode):
-    if request.user.is_authenticated:
+def remove(request, user_id):
+    if request.method == "POST":
         user: MyUser = request.user
-        try:
-            friend = MyUser.objects.get(userSocialCode=socialCode)
-            user.removeFriend(friend)
-            return Response({'message': 'Friend removed'}, status=200)
-        except MyUser.DoesNotExist:
-            return Response({'error': 'User not found'}, status=404)
-    else:
-        return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-
-
-
-
-
-
-
-
-
-
-# NOTIFICATIONS
-@csrf_exempt
-def get_notifications(request):
-    if request.user.is_authenticated:
-        notifications = Notification.objects.filter(user=request.user, is_read=False)
-        notifications_data = [{'message': notification.message} for notification in notifications]
-        return JsonResponse({'notifications': notifications_data})
-    else:
-        return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# FRIEND REQUEST HANDLING
-# UTILS
-
-def accept_friend_request(request, friend_request):
-    friend_request.status = 'accepted'
-    friend_request.save()
-    request.user.friendlist.add(friend_request.from_user)
-    friend_request.from_user.friendlist.add(request.user)
-    request.user.save()
-    friend_request.from_user.save()
-
-    conversation = currentChat.objects.create()
-    conversation.members.add(request.user, friend_request.from_user)
-    conversation.save()
-
-
-    print(f"Friend request accepted: {friend_request.id}")
-    return JsonResponse({'message': 'Friend request accepted'})
-
-def reject_friend_request(friend_request):
-    friend_request.status = 'rejected'
-    friend_request.save()
-    print(f"Friend request rejected: {friend_request.id}")
-    return JsonResponse({'message': 'Friend request rejected'})
-
-
-def handle_friend_request(request):
-    TargetUserCode = json.loads(request.body)['user_code']
-    if TargetUserCode == request.user.userSocialCode:
-        return JsonResponse({'error': 'You cannot send a friend request to yourself'}, status=400)
-    try:
-        target_user = MyUser.objects.get(userSocialCode=TargetUserCode)
-    except MyUser.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)
-    from_user = request.user
-    if FriendRequest.objects.filter(from_user=from_user, to_user=target_user, status='pending').exists():
-        return JsonResponse({'error': 'Friend request already sent'}, status=400)
-    friend_request = FriendRequest.objects.create(from_user=from_user, to_user=target_user)
-    notification = Notification.objects.create(user=target_user, message=f"{from_user.username} sent you a friend request.")
-
-    friend_request.save()
-    notification.save()
-
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        f"user_{target_user.userSocialCode}",
-        {
-            'type': 'Notification',
-            'notifications': f'{notification.message}'
-        }
-    )
-    return JsonResponse({'message': 'Friend request sent successfully!'})
-
-
-
-
-
-# GETTER
-def get_request(request):
-    if request.user.is_authenticated:
-        pending_requests = FriendRequest.objects.filter(to_user=request.user, status='pending')
-        requests_data = [{
-            'request_id': fr.id,
-            'from_user': fr.from_user.username,
-            'from_user_id': fr.from_user.id,
-            'from_user_profile_picture': fr.from_user.profile_picture.url
-        } for fr in pending_requests]
-        
-        print(requests_data)
-        return JsonResponse({'friend_requests': requests_data})
-    else:
-        return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-# MANAGE
-def manage_request(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
-    data = json.loads(request.body)
-    friend_request_id = data.get('friend_request_id')
-    action = data.get('action')
-    try:
-        friend_request = FriendRequest.objects.get(id=friend_request_id, to_user=request.user)
-    except FriendRequest.DoesNotExist:
-        return JsonResponse({'error': 'Friend request not found'}, status=404)
-    if action == 'accept':
-        return accept_friend_request(request, friend_request)
-    elif action == 'reject':
-        return reject_friend_request(friend_request)
-    return JsonResponse({'error': 'Invalid action'}, status=400)
-
-# SEND
-
-
-def send_request(request):
-    if request.method == 'POST':
-        return handle_friend_request(request)
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-
-
-# FRIEND REQUEST HANDLING
+        friend_to_remove = MyUser.objects.get(id=user_id)
+        user.removeFriend(friend_to_remove)
+        return JsonResponse({'status': 'success', 'message': f'Friend {friend_to_remove.username} removed successfully.'})

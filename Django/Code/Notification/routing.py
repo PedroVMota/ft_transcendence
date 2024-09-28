@@ -1,9 +1,9 @@
 # Sockets/routing.py
-from django.urls import path, re_path
+from django.urls import re_path
 from . import consumers
 
 websocket_urlpatterns = [
-    re_path('ws/notifications/', consumers.NotificationsConsumer.as_asgi()),
+    re_path(r'ws/notifications/', consumers.NotificationsConsumer.as_asgi()),
 ]
 
 

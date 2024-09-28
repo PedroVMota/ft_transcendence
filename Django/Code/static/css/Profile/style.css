@@ -1,83 +1,258 @@
-/* position: relative;
-z-index: 1;
-background: rgba(255, 255, 255, 0.1);
-padding: 2rem;
-border-radius: 10px;
-box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-backdrop-filter: blur(10px);
--webkit-backdrop-filter: blur(10px);
-border: solid 1px #5d9ed68f;
-box-shadow: 0px 10px 20px 4px rgba(0, 0, 0, 0.308);
-width: 500px;
-height: auto;
-max-width: 90%;
-opacity: 1;
-transition: opacity 0.5s ease, transform 0.5s ease; */
-
-
-
-.card {
-    position: relative !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-radius: 10px !important;
+ .acrylicStyle {
+    background: rgba(205, 205, 205, 0.1) !important;
     backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
     border: solid 1px #5d9ed68f !important;
-    width: 100% !important;
-    box-shadow: 0px 10px 20px 4px rgba(0, 0, 0, 0.308);
-    color: white !important;
+    color: rgb(230, 230, 230) !important;
 }
 
-.card-header {
-    border-bottom: 1px solid #5a80a08b !important;
-}
-.form-label {
-    color: #a8ccebc8 !important;
-}
-
-.form-control {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid #5d9ed68f !important;
-    color: white !important;
+.acrylicStyle-button {
+    background: rgba(205, 205, 205, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    border: solid 1px #5d9ed68f !important;
+    color: rgb(230, 230, 230) !important;
 }
 
-/* Specific styling for file input text and button */
-.form-control[type="file"] {
-    color: white !important; /* Ensures the file input text is white */
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid #5d9ed68f !important;
-    overflow: hidden; /* Prevents overflow issues */
-    padding: 0.25rem; /* Adjust padding for consistency */
+
+.acrylicStyle-modal {
+    background: rgba(205, 205, 205, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    border: solid 1px #5d9ed68f !important;
+    color: rgb(230, 230, 230) !important;
 }
 
-/* Style the file input button for WebKit browsers */
-.form-control[type="file"]::-webkit-file-upload-button {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid #5d9ed68f;
+.acrylicStyle-header{
+    background: rgba(205, 205, 205, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    border: solid 1px #5d9ed68f !important;
+    color: rgb(230, 230, 230) !important;
+}
+
+.acrylicStyle-header button{
+    color: rgb(230, 230, 230) !important;
+}
+
+.text-success-ligher {
+    color: #14fa4a !important;
+}
+
+.text-danger-ligher {
+    color: #ff4d4d !important;
+}
+
+/* On hover, the up element moves up from bottom to top */
+.acrylicStyle-button:hover .move-up {
+    margin-left: 0.5rem;
+    height: 100%;
+    color : white !important;
+}
+
+/* On hover, the down element moves down from top to bottom */
+.acrylicStyle-button:hover .move-down {
+    margin-left: 0.5rem;
+    height: 100%;
+    color : white !important;
+}
+
+/* Move-down element (moves from top to bottom) */
+.move-down {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-left: 0.25rem;
+    height: 0%;
+    width: 100%;
+    background-color: rgba(161, 75, 240, 1);
+    transition: all 0.3s ease;
+    z-index: -1;
+}
+
+/* Move-up element (moves from bottom to top) */
+.move-up {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-left: 0.25rem;
+    height: 0%;
+    width: 100%;
+    background-color: rgba(131, 78, 181, 1);
+    transition: all 0.3s ease;
+    z-index: -1;
+}
+
+/* Button hover effect */
+
+.bg-centered-fixed {
+    background-size: cover !important;  /* Ensures the image fills the container while maintaining its aspect ratio */
+    background-position: center !important;  /* Centers the image */
+    background-repeat: no-repeat !important;
+}
+
+/* Media queries for responsiveness */
+@media screen and (max-width: 768px) {
+    .banner-cover {
+        height: 300px;  /* Adjust height for smaller screens */
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .banner-cover {
+        height: 200px;  /* Further adjust height for very small screens */
+    }
+}
+
+
+.pic-filter-theme{
+    filter: brightness(0.8) saturate(1.5) contrast(0.8);
+}
+
+
+
+
+
+/* Base styles for form and input */
+form {
+    margin: 0 auto;
+}
+
+.floating-label-group {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.floating-label-group input {
+    width: 100%;
+    padding: 1rem 0.75rem;
+    background: rgba(205, 205, 205, 0.1);
+    border: 2px solid #5d9ed68f !important;
+    color: #fff;
+    font-size: 1rem;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+    outline: none;
     color: white;
-    padding: 0.5rem 1rem; /* Add some padding for a nicer look */
-    border-radius: 5px; /* Make the button's corners rounded */
-    cursor: pointer; /* Change the cursor to pointer on hover */
 }
 
-/* Style the file input button for Firefox */
-.form-control[type="file"]::file-selector-button {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid #5d9ed68f;
+.floating-label-group input:focus {
+    outline: none;
+    box-shadow: none; /* Remove Bootstrap's box-shadow */
+    border-color: #5d9ed6; /* Keep the border color consistent */
     color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
+    /* background: rgba(255, 255, 255, 0.1); */
+}
+
+.floating-label-group label {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    font-size: 1rem;
+    color: #999;
+    padding: 0 0.25rem;
+    
+    pointer-events: none;
+    transition: all 0.3s ease;
+    transform: translateY(-50%); /* Initially center vertically */
+}
+
+.floating-label-group input:focus ~ label,
+.floating-label-group input:not(:placeholder-shown) ~ label {
+    top: -0.50rem; /* Moves to the top */
+    font-size: 0.75rem;
+    color: #e6e6e6;
+    padding: 0 0.5rem;
+    transform: none;
+}
+
+.floating-label-group input:focus ~ label {
+    color: #5d9ed6;
+}
+
+/* Hide placeholder text */
+.floating-label-group input::placeholder {
+    color: transparent;
+}
+
+.file-input {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.file-input input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
     cursor: pointer;
 }
 
-/* Hover effect for the file input button */
-.form-control[type="file"]::-webkit-file-upload-button:hover,
-.form-control[type="file"]::file-selector-button:hover {
-    background: rgba(255, 255, 255, 0.2); /* Slightly brighter on hover */
+/* Custom styling for the file input container */
+.file-input-label {
+    display: block;
+    background: transparent;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 2px solid #5d9ed68f !important;
+    color: rgb(230, 230, 230);
+    padding: 10px 20px;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.file-input-label:hover {
+    background: rgba(132, 0, 255, 0.2);
+}
+
+/* Customize icon or text inside the label */
+.file-input-label span {
+    pointer-events: none;
+}
+
+.file-input-label i {
+    margin-right: 8px;
 }
 
 
-.img-thumbnail {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid #5d9ed68f !important;
+.invert{
+    filter: invert(1);
+}
+
+
+/* Custom Table Styling */
+.table-custom {
+    background-color: transparent !important;
+    border-collapse: collapse;
+}
+
+.table-custom th,
+.table-custom td {
+    background-color: transparent !important;
+    border: none; /* Removes borders from cells */
+    color: white; /* Keeps the text color white */
+}
+
+.table-custom thead th {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Adds a subtle bottom border to header */
+}
+
+.table-custom tbody tr:hover td{
+    background-color: rgba(148, 34, 34, 0.035) !important; /* Lighten the row on hover */
+}
+.table-custom tbody tr:hover {
+    background-color: rgba(148, 34, 34, 0.035) !important; /* Lighten the row on hover */
+}
+
+
+
+@media (max-width: 768px) {
+    .rapidChart {
+        max-width: 150px;
+    }
 }

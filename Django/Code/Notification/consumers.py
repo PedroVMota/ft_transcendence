@@ -1,9 +1,8 @@
 # Sockets/consumers.py
 import json
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
-from asgiref.sync import async_to_sync, sync_to_async
 import json
-from Auth.models import Conversation, currentChat
+from Chat.models import Conversation, currentChat
 from channels.db import database_sync_to_async
 from django.utils import timezone
 
