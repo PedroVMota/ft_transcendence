@@ -1,10 +1,15 @@
-
-
-
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+.root{
+    min-height: 100vh;
+}
+
+.body{
+    min-height: 100vh;
 }
 
 body {
@@ -28,8 +33,6 @@ body {
     z-index: -1; /* Ensure the gradient is behind the content */
     pointer-events: none; /* Allows the content to be interactable while ignoring the gradient */
 }
-
-
 
 .acrylicStyle{
     background: rgba(205, 205, 205, 0.1) !important;
@@ -135,4 +138,9 @@ body {
 
 .bg-purple-neon-light {
     background-color: #bfa3f9 !important;
+}
+
+.backgroundBody{
+    position: fixed;
+    min-height: 100vh;
 }

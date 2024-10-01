@@ -20,6 +20,7 @@
     </div>
 
     <div id="root" class="px-0 relative">
+        {% include 'ProfileComp/ModelProfile.html' %}
         <div class="body acrylicStyle border-0 w-100">
             <div class="container-lg position-relative">
                 <!-- Banner Cover -->
@@ -42,10 +43,27 @@
                     </div>
 
                     <!-- Button to edit the profile -->
+                    {% if can_edit %}
                     <button class="btn acrylicStyle-button text-white" data-bs-toggle="modal"
                         data-bs-target="#editProfileModal">
                         Edit Profile
                     </button>
+                    {% elif friend_request_status == 'accepted' %}
+                    <!-- Show the "Remove Friend" button if they are friends -->
+                    <button id="removeFriendButton" class="btn acrylicStyle-button text-white">
+                        Remove Friend
+                    </button>
+                    {% elif friend_request_status == 'pending' %}
+                    <!-- Show the "Friend Request Sent" button if a friend request is pending -->
+                    <button class="btn acrylicStyle-button text-white" disabled>
+                        Friend Request Sent
+                    </button>
+                    {% else %}
+                    <!-- Show the "Add Friend" button if they are not friends or the request was rejected -->
+                    <button id="addFriendButton" class="btn acrylicStyle-button text-white">
+                        Add Friend
+                    </button>
+                    {% endif %}
                 </div>
 
                 <div class="container-lg" style="width: 90%; margin: 0 auto;">
@@ -54,138 +72,76 @@
                             <!-- Existing Completed Games Table -->
                             <div class="card bg-transparent border-0 p-3">
                                 <h5 class="mb-3 text-white">Completed Games</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-custom table-dark">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-white" scope="col">Players</th>
-                                                <th class="text-white" scope="col">Result</th>
-                                                <th class="text-white" scope="col">Accuracy</th>
-                                                <th class="text-white" scope="col">Moves</th>
-                                                <th class="text-white" scope="col">Date</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <!-- Example Game Row -->
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex flex-column">
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="text-white fw-bold">PedroMotaPT</span>
-                                                            <span class="badge">(443)</span>
-                                                            <span class="ms-2">🇵🇹</span>
-                                                        </div>
-                                                        <div class="d-flex align-items-center mt-1">
-                                                            <span class="text-white fw-bold">devarasai9</span>
-                                                            <span class="badge">(493)</span>
-                                                            <span class="ms-2">🇮🇳</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex flex-column">
-                                                        <div>0 <span class="text-danger">🔴</span></div>
-                                                        <div>1 <span class="text-success">🟢</span></div>
-                                                    </div>
-                                                </td>
-                                                <td class="text-white">65.8 - 85.1</td>
-                                                <td class="text-white">13</td>
-                                                <td class="text-white">Sep 16, 2024</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                {% include 'ProfileComp/PlayedGames.html' %}
                             </div>
-                        </div>
 
-                        <!-- Stats Column for "Rapid" -->
-                        <div class="col-lg-4">
-                            <div class="card bg-transparent border-0 p-3 text-white">
-                                <h5 class="mb-3">Stats</h5>
-                                <div class="d-flex justify-content-between">
-                                    <span>Rapid</span>
-                                    <span>443</span>
+                            <!-- Stats Column for "Rapid" -->
+                            <div class="col-lg-4">
+                                <div class="card bg-transparent border-0 p-3 text-white">
+                                    <h5 class="mb-3">Stats</h5>
+                                    <u><span><b>Matchmaking Rating:</b> <span>{{ user.MMR }}</span> </span></u>
+                                    <u><span><b>Highest: </b>{{ user.HigherRank }} {{ user.DateOfHigherRank|date:"M d" }} </span> </u>
+                                    <u><span><b>Games:</b> {{ user.TotalOfGames }}</span></u>
+                                    <u><span><b>W/L: </b>{{ user.NumberOfWins }} / {{ user.NumberOfLosses }}</span></u>
                                 </div>
-                                <p>Highest: <span class="text-success-ligher">{{ user.HigherRank }}</span> {{ user.DateOfHigherRank }} </p>    
-                                <p>Games: {{ user.TotalOfGames }}</p>
-                                <p>W/L: <span class="text-success-ligher"> {{ user.NumberOfWins }} </span> <span class="text-danger-ligher"> {{ user.NumberOfLosses }} </span> </p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+        {% if friend_request_status == 'not_friends' or friend_request_status == 'rejected' %}
+        <script type="module">
+            import { reloadWindow } from "{% static '/js/Spa/Spa.js' %}";
+            document.getElementById('addFriendButton').addEventListener('click', (e) => {
+                e.preventDefault();
+                fetch("{% url 'send_request' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_code: '{{ user.userSocialCode }}' })
+                }).then(response => {
+                    console.log(response);
+                    if (response.status == 200) {
+                        alert('Friend request sent');
+                    } else {
+                        alert('Failed to send friend request');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        </script>
+        {% elif friend_request_status == 'friends' %}
+        <script type="module">
+            // path('token/remove/<int:socialCode>/', views.remove, name='remove'),
+            import { reloadWindow } from "{% static '/js/Spa/Spa.js' %}";
+            document.getElementById('removeFriendButton').addEventListener('click', (e) => {
+                e.preventDefault();
+                fetch("{% url 'remove' user.userSocialCode %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    console.log(response);
+                    if (response.status == 200) {
+                        alert('Friend removed');
+                        reloadWindow();
+                    } else {
+                        alert('Failed to remove friend');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+            });
 
-    <!-- Modal Structure -->
-    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog ">
-            <div class="modal-content bg-dark">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
-                    <button type="button" class="btn-close btn-light invert" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" enctype="multipart/form-data" id="profileUpdateForm">
-                        {% csrf_token %}
-                        <!-- First Name Input -->
-                        <div class="floating-label-group">
-                            <input type="text" id="firstName" name="first_name" class="form-control bg-dark"
-                                placeholder=" " value="{{ user.first_name }}"/>
-                            <label class="bg-dark" for="firstName">First Name</label>
-                        </div>
 
-                        <!-- Last Name Input -->
-                        <div class="floating-label-group">
-                            <input type="text" id="lastName" name="last_name" class="form-control bg-dark"
-                                placeholder=" " value="{{ user.last_name }}"/>
-                            <label class="bg-dark" for="lastName">Last Name</label>
-                        </div>
-
-                        <!-- Profile Banner Input -->
-                        <div class="mb-3">
-                            <label for="profileBanner" class="form-label text-white">Profile Banner</label>
-                            <div class="file-input">
-                                <label class="file-input-label" for="profileBanner">
-                                    <i class="fas fa-upload"></i>
-                                    <span>Choose Profile Banner</span>
-                                </label>
-                                <input type="file" id="profileBanner" name="profile_banner">
-                            </div>
-                        </div>
-
-                        <!-- Profile Picture Input -->
-                        <div class="mb-3">
-                            <label for="profilePicture" class="form-label text-white">Profile Picture</label>
-                            <div class="file-input">
-                                <label class="file-input-label" for="profilePicture">
-                                    <i class="fas fa-upload"></i>
-                                    <span>Choose Profile Picture</span>
-                                </label>
-                                <input type="file" id="profilePicture" name="profile_picture">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn acrylicStyle-button position-relative" data-bs-dismiss="modal">
-                        <div class="move-down"></div>
-                        <div class="move-up"></div>
-                        Close
-                    </button>
-                    <button type="submit" form="profileUpdateForm" class="btn acrylicStyle-button" id="saveChanges">
-                        <div class="move-down"></div>
-                        <div class="move-up"></div>
-                        Save Changes
-                    </button>
-                </div>
-
-            </div>
-        </div>
-    </div>
+        </script>
+        {% endif %}
     </div>
 
     <div id="footer"></div>
@@ -194,40 +150,5 @@
         crossorigin="anonymous"></script>
     <script type="module" src="{% static '/js/Spa/Spa.js' %}"></script>
 </body>
-
-
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script> 
-    document.getElementById('saveChanges').addEventListener('click', (e) => {
-        e.preventDefault();
-        let form = document.getElementById('profileUpdateForm');
-        let formData = new FormData(form);
-
-        fetch("{% url 'update_user' %}", {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': form.querySelector('input[name="csrfmiddlewaretoken"]').value
-            },
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert('Profile updated successfully!');
-                } else {
-                    console.log(data.errors);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    });
-
-
-
-</script>
-
-
 
 </html>

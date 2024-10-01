@@ -34,6 +34,11 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                 'create_date': message['create_date'].strftime('%Y-%m-%d %H:%M:%S')
             }))
 
+    async def welcome(self, event):
+        await self.send(text_data=json.dumps({
+            'Code': event['userSocialCode']
+        }))
+
     async def receive(self, text_data):
         data = json.loads(text_data)
         message = data['message']

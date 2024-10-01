@@ -89,15 +89,10 @@ class MyUser(AbstractUser):
     Wallet = models.OneToOneField(UserWallet, on_delete=models.CASCADE, null=True, blank=True)
 
     friendlist = models.ManyToManyField('self', blank=True)
-    blocked_users = models.ManyToManyField('self', blank=True)  # New field for blocking users
     allChat = models.ManyToManyField(currentChat, blank=True)
 
     create_date = models.DateTimeField(auto_now_add=True)
     email = models.EmailField(blank=True, unique=False, null=True)
-
-
-
-
 
 
     #Statistics About the User
@@ -105,20 +100,19 @@ class MyUser(AbstractUser):
     NumberOfWins = models.IntegerField(default=0)
     NumberOfLosses = models.IntegerField(default=0)
 
-    HigherRank = models.IntegerField(default=1)
-    DateOfHigherRank = models.DateTimeField(auto_now_add=True)
+    MMR = models.IntegerField(default=1) # Match Making Rank
+
+
+
+
+    HigherRank = models.IntegerField(default=1) # The Highest Rank the user has ever reached
+    DateOfHigherRank = models.DateTimeField(auto_now_add=True) # The Date the user reached the highest rank
+
     # AllPlayedGames = 
-
-
-
-
-
     def __add__user__(self, friend: 'MyUser'):
         """Add a user to the friend list."""
         if friend in self.friendlist.all():
             raise ValueError("User is already a friend")
-        if friend in self.blocked_users.all():
-            raise ValueError("User is blocked")
         if friend == self:
             raise ValueError("User cannot add themselves as a friend")
         self.friendlist.add(friend)
@@ -131,34 +125,30 @@ class MyUser(AbstractUser):
     def removeFriend(self, user: 'MyUser'):
         if user not in self.friendlist.all():
             pass
-        elif user in self.blocked_users.all():
-            pass
         else:
             self.friendlist.remove(user)
+            chats: currentChat = currentChat.objects.filter(members=user).filter(members=self)
+            for chat in chats:
+                chat.delete()
             self.save()
         self.allChat.filter(members=user).delete()
-        
-    def blockUser(self, user: 'MyUser'):
-        if user in self.friendlist.all():
-            self.friendlist.remove(user)
-        self.blocked_users.add(user)
-        self.allChat.filter(members=user).delete()
-        self.save()
+    
+    def isFriend(self, user: 'MyUser'):
+        for friend in self.friendlist.all():
+            if friend == user:
+                return True
+        return False
 
 
-    class Getters:
-        def getChatData(self):
-            return [chat.getDict() for chat in self.allChat.all()]
+    def getChatData(self):
+        return [chat.getDict() for chat in self.allChat.all()]
 
-        def getBlockedUsers(self):
-            return [user.username for user in self.blocked_users.all()]
+    def getFriendList(self):
+        return [friend.username for friend in self.friendlist.all()]
 
-        def getFriendList(self):
-            return [friend.username for friend in self.friendlist.all()]
-
-        def allChats(self):
-            return [chat.unique_id for chat in self.allChat.all()]
-        
+    def allChats(self):
+        return [chat.unique_id for chat in self.allChat.all()]
+    
 
     def getDict(self):
         return {
@@ -166,14 +156,10 @@ class MyUser(AbstractUser):
                 'first_name': self.first_name,
                 'last_name': self.last_name,
                 'userCode': self.userSocialCode,
-
                 "profile_picture": self.profile_picture.url,
                 "profile_banner": self.profile_banner.url,
             },
-            "Wallet": {
-                'balance': self.Wallet.getBalance(),
-            },
-            "Chats": self.Getters().getChatData(),
+            "Chats": self.getChatData(),
         }
     
     def save(self, *args, **kwargs):
@@ -183,14 +169,3 @@ class MyUser(AbstractUser):
     
     def __str__(self):
         return self.username
-    
-
-class serverLogs(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
-    mehod = models.CharField(max_length=10, default='GET')
-    path = models.CharField(max_length=100, default='/')
-    status = models.BigIntegerField(default=0)
-    create_date = models.DateTimeField(auto_now_add=True)
-    update_date = models.DateTimeField(auto_now=True)
-    def __str__(self):
-        return self.user.username

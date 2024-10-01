@@ -5,6 +5,8 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD: example
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - default
 
@@ -49,15 +51,15 @@ services:
     depends_on:
       - django
     
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    ports:
-      - 5050:80
-    depends_on:
-      - db
-    volumes:
-      - pgadmin:/var/lib/pgadmin
+  # pgadmin:
+  #   container_name: pgadmin
+  #   image: dpage/pgadmin4
+  #   ports:
+  #     - 5050:80
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - pgadmin:/var/lib/pgadmin
       
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin@pgadmin.org
@@ -66,6 +68,7 @@ services:
 volumes:
   static_volume:
   pgadmin:
+  postgres_data:
 
 
 

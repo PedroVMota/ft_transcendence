@@ -74,7 +74,6 @@ document.getElementById('loginForm').addEventListener('submit', function (event)
             throw new Error('Login failed');
         }
     }).then(data => {
-        console.log('Login successful:', data.message);
         Alert.ShowAlert('Login successful', 'alert alert-success alert-dismissible fade show');
         window.location.replace('/');
         // Handle successful login (e.g., redirect to a different page)

@@ -17,7 +17,7 @@ export default class Home extends AComponent {
         // this.#parentElement.innerHTML = '<span>Pending...</span>';
 
         // this._getHtml(url).then((html) => {
-        //     console.log("HTML: ", html);
+        //     ("HTML: ", html);
         //     this.#parentElement.innerHTML = html;
         // }).catch((error) => {
         //     console.error(error);

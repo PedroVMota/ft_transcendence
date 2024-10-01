@@ -30,20 +30,31 @@ def reject_friend_request(friend_request):
 
 
 def handle_friend_request(request):
-    TargetUserCode = json.loads(request.body)['user_code']
-    if TargetUserCode == request.user.userSocialCode:
-        return JsonResponse({'error': 'You cannot send a friend request to yourself'}, status=400)
-    target_user = MyUser.objects.get(userSocialCode=TargetUserCode)
-    print(" _________ ", target_user)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    data = json.loads(request.body)
+    user_code = ""
+    username = ""
+
+    if 'user_code' in data:
+        user_code = data.get('user_code')
+    else:
+        return JsonResponse({'error': 'Invalid request data'}, status=400)
+    
+    try:
+        target_user = MyUser.objects.get(userSocialCode=user_code)
+    except MyUser.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    
     from_user = request.user
-    if FriendRequest.objects.filter(from_user=from_user, to_user=target_user, status='pending').exists():
-        return JsonResponse({'error': 'Friend request already sent'}, status=400)
     friend_request = FriendRequest.objects.create(from_user=from_user, to_user=target_user)
     notification = Notification.objects.create(user=target_user, message=f"{from_user.username} sent you a friend request.")
 
     friend_request.save()
     notification.save()
-
+    # Send notification to target user
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         f"user_{target_user.userSocialCode}",
@@ -53,9 +64,6 @@ def handle_friend_request(request):
         }
     )
     return JsonResponse({'message': 'Friend request sent successfully!'})
-
-
-
 
 
 # GETTER
@@ -78,6 +86,7 @@ def manage_request(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method'}, status=405)
     data = json.loads(request.body)
+    print(json.dumps(data, indent=4))
     friend_request_id = data.get('friend_request_id')
     action = data.get('action')
     try:
@@ -95,6 +104,7 @@ def manage_request(request):
 
 def send_request(request):
     if request.method == 'POST':
+        print("Sending friend request {}".format(request.body))
         return handle_friend_request(request)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 

@@ -1,13 +1,12 @@
 {% load static %}
-
 <!-- Sticky Navbar -->
 <nav class="navbar py-4 px-4 navbar-expand-sm navbar-dark sticky-top acrylicStyle border-0">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="javascript:void(0)" id="nav-home">
-        {% if user.profile_picture %}
-        <img src="/media/{{ user.profile_picture }}" alt="Profile Picture" class="" style="width: 50px; height: 50px; border-radius: 100%; object-fit: cover;">
+        {% if request.user.profile_picture %}
+        <img src="/media/{{ request.user.profile_picture }}" alt="Profile Picture" class="" style="width: 50px; height: 50px; border-radius: 100%; object-fit: cover;">
         {% endif %}
-        <span class=" p-2 fw-bolder text-white">{{ user.first_name }} {{ user.last_name }}</span>
+        <span class=" p-2 fw-bolder text-white">{{ request.user.first_name }} {{ request.user.last_name }}</span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
       aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,10 +57,7 @@
 </nav>
 
 <style>
-
   .nav-link {
-
-
     background-color: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -91,5 +87,8 @@
       margin: 0 0.25rem !important;
     }
   }
-  
 </style>
+
+<script>
+  
+</script>

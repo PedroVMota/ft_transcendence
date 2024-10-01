@@ -16,7 +16,6 @@ class Menu extends AComponent {
 
     // Increase the number of notifications or messages
     Increase = (Target, event) => {
-        console.log("Increase: ", event);
         if (event === "notifications") {
             this.#numberofNotifications += 1;
         } else if (event === "message") {
@@ -69,71 +68,72 @@ class Menu extends AComponent {
     }
 
     #renderFriendRequests = (data) => {
-        console.log(".....", data);
         let notificationsList = document.getElementById("notificationsMenu");
         let notificationBadge = document.getElementById("notificationBadge");
-
+    
         if (data.friend_requests === undefined || data.friend_requests.length === 0) {
             notificationsList.innerHTML = `<li><span class="dropdown-item-text">No new notifications</span></li>`;
             notificationBadge.textContent = '0';
-            print("Condition 1: ", data.friend_requests);
-            print("Condition 2: ", data.friend_requests.length);
+            console.log("Condition 1: ", data.friend_requests);
+            console.log("Condition 2: ", data.friend_requests.length);
         } else {
             notificationBadge.textContent = data.friend_requests.length;
             data.friend_requests.forEach((friendRequest) => {
                 let notification = document.createElement('a');
                 notification.classList.add('dropdown-item');
-                console.log("Friend Request: ", friendRequest);
                 notification.href = '#';
                 notification.innerHTML = `
                     <div class="d-flex align-items-center" data-idrequest="${friendRequest.request_id}">
-                    <div class="py-1 px-1">
-                        <img class="rounded-circle" src="${friendRequest.from_user_profile_picture}" width="50" height="50" alt="Profile Picture">
-                    </div>
-                    <div class="flex-grow-1 px-1">
-                        <div class="font-weight-bold">${friendRequest.from_user}</div>
-                        <div class="text-muted small">sent you a friend request.</div>
-                        <div class="mt-2">
-                            <button class="btn btn-success btn-sm mr-2" id="acceptRequest_${friendRequest.request_id}">Accept</button>
-                            <button class="btn btn-danger btn-sm" id="denyRequest_${friendRequest.request_id}">Deny</button>
+                        <div class="py-1 px-1">
+                            <img class="rounded-circle" src="${friendRequest.from_user_profile_picture}" width="50" height="50" alt="Profile Picture">
+                        </div>
+                        <div class="flex-grow-1 px-1">
+                            <div class="font-weight-bold">${friendRequest.from_user}</div>
+                            <div class="text-muted small">sent you a friend request.</div>
+                            <div class="mt-2">
+                                <button class="btn btn-success btn-sm mr-2" id="acceptRequest_${friendRequest.request_id}" data-request="${friendRequest.request_id}">Accept</button>
+                                <button class="btn btn-danger btn-sm" id="denyRequest_${friendRequest.request_id}" data-request="${friendRequest.request_id}">Deny</button>
+                            </div>
                         </div>
                     </div>
-                </div>
                 `;
                 notificationsList.appendChild(notification);
+    
+                // Add event listeners to buttons
                 document.getElementById(`acceptRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
                     e.preventDefault();
-                    console.log("Accept request");
-                    Requests.post('/auth/token/friend/request/manage/', {
-                        friend_request_id: friendRequest.request_id,  // Changed to request_id
-                        action: 'accept'
-                    }, this.#defaultHeader).then((data) => {
-                        console.log(data);
-                    }).catch((error) => {
-                        console.error(error);
-                    });
+                    let requestId = e.target.getAttribute("data-request"); // Corrected data-request attribute
+                    this.#manageFriendRequest(e, requestId, "accept");
                 });
                 document.getElementById(`denyRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
                     e.preventDefault();
-                    console.log("Deny request");
-                    Requests.post('/manage_friend_request/', {
-                        friend_request_id: friendRequest.request_id,  // Changed to friendRequest.request_id
-                        action: 'deny'
-                    }, this.#defaultHeader).then((data) => {
-                        console.log(data);
-                    }).catch((error) => {
-                        console.error(error);
-                    });
+                    let requestId = e.target.getAttribute("data-request"); // Corrected data-request attribute
+                    this.#manageFriendRequest(e, requestId, "reject"); 
                 });
-
-
             });
+            this.#decoratorToggle();
         }
-
-        this.#decoratorToggle();
     }
-
-
+    
+    #manageFriendRequest = (e, id, action) => {
+        fetch('/auth/token/friend/request/manage/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken') // Assuming you have a getCookie function to retrieve CSRF tokens
+            },
+            body: JSON.stringify({
+                friend_request_id: id,
+                action: action
+            })
+        }).then((response) => {
+            return response.json();
+        }).then((data) => {
+            console.log(data);
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
 
 
 
@@ -147,7 +147,7 @@ class Menu extends AComponent {
         this.#notificationSocket = new WebSocket(`${protocol}://${window.location.host}/ws/notifications/`);
         this.#notificationSocket.onmessage = (e) => {
             let data = JSON.parse(e.data);
-            console.log("WebSocket message: ", data);
+
             if (data.notifications !== undefined) {
                 this.Increase("notifications", "notifications");
                 if (data.Message !== undefined) {
@@ -157,10 +157,10 @@ class Menu extends AComponent {
             this.#decoratorToggle();
         };
         this.#notificationSocket.onclose = (e) => {
-            console.log("WebSocket closed: ", e);
+
         };
         this.#notificationSocket.onerror = (e) => {
-            console.log("WebSocket error: ", e);
+
         };
 
     }
@@ -186,8 +186,6 @@ class Menu extends AComponent {
                 this.#numberofNotifications = 0;
                 this.#decoratorToggle();
                 Requests.get('/auth/token/friend/request/get/', this.#defaultHeader).then((data) => {
-
-                    console.warn("Friend Requests: ", data);
                     let notificationsList = document.getElementById("notificationsMenu");
                     notificationsList.innerHTML = '';
         
@@ -211,14 +209,11 @@ class Menu extends AComponent {
             'X-CSRFToken': getCookie('csrftoken')
         };
         const rep = await Requests.post('/Logout/', {}, Header);
-        console.log(rep);
         window.location.href = '/';
     }
 
     navigateTo(e, url) {
         e.preventDefault();
-        console.log("Navigate to: ", url);
-        console.log("SPA Object: ", this.#spaObject);
         this.#spaObject.setTo(url);
     }
 

@@ -20,26 +20,22 @@ class WebSocketClient extends AWebChat {
 
         // Send a ping every 2 seconds.
         setInterval(() => {
-            console.log('Sending ping to server');
             this._ws.send('ping');
         }, 2000);
     }
 
     onMessage(event) {
-        console.log('WebSocket message received:', event.data);
         this.#addMessageToChat(event.data);
     }
 
     onOpen() {
-        console.log('WebSocket connection opened');
     }
 
     onClose() {
-        console.log('WebSocket connection closed');
     }
 
     onError(error) {
-        console.error('WebSocket error:', error);
+        console.log('WebSocket Error: ' + error);
     }
 
     #addMessageToChat(data) {
@@ -54,7 +50,6 @@ class WebSocketClient extends AWebChat {
 
     bindSendButton() {
         document.getElementById('sendMenssage').addEventListener('click', () => {
-            console.log('Button clicked');
             const input = document.getElementById('inputVal');
             const message = input.value;
             if (message) {

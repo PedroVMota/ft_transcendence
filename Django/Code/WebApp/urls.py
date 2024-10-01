@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, re_path
 from . import views
 
 
@@ -7,10 +7,8 @@ urlpatterns = [
     path('Menu/', views.Menu, name='Menu'),
     path('Login/', views.login_register_view, name='Login'),
     path('Logout/', views.logout, name='Logout'),
-    # path('friendsList/', views.friends, name='friends'),
-    #  const searchQuery = `/searchUser?user_code=${encodeURIComponent(userCode)}`;
     path('searchUser/', views.searchUser, name='searchUser'),
-    path('Profile/', views.edit_profile, name='Profile'),
+    re_path(r'^Profile/(?:(?P<socialCode>\d+)/)?$', views.Profile, name='Profile'),  # Make socialCode optional
     path('Friends/', views.Friends, name='Friends'),
     path('Game/', views.Game, name='Game'),
 ] 

@@ -1,0 +1,184 @@
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                <button type="button" class="btn-close btn-light invert" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="profileUpdateForm">
+                    <!-- First Name Input -->
+                    <div class="floating-label-group">
+                        <input type="text" id="firstName" name="first_name" class="form-control bg-dark"
+                            placeholder=" " />
+                        <label class="bg-dark" for="firstName">First Name</label>
+                    </div>
+
+                    <!-- Last Name Input -->
+                    <div class="floating-label-group">
+                        <input type="text" id="lastName" name="last_name" class="form-control bg-dark"
+                            placeholder=" " />
+                        <label class="bg-dark" for="lastName">Last Name</label>
+                    </div>
+
+                    <!-- Profile Banner Input -->
+                    <div class="mb-3">
+                        <label for="profileBanner" class="form-label text-white">Profile Banner</label>
+                        <div class="file-input">
+                            <label class="file-input-label" for="profileBanner">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose Profile Banner</span>
+                            </label>
+                            <input type="file" id="profileBanner" name="profile_banner">
+                        </div>
+                    </div>
+
+                    <!-- Profile Picture Input -->
+                    <div class="mb-3">
+                        <label for="profilePicture" class="form-label text-white">Profile Picture</label>
+                        <div class="file-input">
+                            <label class="file-input-label" for="profilePicture">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose Profile Picture</span>
+                            </label>
+                            <input type="file" id="profilePicture" name="profile_picture">
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn acrylicStyle-button position-relative" data-bs-dismiss="modal">
+                            <div class="move-down"></div>
+                            <div class="move-up"></div>
+                            Close
+                        </button>
+                        <button type="submit" class="btn acrylicStyle-button" id="saveChanges">
+                            <div class="move-down"></div>
+                            <div class="move-up"></div>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<!-- Modal for Profile Edit -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                <button type="button" class="btn-close btn-light invert" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="profileUpdateForm">
+                    {% csrf_token %}
+                    <!-- First Name Input -->
+                    <div class="floating-label-group">
+                        <input type="text" id="firstName" name="first_name" class="form-control bg-dark"
+                            placeholder=" " />
+                        <label class="bg-dark" for="firstName">First Name</label>
+                    </div>
+
+                    <!-- Last Name Input -->
+                    <div class="floating-label-group">
+                        <input type="text" id="lastName" name="last_name" class="form-control bg-dark"
+                            placeholder=" " />
+                        <label class="bg-dark" for="lastName">Last Name</label>
+                    </div>
+
+                    <!-- Profile Banner Input -->
+                    <div class="mb-3">
+                        <label for="profileBanner" class="form-label text-white">Profile Banner</label>
+                        <div class="file-input">
+                            <label class="file-input-label" for="profileBanner">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose Profile Banner</span>
+                            </label>
+                            <input type="file" id="profileBanner" name="profile_banner">
+                        </div>
+                    </div>
+
+                    <!-- Profile Picture Input -->
+                    <div class="mb-3">
+                        <label for="profilePicture" class="form-label text-white">Profile Picture</label>
+                        <div class="file-input">
+                            <label class="file-input-label" for="profilePicture">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose Profile Picture</span>
+                            </label>
+                            <input type="file" id="profilePicture" name="profile_picture">
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn acrylicStyle-button position-relative" data-bs-dismiss="modal">
+                            <div class="move-down"></div>
+                            <div class="move-up"></div>
+                            Close
+                        </button>
+                        <button type="submit" class="btn acrylicStyle-button" id="saveChanges">
+                            <div class="move-down"></div>
+                            <div class="move-up"></div>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% load static %}
+<!-- JavaScript -->
+<script type="module">
+    import spa from "{% static 'js/Spa/Spa.js' %}";
+    document.addEventListener('submit', function (e) {
+        // Check if the event was triggered by the form with id 'profileUpdateForm'
+        e.preventDefault();  // Prevent the default form submission behavior
+
+        // Create a FormData object to hold form values
+        let form = e.target;
+        let formData = new FormData(form);
+
+        // Fetch API to send the form data via POST to the correct URL
+        fetch("{% url 'update_user' %}", {  // Use Django's `url` template tag to generate the correct URL
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',  // Add CSRF token for Django (ensure the CSRF token is available in the template)
+                'Accept': 'application/json',  // Expect JSON response
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();  // Parse JSON response
+            })
+            .then(data => {
+                if (data.error) {
+                    console.error('Error:', data.error);
+                } else {
+                    console.log('Submitted successfully!', data);
+                    const modalElement = document.getElementById('editProfileModal');
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if(!modal) {
+                        return;
+                    }
+                    if (!modalElement) {
+                        return;
+                    }
+                    modal.hide();
+                    spa.loadPage();
+                }
+            })
+            .catch(error => {
+                console.error('Error during fetch:', error);
+            });
+    });
+</script>

@@ -1,161 +1,156 @@
-.acrylicStyle {
-    background: rgba(205, 205, 205, 0.1) !important;
-    border-radius: 5px !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(5px) !important;
-    border: solid 1px #5d9ed68f !important;
-    color: rgb(230, 230, 230) !important;
-}
-
-.btn-acrilic {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid #5d9ed68f !important;
-    color: white !important;
-    border-radius: 5;
-}
-
-
-.form-control {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid #5d9ed68f !important;
-    color: white !important;
-    border-radius: 5;
-}
-
-.form-control::placeholder {
-    color: #a8ccebc8 !important;
-}
-
-
-
-/* Each user friend */
-.friend-item{
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between;
-}
-
-.friend-info{
+/* Overall chat container */
+.chat-container {
+    height: 80vh; /* Adjust as needed */
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    background-color: rgba(29, 73, 112, 0.172);
 }
 
-.friend-control{
-    display: flex !important;
-    justify-content: end !important;
-    align-items: center !important;
-}
-
-
-.icon-centered{
+/* Chat widget with message overflow */
+.chat-widget {
+    background-color: rgba(29, 73, 112, 0.172);
+    border-bottom: 1px solid rgba(124, 182, 233, 0.172);
+    flex-grow: 1;
+    overflow-y: auto;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column; /* Makes the latest messages appear at the bottom */
+    padding: 10px;
 }
-.icon-centered button{
-    width: 100%;
-    height: 100%;
+
+/* Sticky chat input section at the bottom */
+.chat-input-section {
+    position: sticky;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1); /* Slight transparent background */
+    padding: 10px;
 }
-/* Each user friend */
 
-
-.chat-area {
-    padding: 15px;
-    height: 50vh; /* Set a fixed height for larger screens */
-    overflow: hidden; /* Ensure the chat area does not overflow */
+/* Message bubble styles */
+.message {
     display: flex;
-    flex-direction: column; /* Stack children vertically */
-}
-
-/* .chat-messages {
-    padding: 15px;
-    border-radius: 10px;
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 15px;
-    background-color: rgba(0, 0, 0, 0.1); /* Optional: Add background for better visibility */
-    /* height: 50%; Fill the available space */
-    /* overflow-y: auto; Enable scrolling if the content overflows */
-    /* flex-grow: 1; Allow the chat-messages container to grow and fill available space */
-    /* overflow-x: none; */
-/* } */ 
-
-
-.chat-messages {
-    padding: 15px;
-    border-radius: 10px;
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 15px;
-    background-color: rgba(0, 0, 0, 0.1); /* Optional: Add background for better visibility */
-    height: 50%; /* Fill the available space */
-    overflow-y: auto; /* Enable scrolling if the content overflows */
-    flex-grow: 1; /* Allow the chat-messages container to grow and fill available space */
-    overflow-x: hidden; /* Hide any horizontal overflow */
-}
-
-.chat-message {
+    align-items: flex-start;
     margin-bottom: 10px;
-    word-wrap: break-word; /* Ensure long words or links wrap to the next line */
 }
 
-
-/* Ensure text inside the chat breaks properly */
-.chat-messages div {
-    word-wrap: break-word; /* Break long words onto the next line */
-    word-break: break-word; /* Break long words as needed */
-    white-space: normal; /* Ensure normal text wrapping */
+.message-mine {
+    justify-content: flex-end;
 }
 
-
-.input-group {
-    display: flex;      
-    flex-direction: row;  
-    width: 100%;
-    flex-shrink: 0; /* Prevent shrinking */
+.message-other {
+    justify-content: flex-start;
 }
 
-.input-group {
-    width: 100%;
+.message-content {
+    max-width: 60%;
+    padding: 10px;
+    border-radius: 8px;
+    display: inline-block;
+    font-size: 14px;
 }
 
-
-/* Media query for smartphones (screens smaller than 768px) */
-@media screen and (max-width: 768px) {
-    .chat-area {
-        height: 50vh; /* Reduce height to 50% of the viewport on small screens */
-        padding: 10px; /* Optionally reduce padding on small screens */
-    }
-
-    .chat-messages {
-        height: 40%; /* Adjust height of the chat messages to fit the reduced chat area */
-        overflow-y: auto; /* Keep scrolling enabled if the content overflows */
-    }
-
-    .input-group {
-        flex-shrink: 0;
-        margin-top: 5px; /* Add some margin to the input form */
-    }
+.message-mine .message-content {
+    background-color: rgba(85, 156, 231, 0.584); /* Your messages */
+    color: white;
+    text-align: right;
 }
 
-.selected{
-    background: rgba(89, 127, 161, 0.705) !important;
+.message-other .message-content {
+    background-color: rgba(255, 255, 255, 0.2); /* Other user messages */
+    color: white;
+    text-align: left;
 }
 
-/* Utils */
-.min-w-25 {
-    min-width: 25%; /* You can customize this value */
-}
-/* Utils */
-
-
-.mr-1{
-    margin-right: 1em !important;
+/* Chat gif placeholder */
+#Wating {
+    margin-top: 100px;
+    text-align: center;
+    display: none !important; /* Hidden by default */
 }
 
-.profile-photo{
-    object-fit: cover;
+.background-image {
+    width: 50%;
+    border-radius: 50%;
+}
+
+/* Top bar styles */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(29, 73, 112, 0.172);
+    padding: 10px;
+    border-bottom: 1px solid rgba(124, 182, 233, 0.172);
+}
+
+/* Profile image styling */
+.profile-picture {
     width: 50px;
     height: 50px;
+    border-radius: 50%;
+}
+
+/* Additional padding for the search section */
+.box {
+    width: 80%;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #71b7e622, #9c59b62c);
+}
+
+.border-modern-right {
+    border-right: 1px solid rgba(249, 249, 249, 0.15) !important;
+}
+
+.chat-friends {
+    border-radius: 5px;
+    border: 1px solid #6c52733e;
+}
+
+.info img {
+    border-radius: calc(5px / 2);
+}
+
+.active {
+    background: linear-gradient(135deg, #f1f1f12d, #9c59b600);
+}
+
+.active, .info {
+    padding-left: 1em;
+}
+
+.w-95 {
+    width: 95%;
+}
+
+.outline-none {
+    outline: none !important;
+    box-sizing: none !important;
+    border: none !important;
+}
+
+/* Input styling */
+input.form-control {
+    width: 100%;
+}
+
+.acrylicInput {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border: none !important;
+    padding: 10px !important;
+    border-radius: 5px !important;
+    width: 100% !important;
+    outline: none !important;
+    box-sizing: none !important;
+}
+
+.acrylicButton {
+    background: rgba(255, 255, 255, 0.5) !important;
+}
+
+.acrylicInput:focus {
+    background: rgba(255, 255, 255, 0.509) !important; /* Modify the background on focus */
+}
+
+/* Background color for your messages */
+.mine-bg {
+    background-color: rgba(85, 156, 231, 0.584) !important;
 }
