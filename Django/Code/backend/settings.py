@@ -12,15 +12,26 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-from datetime import timedelta
 
 # Base Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security Settings
-SECRET_KEY = "@1_zs)rtcfb+3!8x(1+i1ue5swaa-9jltt6utcuk^h=u2kxl75"
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+SECRET_KEY = os.getenv('SECRET_KEY', '')
+DEBUG = os.getenv('DEBUG', 'True').lower() in ['true', '1']
+
+
+
+print(f"List of Allowed Hosts: {os.getenv('ALLOWED_HOSTS', '').split(',')}")
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+
+
+
+
+AUTHENTICATION_BACKENDS = [
+    'Auth.backends.UserLogin',
+    'django.contrib.auth.backends.ModelBackend',  # Keep the default backend for admin access
+]
 
 # Application Definition
 INSTALLED_APPS = [
@@ -75,11 +86,11 @@ ASGI_APPLICATION = 'backend.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'example',
-        'HOST': 'db',
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME', ''),
+        'USER': os.getenv('DB_USER', ''),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', ''),
+        'PORT': os.getenv('DB_PORT', ''),
     },
 }
 
@@ -95,6 +106,7 @@ USE_TZ = True
 
 # Static and Media Files
 STATIC_URL = 'static/'
+STATIC_ROOT = 'static/'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -113,16 +125,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'None'
-CSRF_TRUSTED_ORIGINS = [
-    "https://localhost:3000",
-    "https://127.0.0.1",
-    "https://192.168.43.129",
-    "https://148.63.55.136",
-    "https://10.12.1.7:3000",
-    "https://10.12.1.8:3000",
-    "https://localhost:65535",
-    "https://10.19.246.249:65535",
-]
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
 
 # Channels Configuration
 CHANNEL_LAYERS = {

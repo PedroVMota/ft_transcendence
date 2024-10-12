@@ -1,131 +1,204 @@
-.page-container {
-    background: linear-gradient(to bottom, #000428, #004e92);
-    color: #fff;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    height: 100vh;
-    width: 100%;
-    position: relative;
-  }
-  
-  .page-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: url('https://wallpapercave.com/wp/wp3837751.jpg');
-    opacity: 0.2;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    z-index: 1;
-  }
-  
-  .page-container::after {
-    background-color: #050716;
-  }
-  
-  .login-container,
-  .register-container {
-    position: relative;
-    z-index: 1;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: solid 1px #5d9ed68f;
-    box-shadow: 0px 10px 20px 4px rgba(0, 0, 0, 0.308);
-    width: 500px;
-    height: auto;
-    max-width: 90%;
-    opacity: 1;
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-  
-  .form-control,
-  .btn {
-    border-radius: 5px;
-  }
-  
-  .form-control {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #fff;
-  }
-  
-  .form-control:focus {
-    background: rgba(255, 255, 255, 0.3);
-    color: #fff;
-  }
-  
-  .btn-primary {
-    background: rgba(255, 255, 255, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-  
-  .btn-primary:hover {
-    background: rgba(255, 255, 255, 0.5);
-  }
-  
-  .login-header,
-  .register-header {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .additional-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1rem;
-  }
-  
-  .additional-options a {
-    color: #fff;
-    text-decoration: none;
-  }
-  
-  .additional-options a:hover {
-    text-decoration: underline;
-  }
-  
-  .hidden {
-    display: none;
-  }
-  
-  .fade-in {
+/* General page layout */
+
+/* Container holding the form */
+/* Form Sections */
+.form-section {
+  color: white;
+  border-radius: 20px; /* Rounded corners */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); /* Shadow */
+  backdrop-filter: blur(10px); /* Blur effect */
+  margin: 0 auto;
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.75); /* Semi-transparent dark background */
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  display: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+.form-section.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Headings and links */
+h1 {
+  font-size: 2.5rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+p {
+  color: #b3b3b3;
+  font-size: 1rem;
+}
+
+.toggle-link {
+  color: #9878f6;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Form Controls */
+.form-control {
+  background-color: rgba(47, 37, 69, 0.9); /* Dark, semi-transparent background */
+  color: #ffffff;
+  border: 1px solid #3f3459;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  background-color: rgba(47, 37, 69, 1); /* Dark background on focus */
+  color: #ffffff;
+  border-color: #8c70f8;
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: #9e90b2;
+}
+
+/* Buttons and Checkbox */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #b3b3b3;
+}
+
+.btn {
+  background-color: #8c70f8;
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.create-account-btn {
+  background-color: #8c70f8;
+}
+
+.divider-text {
+  color: #999;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+}
+
+.bg-intra {
+  background-color: #b74bc5;
+  color: white;
+}
+
+@-webkit-keyframes slide-in-blurred-top {
+  0% {
+    -webkit-transform: translateY(-1000px) scaleY(2.5) scaleX(0.2);
+            transform: translateY(-1000px) scaleY(2.5) scaleX(0.2);
+    -webkit-transform-origin: 50% 0%;
+            transform-origin: 50% 0%;
+    -webkit-filter: blur(40px);
+            filter: blur(40px);
     opacity: 0;
-    transform: translateY(-20px);
-    animation: fadeIn 0.5s forwards;
   }
-  
-  .fade-out {
+  100% {
+    -webkit-transform: translateY(0) scaleY(1) scaleX(1);
+            transform: translateY(0) scaleY(1) scaleX(1);
+    -webkit-transform-origin: 50% 50%;
+            transform-origin: 50% 50%;
+    -webkit-filter: blur(0);
+            filter: blur(0);
     opacity: 1;
-    transform: translateY(0);
-    animation: fadeOut 0.5s forwards;
   }
-  
-  .h-full {
-    height: 100%;
+}
+@keyframes slide-in-blurred-top {
+  0% {
+    -webkit-transform: translateY(-1000px) scaleY(2.5) scaleX(0.2);
+            transform: translateY(-1000px) scaleY(2.5) scaleX(0.2);
+    -webkit-transform-origin: 50% 0%;
+            transform-origin: 50% 0%;
+    -webkit-filter: blur(40px);
+            filter: blur(40px);
+    opacity: 0;
   }
-  
-  @keyframes fadeIn {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  100% {
+    -webkit-transform: translateY(0) scaleY(1) scaleX(1);
+            transform: translateY(0) scaleY(1) scaleX(1);
+    -webkit-transform-origin: 50% 50%;
+            transform-origin: 50% 50%;
+    -webkit-filter: blur(0);
+            filter: blur(0);
+    opacity: 1;
   }
-  
-  @keyframes fadeOut {
-    to {
-      opacity: 0;
-      transform: translateY(20px);
-    }
+}
+
+@-webkit-keyframes slide-out-blurred-top {
+  0% {
+    -webkit-transform: translateY(0) scaleY(1) scaleX(1);
+            transform: translateY(0) scaleY(1) scaleX(1);
+    -webkit-transform-origin: 50% 0%;
+            transform-origin: 50% 0%;
+    -webkit-filter: blur(0);
+            filter: blur(0);
+    opacity: 1;
   }
+  100% {
+    -webkit-transform: translateY(-1000px) scaleY(2) scaleX(0.2);
+            transform: translateY(-1000px) scaleY(2) scaleX(0.2);
+    -webkit-transform-origin: 50% 0%;
+            transform-origin: 50% 0%;
+    -webkit-filter: blur(40px);
+            filter: blur(40px);
+    opacity: 0;
+  }
+}
+@keyframes slide-out-blurred-top {
+  0% {
+    -webkit-transform: translateY(0) scaleY(1) scaleX(1);
+            transform: translateY(0) scaleY(1) scaleX(1);
+    -webkit-transform-origin: 50% 0%;
+            transform-origin: 50% 0%;
+    -webkit-filter: blur(0);
+            filter: blur(0);
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: translateY(-1000px) scaleY(2) scaleX(0.2);
+            transform: translateY(-1000px) scaleY(2) scaleX(0.2);
+    -webkit-transform-origin: 50% 0%;
+            transform-origin: 50% 0%;
+    -webkit-filter: blur(40px);
+            filter: blur(40px);
+    opacity: 0;
+  }
+}
+
+
+.slide-in-blurred-top {
+	-webkit-animation: slide-in-blurred-top 1.2s cubic-bezier(0.075, 0.820, 0.165, 1.000) both;
+	        animation: slide-in-blurred-top 1.2s cubic-bezier(0.075, 0.820, 0.165, 1.000) both;
+}
+
+.slide-out-blurred-top {
+	-webkit-animation: slide-out-blurred-top 0.45s cubic-bezier(0.755, 0.050, 0.855, 0.060) both;
+	        animation: slide-out-blurred-top 0.45s cubic-bezier(0.755, 0.050, 0.855, 0.060) both;
+}

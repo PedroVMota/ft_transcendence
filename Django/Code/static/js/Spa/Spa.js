@@ -18,26 +18,24 @@ class Spa {
     };
 
     constructor() {
-        try {
-            this.#menu = new Menu('/Menu/', this);
-            if (!this.#menu) {
-                throw new Error("Menu initialization failed");
-            }
+        this.#menu = new Menu('/Menu/', this);
+        if (!this.#menu) {
+            throw new Error("Menu initialization failed");
+        }
+        else{
             this.#menu.render();
-            
-            this.#content = document.getElementById("root");
-            if (!this.#content) {
-                console.error("Root element not found");
-                return;
-            }
+        }
 
-            this.#footer = document.getElementById("footer");
-            if (!this.#footer) {
-                console.error("Footer element not found");
-                return;
-            }
-        } catch (error) {
-            console.error("Error during Spa initialization:", error);
+        this.#content = document.getElementById("root");
+        if (!this.#content) {
+            console.error("Root element not found");
+            return;
+        }
+
+        this.#footer = document.getElementById("footer");
+        if (!this.#footer) {
+            console.error("Footer element not found");
+            return;
         }
     }
 
@@ -77,7 +75,7 @@ class Spa {
                 }
                 break;
         }
-        if(this.#currentRoute) {
+        if (this.#currentRoute) {
             this.#currentRoute.render();
         }
     }

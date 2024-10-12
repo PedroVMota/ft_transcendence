@@ -9,6 +9,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - default
+    env_file:
+      - .env
 
   redis-server:
     container_name: redis-server
@@ -16,6 +18,7 @@ services:
     image: redis
     networks:
       - default
+
 
     
   django:
@@ -30,19 +33,24 @@ services:
     depends_on:
       - db
       - redis-server
+    hostname: django
     restart: always
     networks:
       - default
+    env_file:
+      - .env
+    
 
   web:
     container_name: Nginx
     build: ./Nginx
     ports:
-      # - 443:443
-      # - 80:443
+      - 443:443
+      - 80:443
       - 3000:443
       - 65535:443
     restart: always
+    hostname: Nginx
     volumes:
       - ./Django/Code/static/:/static/
       - ./Django/Code/media/:/media/
@@ -50,6 +58,8 @@ services:
       - default
     depends_on:
       - django
+    env_file:
+      - .env
     
   # pgadmin:
   #   container_name: pgadmin

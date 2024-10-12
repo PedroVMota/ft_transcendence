@@ -12,18 +12,23 @@ export default class Home extends AComponent {
     }
 
     render() {
-        // let url = this.getUrl();
-        // // Display pending message
-        // this.#parentElement.innerHTML = '<span>Pending...</span>';
-
-        // this._getHtml(url).then((html) => {
-        //     ("HTML: ", html);
-        //     this.#parentElement.innerHTML = html;
-        // }).catch((error) => {
-        //     console.error(error);
-        // });
-
-        this.#parentElement.innerHTML = '<h1>Home</h1>';
+        const url = this.getUrl()
+        if(this.#parentElement.innerHTML !== ''){
+            return ;
+        }
+        this._getHtml(url).then((html) => {
+            let doomResponse = new DOMParser().parseFromString(html, 'text/html');
+            let rootContentHtml = doomResponse.getElementById('root').innerHTML;
+            if (rootContentHtml) {
+                document.head.innerHTML = doomResponse.head.innerHTML;
+                this.#parentElement.innerHTML = rootContentHtml;
+            }
+            else {
+                null
+            }
+        }).catch((error) => {
+            console.error('Error fetching HTML:', error);
+        });
     }
 
     destroy() {

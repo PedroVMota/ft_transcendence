@@ -44,6 +44,12 @@ class Menu extends AComponent {
     #decoratorToggle() {
         let notificationBadge = document.getElementById("notificationBadge");
         let messagesBadge = document.getElementById("messagesBadge");
+
+
+        if (notificationBadge === null || messagesBadge === null) {
+            return;
+        }
+
         let displayOffClass = "d-none";
 
         if (this.#numberofNotifications > 0) {
@@ -70,6 +76,10 @@ class Menu extends AComponent {
     #renderFriendRequests = (data) => {
         let notificationsList = document.getElementById("notificationsMenu");
         let notificationBadge = document.getElementById("notificationBadge");
+
+        if(notificationBadge === undefined || notificationsList === undefined){
+            return;
+        }
     
         if (data.friend_requests === undefined || data.friend_requests.length === 0) {
             notificationsList.innerHTML = `<li><span class="dropdown-item-text">No new notifications</span></li>`;
@@ -147,7 +157,6 @@ class Menu extends AComponent {
         this.#notificationSocket = new WebSocket(`${protocol}://${window.location.host}/ws/notifications/`);
         this.#notificationSocket.onmessage = (e) => {
             let data = JSON.parse(e.data);
-
             if (data.notifications !== undefined) {
                 this.Increase("notifications", "notifications");
                 if (data.Message !== undefined) {
@@ -157,10 +166,8 @@ class Menu extends AComponent {
             this.#decoratorToggle();
         };
         this.#notificationSocket.onclose = (e) => {
-
         };
         this.#notificationSocket.onerror = (e) => {
-
         };
 
     }
@@ -174,6 +181,12 @@ class Menu extends AComponent {
             let game = document.getElementById("nav-game");
             let home = document.querySelectorAll("#nav-home");
             let notificationsDropdown = document.getElementById("notificationsDropdown");
+
+            if(profile === null || friends === null || logout === null || game === null || home === null || notificationsDropdown === null){
+                return;
+            }
+
+
 
             home.forEach((element) => {
                 element.addEventListener("click", (e) => this.navigateTo(e, "/"));

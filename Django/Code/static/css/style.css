@@ -1,146 +1,275 @@
+/* Root variables */
+:root {
+	--text-white: #e6e6e6;
+	--text-black: #1b1b1b;
+	--text-gray: #b3b3b3;
+	--text-gray-light: #d9d9d9;
+
+	--color-dark-blue: rgb(55, 70, 116);
+	--color-dark-blue-darker: rgb(38, 49, 81);
+	--color-dark-blue-brighter: rgb(71, 91, 150);
+
+	--color-bright-blue: rgb(62, 128, 236);
+	--color-bright-blue-darker: rgb(43, 89, 165);
+	--color-bright-blue-brighter: rgb(80, 166, 255);
+
+	--color-dark: rgb(23, 19, 27);
+	--color-dark-darker: rgb(16, 13, 18);
+	--color-dark-brighter: rgb(29, 24, 35);
+
+	--color-purple: rgb(119, 93, 198);
+	--color-purple-darker: rgb(83, 65, 138);
+	--color-purple-brighter: rgb(122, 101, 183);
+
+	--color-deep-blue: rgb(52, 92, 164);
+	--color-deep-blue-darker: rgb(36, 64, 114);
+	--color-deep-blue-brighter: rgb(67, 119, 213);
+
+
+	--color-dark-gray: rgb(46, 42, 56);
+	--color-dark-gray-darker: rgb(32, 29, 39);
+	--color-dark-gray-brighter: rgb(59, 54, 72);
+}
+
+
+
+
+.text-secondary {
+	color: var(--text-white) !important;
+}
+
+/* Primary color classes */
+.bg-myprimary {
+	background-color: var(--color-deep-blue-brighter) !important;
+	color: var(--text-white) !important;
+}
+
+.bg-myprimary:hover {
+	background-color: var(--color-deep-blue) !important;
+	color: var(--text-white) !important;
+}
+
+.btn-myprimary {
+	background-color: var(--color-deep-blue-brighter) !important;
+	border-color: var(--color-deep-blue-brighter) !important;
+	color: var(--text-white) !important;
+}
+
+.btn-myprimary:hover {
+	background-color: var(--color-deep-blue) !important;
+	border-color: var(--color-deep-blue) !important;
+	color: var(--text-white) !important;
+}
+
+/* General reset */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
 }
 
-.root{
-    min-height: 100vh;
+.root {
+	min-height: 100vh;
 }
 
-.body{
-    min-height: 100vh;
+.body {
+	min-height: 100vh;
 }
 
+/* Body and background */
 body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh; /* Ensure the body covers at least the viewport height */
-    position: relative;
-    overflow-x: hidden; /* Prevent horizontal scroll */
-    background: url('https://wallpapercave.com/wp/wp3837751.jpg') no-repeat center center;
-    background-size: cover;
-    background-attachment: fixed; /* Keep background fixed while scrolling */
+	margin: 0;
+	padding: 0;
+	min-height: 100vh;
+	position: relative;
+	overflow-x: hidden;
+	background: url('https://wallpapercave.com/wp/wp3837751.jpg') no-repeat center center;
+	background-size: cover;
+	background-attachment: fixed;
 }
 
 .backgroundBody {
-    position: fixed; /* Fix the gradient layer so it covers the full viewport */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%; /* Ensure it covers the full viewport */
-    background: linear-gradient(to bottom, #0004285d, #004e9260); /* The gradient effect */
-    z-index: -1; /* Ensure the gradient is behind the content */
-    pointer-events: none; /* Allows the content to be interactable while ignoring the gradient */
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(to bottom, #0004285d, #004e9260);
+	z-index: -1;
+	pointer-events: none;
 }
 
-.acrylicStyle{
+/* Acrylic style shared across pages */
+.acrylicStyle {
+	background: rgba(205, 205, 205, 0.1) !important;
+	border-radius: 5px !important;
+	backdrop-filter: blur(10px) !important;
+	-webkit-backdrop-filter: blur(5px) !important;
+	color: rgb(230, 230, 230) !important;
+}
+
+
+.acrylicStyle-photo {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
     background: rgba(205, 205, 205, 0.1) !important;
-    border-radius: 5px !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(5px) !important;
-    border: solid 1px #5d9ed68f !important;
     color: rgb(230, 230, 230) !important;
+    z-index: 2;
+    width: 75px;
+    height: 75px;
+}
+
+.acrylicStyle-button,
+.acrylicStyle-modal,
+.acrylicStyle-header {
+	background: rgba(205, 205, 205, 0.1) !important;
+	backdrop-filter: blur(10px) !important;
+	-webkit-backdrop-filter: blur(2px) !important;
+	color: rgb(230, 230, 230) !important;
+}
+
+.acrylicStyle-header button {
+	color: rgb(230, 230, 230) !important;
+}
+
+/* Text colors */
+.text-success-ligher {
+	color: #14fa4a !important;
+}
+
+.text-danger-ligher {
+	color: #ff4d4d !important;
 }
 
 /* Spinner overlay */
 .spinner-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #004e92c5; /* Semi-transparent background */
-    backdrop-filter: blur(5px); /* Semi-transparent blur */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000000; /* Ensure it's on top of everything */
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #004e92c5;
+	backdrop-filter: blur(5px);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 10000000;
 }
 
 /* Spinner */
 .spinner {
-    border: 8px solid #173142; /* Light grey */
-    border-top: 8px solid #3498db; /* Blue */
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
+	border: 8px solid #173142;
+	border-top: 8px solid #3498db;
+	border-radius: 50%;
+	width: 60px;
+	height: 60px;
+	animation: spin 1s linear infinite;
+}
+
+
+
+/* Page layout */
+#root {
+	height: 100%;
+	z-index: 2 !important;
+}
+
+#headerMenu {
+	z-index: 2 !important;
+}
+
+#footer {
+	z-index: 2 !important;
+}
+
+/* CSS Animations */
+@keyframes slideInRight {
+	0% {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slideOutRight {
+	0% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+
+	100% {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+}
+
+@keyframes slide-left {
+	0% {
+		transform: translateX(0);
+	}
+
+	100% {
+		transform: translateX(-25px);
+	}
 }
 
 /* Spin animation */
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
 }
 
-
-#root {
-    height: 100%;
-    z-index: 2 !important;
-}
-
-#headerMenu {
-    z-index: 2 !important;
-}
-
-#footer {
-    z-index: 2 !important;
-}
-
-
-
-/* CSS Animation */
-@keyframes slideInRight {
+@keyframes pulse {
     0% {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    100% {
-        transform: translateX(0);
+        transform: translate(-50%, -50%) scale(0); /* Start small */
         opacity: 1;
     }
-}
-
-@keyframes slideOutRight {
-    0% {
-        transform: translateX(0);
-        opacity: 1;
+    50% {
+        transform: translate(-50%, -50%) scale(1.5); /* Grow */
+        opacity: 0.6;
     }
     100% {
-        transform: translateX(100%);
-        opacity: 0;
+        transform: translate(-50%, -50%) scale(7); /* Full size */
+        opacity: 0; /* Fade out */
     }
 }
 
+.slide-left {
+	animation: slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) infinite alternate-reverse forwards;
+}
+
+/* Alert animation */
 .alert {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1050;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    animation: slideInRight 0.5s forwards;
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	z-index: 1050;
+	opacity: 0;
+	transition: opacity 0.5s ease-in-out;
+	animation: slideInRight 0.5s forwards;
 }
 
 .alert.hide {
-    animation: slideOutRight 0.5s forwards;
+	animation: slideOutRight 0.5s forwards;
 }
 
-
-
-
-
-
-.bg-purple-neon {
-    background-color: #a07ce4 !important;
+.text-successl{
+	color: #00ff3c !important ;
 }
 
-.bg-purple-neon-light {
-    background-color: #bfa3f9 !important;
-}
-
-.backgroundBody{
-    position: fixed;
-    min-height: 100vh;
+.text-dangerl{
+	color: #ff0000 !important ;
 }

@@ -74,12 +74,8 @@ class UserWallet(models.Model):
     def __str__(self):
         return f"{self.User.username} Wallet"
 
-
-
-
-
-
 class MyUser(AbstractUser):
+    intraCode = models.CharField(max_length=2048, null=True, blank=True)
     profile_picture = models.ImageField(upload_to=upload_to, default=DEFAULT_IMAGE)
     profile_banner = models.ImageField(upload_to=upload_to, default=DEFAULT_BANNER)
     first_name = models.CharField(max_length=255, null=True, blank=True)
@@ -101,9 +97,6 @@ class MyUser(AbstractUser):
     NumberOfLosses = models.IntegerField(default=0)
 
     MMR = models.IntegerField(default=1) # Match Making Rank
-
-
-
 
     HigherRank = models.IntegerField(default=1) # The Highest Rank the user has ever reached
     DateOfHigherRank = models.DateTimeField(auto_now_add=True) # The Date the user reached the highest rank
