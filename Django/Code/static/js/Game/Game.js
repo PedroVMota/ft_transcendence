@@ -5,7 +5,7 @@ import { getCookie, Requests } from "../Utils/Requests.js";
 import Wall from './Wall.js';
 import Paddle from './Paddle.js';
 import Ball from './Ball.js';
-
+import AIController from './AIController.js'; // Importa a classe da IA
 
 export default class Game extends AComponent {
     #parentElement = null;
@@ -16,6 +16,7 @@ export default class Game extends AComponent {
     #mouseX = 0;           // Captura a posição do mouse no eixo X
     #mouseY = 0;           // Captura a posição do mouse no eixo Y
     #cameraRotationSpeed = 0.005;  // Define a velocidade de rotação da câmera
+    #aiController = null;  // Referência à IA
     constructor(url, spaObject) {
         super(url, spaObject);
         this.#parentElement = document.getElementById("root");
@@ -48,12 +49,13 @@ export default class Game extends AComponent {
     initializeGame() {
         let scene, camera, renderer;
         let paddle1, paddle2, ball, wallTop, wallBottom;
+        const iaSpeed = 0.1; // Velocidade de movimentação da IA
         
         const init = () => {
             scene = new THREE.Scene();
             // Defina a posição e rotação da câmera para ficar inclinada atrás dos paddles
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 5, 10); // Posição mais centrada e elevada
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.set(0, 0, 10); // Posição mais centrada e elevada
             camera.lookAt(new THREE.Vector3(0, 0, 0)); // Mira no centro da cena
             
             
@@ -78,6 +80,7 @@ export default class Game extends AComponent {
             scene.add(wallBottom.mesh);
             handleCameraControls();
             
+            this.#aiController = new AIController(paddle2, ball, iaSpeed);   //instancia da AI
             animate();
         }
         const printCameraPositionAndRotation = () => {
@@ -102,6 +105,8 @@ export default class Game extends AComponent {
             ball.update();
             ball.checkCollision(paddle1);
             ball.checkCollision(paddle2);
+
+            this.#aiController.update();
     
             renderer.render(scene, camera);
         }
@@ -122,6 +127,12 @@ export default class Game extends AComponent {
                 let cameraMoved = false; // Verifica se a câmera se moveu
     
                 switch (event.key) {
+
+                    case 'q':
+                        camera.position.set(0, 0, 10);
+                        camera.lookAt(new THREE.Vector3(0, 0, 0)); // Mira no centro da cena
+                        break;
+
 
                     case 'n':
                     camera.position.x -= cameraSpeed; // Move a câmera para frente

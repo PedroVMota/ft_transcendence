@@ -39,12 +39,17 @@ export default class Ball {
             if (this.mesh.position.y - this.geometry.parameters.radius <= paddle.mesh.position.y + paddle.geometry.parameters.height / 2 &&
                 this.mesh.position.y + this.geometry.parameters.radius >= paddle.mesh.position.y - paddle.geometry.parameters.height / 2) {
                 
-                this.speed.x *= -1; // Inverte a direção no eixo X
-                this.speed.x += this.speed.x > 0 ? 0.01 : -0.01;
-                this.speed.y += this.speed.y > 0 ? 0.01 : -0.01;
+                // Apenas inverte a direção se a bola estiver realmente se movendo em direção ao paddle
+                if (this.speed.x < 0 && this.mesh.position.x < 0 || this.speed.x > 0 && this.mesh.position.x > 0) {
+                    this.speed.x *= -1; // Inverte a direção no eixo X
+                    this.speed.x += this.speed.x > 0 ? 0.01 : -0.01; // Aumenta a velocidade a cada colisão
+                    this.speed.y += this.speed.y > 0 ? 0.01 : -0.01; // Aumenta a velocidade no eixo Y também
+                }
+                
                 return true;
             }
         }
         return false;
     }
+    
 }
