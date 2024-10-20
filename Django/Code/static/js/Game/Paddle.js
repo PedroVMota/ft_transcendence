@@ -1,6 +1,4 @@
-// Dependencies
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js';
-
 
 export default class Paddle {
     constructor(positionX, color = 0x00ff00) {
