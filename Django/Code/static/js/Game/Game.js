@@ -80,7 +80,8 @@ export default class Game extends AComponent {
             scene.add(wallBottom.mesh);
             handleCameraControls();
             
-            this.#aiController = new AIController(paddle2, ball, iaSpeed);   //instancia da AI
+            this.#aiController = new AIController(paddle2, ball, paddle1, iaSpeed);   // Instancia da AI com paddle adversário
+
             animate();
         }
         const printCameraPositionAndRotation = () => {

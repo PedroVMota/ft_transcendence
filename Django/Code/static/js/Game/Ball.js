@@ -6,6 +6,7 @@ export default class Ball {
         this.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.speed = { x: 0.01, y: 0.01 };
+        this.maxSpeed = 0.05; // Limite máximo de velocidade para a bola
     }
 
     update() {
@@ -23,13 +24,18 @@ export default class Ball {
             this.mesh.position.x - this.geometry.parameters.radius <= -4.5) {
             this.reset();
         }
+
+        // Limita a velocidade da bola
+        this.speed.x = Math.min(this.maxSpeed, Math.max(-this.maxSpeed, this.speed.x));
+        this.speed.y = Math.min(this.maxSpeed, Math.max(-this.maxSpeed, this.speed.y));
     }
     
     reset() {
         // Reseta a posição da bola ao centro
         this.mesh.position.set(0, 0, 0);
-        // Define a velocidade inicial (pode ser aleatória)
-        this.speed = { x: 0.01, y: 0.01 };
+        // Define uma velocidade inicial (pode ser aleatória para tornar o jogo mais dinâmico)
+        const initialSpeed = 0.01;
+        this.speed = { x: (Math.random() < 0.5 ? -1 : 1) * initialSpeed, y: (Math.random() < 0.5 ? -1 : 1) * initialSpeed };
     }
 
     checkCollision(paddle) {
@@ -42,14 +48,19 @@ export default class Ball {
                 // Apenas inverte a direção se a bola estiver realmente se movendo em direção ao paddle
                 if (this.speed.x < 0 && this.mesh.position.x < 0 || this.speed.x > 0 && this.mesh.position.x > 0) {
                     this.speed.x *= -1; // Inverte a direção no eixo X
-                    this.speed.x += this.speed.x > 0 ? 0.01 : -0.01; // Aumenta a velocidade a cada colisão
-                    this.speed.y += this.speed.y > 0 ? 0.01 : -0.01; // Aumenta a velocidade no eixo Y também
+
+                    // Adiciona variação no ângulo com base na posição da colisão no paddle
+                    const collisionOffset = (this.mesh.position.y - paddle.mesh.position.y) / (paddle.geometry.parameters.height / 2);
+                    this.speed.y += collisionOffset * 0.02; // Variação na velocidade Y com base na colisão
+
+                    // Aumenta a velocidade levemente, mas limita ao máximo
+                    this.speed.x += this.speed.x > 0 ? 0.005 : -0.005;
+                    this.speed.y += this.speed.y > 0 ? 0.005 : -0.005;
                 }
-                
+
                 return true;
             }
         }
         return false;
     }
-    
 }
