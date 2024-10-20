@@ -78,14 +78,16 @@
 
 /* Body and background */
 body {
-	margin: 0;
-	padding: 0;
-	min-height: 100vh;
-	position: relative;
+	height: 100vh;
+	width: 100vw;
 	overflow-x: hidden;
 	background: url('https://wallpapercave.com/wp/wp3837751.jpg') no-repeat center center;
 	background-size: cover;
 	background-attachment: fixed;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
 }
 
 .backgroundBody {
@@ -94,46 +96,10 @@ body {
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background: linear-gradient(to bottom, #0004285d, #004e9260);
+	background-color: #3772c41f;
+	backdrop-filter: blur(5px);
 	z-index: -1;
 	pointer-events: none;
-}
-
-/* Acrylic style shared across pages */
-.acrylicStyle {
-	background: rgba(205, 205, 205, 0.1) !important;
-	border-radius: 5px !important;
-	backdrop-filter: blur(10px) !important;
-	-webkit-backdrop-filter: blur(5px) !important;
-	color: rgb(230, 230, 230) !important;
-}
-
-
-.acrylicStyle-photo {
-    position: relative;
-    background-size: cover;
-    background-position: center;
-    border-radius: 50%;
-    background: rgba(205, 205, 205, 0.1) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(5px) !important;
-    color: rgb(230, 230, 230) !important;
-    z-index: 2;
-    width: 75px;
-    height: 75px;
-}
-
-.acrylicStyle-button,
-.acrylicStyle-modal,
-.acrylicStyle-header {
-	background: rgba(205, 205, 205, 0.1) !important;
-	backdrop-filter: blur(10px) !important;
-	-webkit-backdrop-filter: blur(2px) !important;
-	color: rgb(230, 230, 230) !important;
-}
-
-.acrylicStyle-header button {
-	color: rgb(230, 230, 230) !important;
 }
 
 /* Text colors */
