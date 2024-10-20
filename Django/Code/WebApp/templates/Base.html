@@ -13,19 +13,24 @@
 </head>
 
 <body>
-    <div class="w-100 h-100 d-flex justify-content-center ">
-        <div class="position-relative px-4">
+    <div class="w-100 h-100 d-flex justify-content-center">
+    {% if user.is_authenticated %}    
+        <div class="position-relative px-4" style="width: 85%;">
+    {% else %}
+        <div class="position-relative px-4" style="width: 100%;">
+    {% endif %}
             <div class="backgroundBody position-absolute"></div>
             <div id="headerMenu"> 
                 {% if user.is_authenticated %}
                     {% include 'Components/Menu.html' %}
                 {% endif %}
             </div>
-            <div id="root" class="px-0 relative w-75">
+            <div id="root" class="px-0 relative w-100">
                 {% block content %}{% endblock %}
             </div>
         </div>
     </div>
+
    
 </body>
 {% if user.is_authenticated %}§
