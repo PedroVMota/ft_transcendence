@@ -1,7 +1,7 @@
 {% load static %}
 
 <!-- Sticky Navbar -->
-<nav class="navbar py-4 acrylicStyle px-4 navbar-expand-sm navbar-dark  sticky-top">
+<nav class="navbar py-4 p-0 w-full navbar-expand-sm navbar-dark  sticky-top">
   <div class="container-fluid">
     <a class="navbar-brand " href="javascript:void(0)" id="nav-home">
         PONGWORLD
@@ -14,17 +14,17 @@
       <ul class="navbar-nav w-100 d-flex flex-row justify-content-center justify-content-sm-end">
         <li class="nav-item">
           <a class="nav-link mx-sm-1" href="javascript:void(0)" id="nav-home">
-            <img src="{% static '/svg/home.svg' %}" alt="Home" class="icon" />
+            <img src="{% static '/svg/Home.svg' %}" alt="Home" class="icon" />
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link mx-sm-1" href="javascript:void(0)" id="nav-profile">
-            <img src="{% static '/svg/Set.svg' %}" alt="Profile" class="icon" />
+            <img src="{% static '/svg/Settings.svg' %}" alt="Profile" class="icon" />
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link mx-sm-1 position-relative" href="javascript:void(0)" id="nav-friends">
-            <img src="{% static '/svg/Peo.svg' %}" alt="menu" class="saturate" />
+            <img src="{% static '/svg/Chat.svg' %}" alt="menu" class="saturate" />
             <span class="badge bg-danger text-white position-absolute translate-middle" id="messagesBadge">
               3
             </span>
@@ -32,7 +32,7 @@
         </li>
         <li class="nav-item dropdown" id="notificationsDropdown">
           <a class="nav-link mx-sm-1 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="{% static '/svg/bell.svg' %}" alt="Notifications" class="icon" />
+            <img src="{% static '/svg/Bell.svg' %}" alt="Notifications" class="icon" />
             <span id="notificationBadge" class="badge bg-danger text-white position-absolute translate-middle">0</span>
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" id="notificationsMenu">
@@ -41,12 +41,12 @@
         </li>
         <li class="nav-item">
           <a class="nav-link mx-sm-1" href="javascript:void(0)" id="nav-game">
-            <img src="{% static '/svg/pong.svg' %}" alt="Game" class="icon" />
+            <img src="{% static '/svg/Game.svg' %}" alt="Game" class="icon" />
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link mx-sm-1" href="javascript:void(0)" id="nav-logout">
-            <img src="{% static '/svg/Log.svg' %}" alt="Logout" class="icon" />
+            <img src="{% static '/svg/Logout.svg' %}" alt="Logout" class="icon" />
           </a>
         </li>
       </ul>
@@ -55,17 +55,6 @@
 </nav>
 
 <style>
-
-  .nav-link {
-
-
-    background-color: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    border: solid 1px #5d9ed68f;
-  }
-
 
   @media (max-width: 576.98px) {
     .navbar-nav {
