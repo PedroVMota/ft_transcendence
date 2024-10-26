@@ -7,8 +7,8 @@ import random
 import os
 
 
-DEFAULT_IMAGE = 'Auth/defaultAssets/ProfilePicture.png'
-DEFAULT_BANNER = 'Auth/defaultAssets/ProfileBanner.png'
+DEFAULT_IMAGE = 'Auth/defaultAssets/ProfilePicture.jpg'
+DEFAULT_BANNER = 'Auth/defaultAssets/ProfileBanner.jpg'
 
 def upload_to(instance, filename):
     extension = filename.split('.')[-1]
