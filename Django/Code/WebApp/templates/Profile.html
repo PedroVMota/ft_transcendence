@@ -43,7 +43,6 @@
 </div>
 <div class="body border-0">
     <!-- Edit Profile Modal -->
-
     <div class="position-relative d-flex flex-column m-auto justify-content-center align-items-center">
         <div class="banner-cover d-flex justify-content-center align-items-center bg-centered-fixed pic-filter-theme rounded-5 z-n1"
             style="width: 100%; height: 300px; background-image: url('/media/{{ user.profile_banner }}'); background-size: cover; background-position: center;">
@@ -135,7 +134,7 @@
 
     // Prepare form data
     let formData = new FormData();
-    formData.append('first_name', document.getElementById('first_name').value);
+    formData.append('f90irst_name', document.getElementById('first_name').value);
     formData.append('last_name', document.getElementById('last_name').value);
 
     const profilePicture = document.getElementById('profile_picture').files[0];
