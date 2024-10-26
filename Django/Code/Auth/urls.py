@@ -1,13 +1,27 @@
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from django.urls import path, include
 from . import views
 
 
+
+
+
 urlpatterns = [
+    path('intra/', views.intra_auth, name='intra_auth'),
     path('token/login/', views.UserLoginAPIView.as_view(), name='login'),
     path('token/register/', views.UserRegistrationView.as_view(), name='register'),
     path('token/flush/', views.CloseSession.as_view(), name='token_flush'),
-    path('user/', views.UserDetailView.as_view(), name='user'),
-    path('', views.HomeView.as_view(), name='home'),
-]
 
+
+    # Getters of information about the authjenticated user
+    path('token/user/update/', views.update_user, name='update_user'),
+
+    # Friends Management
+    path('token/remove/<int:socialCode>/', views.remove, name='remove'),
+
+    
+    path('', include('Notification.urls')),
+    path('', include('Chat.urls')),
+    
+
+
+]

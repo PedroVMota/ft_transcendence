@@ -1,159 +1,37 @@
 import AComponent from "../Spa/AComponent.js";
-import { Requests } from "../Utils/Requests.js";
-import WebSocketClient from "./NotificationSocket.js";
-
-// Helper function to get the CSRF token
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
+import spa from "../Spa/Spa.js";
 
 export default class Friends extends AComponent {
     #parentElement = null;
     #spaObject = null;
     #socket = null;
-    #activeChatId = null;  // Track the active chat
+    #activeChatId = null;
+    #userSocialCode = null;
 
     constructor(url, spaObject) {
-        super(url, spaObject);
-        this.#parentElement = document.getElementById("root");
+        super(url, spaObject)
+        this.#parentElement = document.getElementById("root")
         this.#spaObject = spaObject;
     }
 
-    #getChat() {
-        let listGroup = document.getElementById('friends-list');
-
-        Requests.get('/get_chat_user/', {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        }).then((response) => {
-            let chats = response.chats;
-            if (chats.length > 0) {
-                listGroup.innerHTML = ''; // Clear existing content
-                chats.forEach((chat) => {
-                    let friendItem = document.createElement('a');
-                    friendItem.href = 'javascript:void(0);';
-                    friendItem.className = 'list-group-item list-group-item-action d-flex friend-item acrylicStyle';
-                    friendItem.id = chat.unique_id;
-                    friendItem.dataset.id = chat.unique_id;
-                    friendItem.innerHTML = `
-                        <div class="position-relative">
-                            <img src="${chat.profile_picture}" alt="${chat.username}">
-                            <span class="friend-status status-online position-absolute"></span>
-                        </div>
-                        <div class="friend-info">
-                            <div>${chat.username}</div>
-                        </div>
-                    `;
-                    listGroup.appendChild(friendItem);
-
-                    // Check if the chat is already active, don't reconnect if so
-                    friendItem.addEventListener('click', () => {
-                        if (this.#activeChatId !== chat.unique_id) {
-                            this.#connectToChat(chat.unique_id);
-                        } else {
-                            console.log('Chat is already active.');
-                        }
-                    });
-                });
-            } else {
-                listGroup.innerHTML = '<p>No chats available.</p>';
-            }
-        }).catch((error) => {
-            console.error('Error fetching chat data:', error);
-            listGroup.innerHTML = '<p>Error fetching chat data.</p>';
-        });
-    }
-
-    #connectToChat(chatId) {
-        // If the chat is already active, don't reconnect
-        if (this.#activeChatId === chatId) {
-            console.log('Chat is already active, not reconnecting.');
-            return;
-        }
-
-        // Close the previous socket if there was one
-        if (this.#socket) {
-            this.#socket.close();
-        }
-
-        // Create a new WebSocket connection
-        this.#socket = new WebSocket(`wss://${window.location.host}/ws/privchat/${chatId}/`);
-
-        // Mark the chat as active
-        this.#activeChatId = chatId;
-
-        // Open WebSocket connection
-        this.#socket.onopen = () => {
-            console.log('WebSocket connection established');
-            document.getElementById('target_chat').dataset.uuid = chatId;
-        };
-
-        // Handle incoming messages (both previous and new ones)
-        this.#socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            this.#displayMessage(data.message, data.user, data.create_date);
-        };
-
-        // Handle WebSocket close event
-        this.#socket.onclose = (event) => {
-            console.log('WebSocket connection closed', event);
-            // If the connection is closed, reset the active chat ID
-            this.#activeChatId = null;
-        };
-
-        // Handle WebSocket errors
-        this.#socket.onerror = (error) => {
-            console.error('WebSocket error', error);
-        };
-
-        // Send a message when the form is submitted
-        const sendMessageForm = document.getElementById('sendMenssage');
-        sendMessageForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const inputVal = document.getElementById('inputVal').value;
-            if (inputVal) {
-                this.#socket.send(JSON.stringify({
-                    'message': inputVal
-                }));
-                document.getElementById('inputVal').value = '';
-            }
-        });
-    }
-
-    #displayMessage(message, user, createDate) {
-        const chatMessages = document.getElementById('target_chat');
-        const messageElement = document.createElement('div');
-        messageElement.className = 'message';
-        messageElement.innerHTML = `<strong>${user} (${createDate}):</strong> ${message}`;
-        chatMessages.appendChild(messageElement);
-        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the latest message
-    }
-
     render() {
-        const url = this.getUrl();
-        this.#parentElement.innerHTML = '<span>Loading...</span>';
-
+        const url = this.getUrl()
+        if(this.#parentElement.innerHTML !== ''){
+            this.#initializeEventListeners();
+            this.#visualizeProfile();
+            return ;
+        }
         this._getHtml(url).then((html) => {
-            const documentResponse = new DOMParser().parseFromString(html, 'text/html');
-            const rootContentHtml = documentResponse.getElementById('root').innerHTML;
+            let doomResponse = new DOMParser().parseFromString(html, 'text/html');
+            let rootContentHtml = doomResponse.getElementById('root').innerHTML;
             if (rootContentHtml) {
-                document.head.innerHTML = documentResponse.head.innerHTML;
+                document.head.innerHTML = doomResponse.head.innerHTML;
                 this.#parentElement.innerHTML = rootContentHtml;
-
-                // Initialize search user events
-                this.#initializeSearchEvents();
-                this.#getChat();
+                this.#initializeEventListeners();
+                this.#visualizeProfile();
+            }
+            else {
+                null
             }
         }).catch((error) => {
             console.error('Error fetching HTML:', error);
@@ -161,94 +39,263 @@ export default class Friends extends AComponent {
     }
 
     destroy() {
-        this.#parentElement.innerHTML = '';
+        this.#parentElement.innerHTML = ''
+        if (this.#socket) this.#socket.close();
     }
 
-    #initializeSearchEvents() {
-        const searchInput = document.querySelector('.form-control[placeholder="Search or add a friend..."]');
-        const searchResultsList = document.getElementById('search-results-list');
+    #initializeEventListeners() {
+        const chatItems = document.querySelectorAll('#toggle_Chat');
+        chatItems.forEach(item => {
+            item.addEventListener('click', () => this.#handleChatItemClick(item));
+        });
+        const inputField = document.querySelector('.chat-input-section input');
+        inputField.addEventListener('keypress', (event) => this.#handleMessageSend(event));
 
-        if (searchInput) {
-            searchInput.addEventListener('input', () => this.#handleSearchInput(searchInput, searchResultsList));
-        } else {
-            console.error('Search input not found');
-        }
+        // Initialize search event listener
+        this.#initializeSearch();
     }
 
-    #handleSearchInput(searchInput, searchResultsList) {
-        const userCode = searchInput.value.trim();
-        if (userCode === "") {
+    #handleChatItemClick(item) {
+        const conversationId = item.getAttribute('data-conversationId')
+        const userFirstLast = item.querySelector('.text-white').innerText
+        const userCode = item.getAttribute('data-usercode')
+        let doom = new DOMParser().parseFromString(item.outerHTML, 'text/html');
+        let profile_picture = doom.getElementById('target_profile').getAttribute('src');
+
+        let user_profile_picture = document.getElementById('user_profile_picture');
+        let user_first_last = document.getElementById('user_first_last');
+        let user_code = document.getElementById('user_code');
+
+        if (this.#activeChatId === conversationId) {
             return;
         }
-        searchResultsList.innerHTML = '';
-        const searchQuery = `/searchUser?user_code=${encodeURIComponent(userCode)}`;
-        fetch(searchQuery, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        })
-        .then(response => response.json())
-        .then(data => this.#renderSearchResults(data, searchResultsList, searchInput))
-        .catch(error => {
-            console.error('Error during search:', error);
-            alert('An error occurred while searching. Please try again.');
-        });
+        this.#activeChatId = conversationId;
+        console.log(item);
+        this.#markChatAsActive(item);
+        if (user_profile_picture) {
+            user_profile_picture.setAttribute('src', profile_picture);
+        }
+        if (user_first_last) {
+            user_first_last.innerText = userFirstLast;
+        }
+        if (user_code) {
+            user_code.innerText = userCode;
+        }
+        doom.close();
+        this.#showChatComponents();
+        this.#clearChat();
+        this.#connectWebSocket(conversationId);
     }
 
-    #renderSearchResults(data, searchResultsList, searchInput) {
-        if (data.friends && data.friends.length > 0) {
-            data.friends.forEach(friend => {
-                const friendItem = this.#createFriendItem(friend);
-                searchResultsList.appendChild(friendItem);
+    #markChatAsActive(item) {
+        const chatItems = document.querySelectorAll('#toggle_Chat');
+        chatItems.forEach(i => i.classList.remove('active'))
+        item.classList.add('active');
+    }
 
-                friendItem.querySelector('.add-friend-btn').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.#sendFriendRequest(searchInput.value.trim());
-                });
-            });
-        } else if (data.error) {
-            const errorItem = document.createElement('div');
-            errorItem.className = 'text-danger';
-            errorItem.textContent = data.error;
-            searchResultsList.appendChild(errorItem);
+    #clearChat() {
+    
+        const chatWidget = document.querySelector('.chat-widget');
+        if(!chatWidget) return;
+        chatWidget.innerHTML = '';
+    }
+
+    #connectWebSocket(conversationId) {
+        let protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        let url = `${protocol}://${window.location.host}/ws/privchat/${conversationId}/`;
+
+        
+        if (this.#socket) this.#socket.close();
+
+        this.#socket = new WebSocket(url);
+
+        this.#socket.onmessage = (event) => this.#handleSocketMessage(event);
+        this.#socket.onerror = (e) => this.#handleSocketError(e);
+        this.#socket.onopen = (e) => this.#handleSocketOpen(e);
+    }
+
+    #handleSocketOpen(e) {
+    }
+
+    #handleSocketError(e) {
+        console.error("WebSocket error:", e);
+    }
+
+    #handleSocketMessage(event) {
+        const data = JSON.parse(event.data);
+        const chatWidget = document.querySelector('.chat-widget');
+        if(!chatWidget) return;
+
+        if (data.type === 'user_data') {
+            this.#userSocialCode = data.userSocialCode;
+            return;
+        }
+
+        const messageElement = this.#createMessageElement(data);
+        chatWidget.appendChild(messageElement);
+
+        this.#scrollToBottom(chatWidget);
+    }
+
+    #scrollToBottom(chatWidget) {
+        chatWidget.scrollTop = chatWidget.scrollHeight;
+    }
+
+    #createMessageElement(data) {
+        const messageClass = data.userSocialCode === this.#userSocialCode ? 'message-mine' : 'message-other';
+        const alignmentClass = data.userSocialCode === this.#userSocialCode ? 'text-end' : 'text-start';
+        const messageColorClass = data.userSocialCode === this.#userSocialCode ? 'mine-bg text-white' : 'bg-secondary text-white';
+
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', messageClass, 'd-flex', 'mb-3');
+        messageElement.innerHTML = `
+            <div class="message-content bg-transparent p-1 border-1 ${alignmentClass}">
+                <span class="text-white fs-6">${data.userSocialCode === this.#userSocialCode ? 'You' : data.user}</span>
+                <div class="message-text ${messageColorClass} p-2 rounded">
+                    ${data.message}
+                </div>
+            </div>
+        `;
+        return messageElement;
+    }
+
+    #showChatComponents() {
+        const waitingDiv = document.getElementById('Wating');
+        const chatTop = document.getElementById('chat_top');
+        const chatBody = document.getElementById('chat_body');
+        const chatInput = document.getElementById('chat_input');
+
+        if(!waitingDiv || !chatTop || !chatBody || !chatInput) return;
+
+
+        waitingDiv.style.cssText = 'display: none !important';
+        chatTop.style.cssText = 'display: flex !important';   
+        chatBody.style.cssText = 'display: flex !important';  
+        chatInput.style.cssText = 'display: block !important';
+    }
+
+    #handleMessageSend(event) {
+        const inputField = event.target;
+
+
+        if (event.key === 'Enter' && this.#socket && this.#socket.readyState === WebSocket.OPEN) {
+            const message = inputField.value.trim();
+            if (message) {
+                this.#socket.send(JSON.stringify({
+                    'message': message
+                }));
+
+                inputField.value = '';
+
+                const chatWidget = document.querySelector('.chat-widget');
+                this.#scrollToBottom(chatWidget);
+            }
         }
     }
 
-    #createFriendItem(friend) {
-        const friendItem = document.createElement('a');
-        friendItem.href = '#';
-        friendItem.className = 'list-group-item list-group-item-action d-flex friend-item acrylicStyle';
-        friendItem.innerHTML = `
-            <div class="position-relative">
-                <img src="${friend.profile_picture}" alt="${friend.username}">
-                <span class="friend-status status-online position-absolute"></span>
-            </div>
-            <div class="friend-info">
-                <div>${friend.username}</div>
-                <div class="text-muted small">${friend.email}</div>
-            </div>
-            <button class="btn btn-primary add-friend-btn" data-username="${friend.username}">Add Friend</button>
-        `;
-        return friendItem;
+    // New methods for handling search functionality
+
+    #initializeSearch() {
+        const form = document.querySelector('.search-bar form');
+        const searchResults = document.getElementById('search-results');
+
+        if (!form || !searchResults) return;
+
+        if (form) {
+            form.addEventListener('submit', (e) => this.#handleSearchSubmit(e, form, searchResults));
+        }
     }
 
-    #sendFriendRequest(userCode) {
-        fetch('/send_friend_request/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({ user_code: userCode })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-        })
-        .catch(error => {
-            console.error('Error sending friend request:', error);
+    #handleSearchSubmit(e, form, searchResults) {
+        e.preventDefault();
+        if (!searchResults) return;
+        const searchField = form.querySelector('#searchField');
+        if(!searchField) return;
+        const searchValue = searchField.value.trim();
+        const isInt = /^\d+$/.test(searchValue);
+        let data = {};
+
+        // Prepare data depending on whether it's a username or user_code search
+        if (isInt) {
+            data = { user_code: searchValue };
+        } else {
+            data = { username: searchValue };
+        }
+
+        // Send search request
+        this.#performSearch(form, data, searchResults);
+    }
+
+    async #performSearch(form, data, searchResults) {
+        try {
+            const response = await fetch("/searchUser/", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': form.querySelector('input[name="csrfmiddlewaretoken"]').value,
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (result && result.user && result.user.Info) {
+                this.#renderSearchResults(result.user, searchResults);
+            }
+        } catch (error) {
+            console.error('Error during search:', error);
+        }
+    }
+
+    #renderSearchResults(user, searchResults) {
+        const searchResultsList = document.getElementById('search-results-list');
+        if(!searchResultsList) return;
+        if (searchResultsList) {
+
+            searchResultsList.innerHTML = '';
+            const userItem = document.createElement('a');
+            userItem.classList.add('list-group-item', 'border-0', 'list-group-item-action', 'bg-transparent', 'd-flex', 'justify-content-between', 'align-items-center');
+            userItem.href = `javascript:void(0)`;  // Use javascript:void(0) to prevent full page reload
+            userItem.setAttribute('data-profile', user.Info.userCode); // Attach user code
+            
+            userItem.innerHTML = `
+                <div class="d-flex align-items-center text-white">
+                    <img src="${user.Info.profile_picture}" style="width: 50px; height: 50px;">
+                    <div class="ms-3 text-white">
+                        <h5 class="mb-0">${user.Info.first_name} ${user.Info.last_name}</h5>
+                        <small class="text-muted fs-6 text-white-50">${user.Info.userCode}</small>
+                    </div>
+                </div>
+                <span id="goto_Profile" data-profile="${user.Info.userCode}" class="btn btn-sm"><i class="fas fa-eye text-white"></i></span>
+            `;
+            searchResultsList.appendChild(userItem);
+            let goto_Profile = document.querySelectorAll("#goto_Profile");
+            for (let i = 0; i < goto_Profile.length; i++) {
+                goto_Profile[i].addEventListener('click', (e) => {
+                    e.preventDefault();
+                    let userCode = goto_Profile[i].getAttribute('data-profile');
+                    if (this.#socket !== null)
+                        this.#socket.close();
+                    spa.setTo(`/Profile/${userCode}/`);
+                });
+            }
+    
+            setTimeout(() => {
+                userItem.classList.add('show');
+            }, 10);
+        }
+    }
+
+    #visualizeProfile(){
+        let goto_Profile = document.querySelectorAll("#goto_Profile");
+
+        for (let i = 0; i < goto_Profile.length; i++) {
+            goto_Profile[i].addEventListener('click', (e) => {
+                e.preventDefault();
+                let userCode = goto_Profile[i].getAttribute('data-profile');
+                if (this.#socket !== null)
+                    this.#socket.close();
+                spa.setTo(`/Profile/${userCode}/`);
         });
+        }
     }
 }

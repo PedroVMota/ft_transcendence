@@ -5,7 +5,6 @@ class AWebChat {
     }
 
     connect() {
-        console.log('Connecting to: ', this._ws.url);   
         this._ws.onopen = this.onOpen;
         this._ws.onmessage = this.onMessage;
         this._ws.onclose = this.onClose;

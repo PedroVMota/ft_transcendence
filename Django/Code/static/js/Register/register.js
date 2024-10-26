@@ -1,4 +1,5 @@
 
+import AComponent from "../Spa/AComponent.js";
 import Alert from "../Spa/Alert.js";
 
 function getCookie(name) {
@@ -16,125 +17,71 @@ function getCookie(name) {
     return cookieValue;
 }
 
+export default class Login extends AComponent {
+    #Login = document.getElementById('loginForm');
+    #Register = document.getElementById('registerForm');
+    #root = document.getElementById('root');
+    #okeyToExcute = true;
 
-// Função para alternar entre os formulários de registro e login
-const ToggleRegisterToLogin = () => {
-    const loginContainer = document.getElementById('loginContainer');
-    const registerContainer = document.getElementById('registerContainer');
-
-    registerContainer.classList.add('fade-out');
-    setTimeout(() => {
-        registerContainer.classList.add('hidden');
-        registerContainer.classList.remove('fade-out');
-        loginContainer.classList.remove('hidden');
-        loginContainer.classList.add('fade-in');
-    }, 500);
-}
-
-const ToggleLoginToRegister = () => {
-    const loginContainer = document.getElementById('loginContainer');
-    const registerContainer = document.getElementById('registerContainer');
-
-    loginContainer.classList.add('fade-out');
-    setTimeout(() => {
-        loginContainer.classList.add('hidden');
-        loginContainer.classList.remove('fade-out');
-        registerContainer.classList.remove('hidden');
-        registerContainer.classList.add('fade-in');
-    }, 500);
-}
-
-// Função simples para mostrar alertas
-const showAlert = (message, timeout) => {
-    alert(message);
-}
-
-// Evento de submissão do formulário de login
-document.getElementById('loginForm').addEventListener('submit', function (event) {
-    event.preventDefault();
-    let loginData = {
-        "username": document.getElementById('loginUser').value,
-        "password": document.getElementById('loginPassword').value
-    };
-
-    fetch('/auth/token/login/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify(loginData),
-        credentials: 'include' // This ensures cookies (like the session cookie) are included in requests
-    }).then(response => {
-        if (response.status === 200) {
-            return response.json();
-        } else if (response.status === 400) {
-            throw new Error('Invalid username or password');
-        } else {
-            throw new Error('Login failed');
-        }
-    }).then(data => {
-        console.log('Login successful:', data.message);
-        Alert.ShowAlert('Login successful', 'alert alert-success alert-dismissible fade show');
-        window.location.replace('/');
-        // Handle successful login (e.g., redirect to a different page)
-        alert
-    }).catch(error => {
-        console.error('Error:', error.message);
-        Alert.ShowAlert(`Login failed. ${error.message}`, 'alert alert-danger alert-dismissible fade show');
-        // Handle errors (e.g., display an error message)
-    });
-});
-
-// Evento de submissão do formulário de registro
-document.getElementById('registerForm').addEventListener('submit', function (event) {
-    event.preventDefault();
-    let pass = document.getElementById('registerPassword').value;
-    let pass2 = document.getElementById('registerConfirmPassword').value;
-
-    if (pass !== pass2) {
-        showAlert("Passwords do not match", 1500);
-        return;
+    constructor(url, spaObject) {
+        super(url, spaObject);
     }
 
-    let data = {
-        "username": document.getElementById('registerUser').value,
-        "email": document.getElementById('registerEmail').value,
-        "password": pass,
-        "password2": pass2
-    };
+    destroy() {
+        if (this.#okeyToExcute)
+            this.#root.innerHTML = '';
+    }
 
-    fetch('/auth/token/register/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+    render() {
+        if (!this.#okeyToExcute)
+            return;
 
-        },
-        body: JSON.stringify(data)
-    }).then(response => {
-        if (response.status === 400 || response.status === 500) {
-            throw new Error('Registration error');
+        // Bind the event listeners to maintain context (`this`)
+        // this.#Login.addEventListener('submit', this.#login.bind(this));
+        this.#Register.addEventListener('submit', (e) => {
+            console.log('Registering');
+        });
+    }
+
+    #login(e) {
+        e.preventDefault();  // Prevent form from refreshing the page
+
+        console.log('Logging in');
+        const body = {
+            "username": document.getElementById('loginUser').value,  // Corrected input ID for login form
+            "password": document.getElementById('loginPassword').value  // Corrected input ID for login form
+        };
+
+        // Check if fields are empty
+        if (body.username === '' || body.password === '') {
+            new Alert('Error', 'All fields are required');
+            return;
         }
-        return response.json();
-    }).then(data => {
-        ToggleRegisterToLogin(); // Alterna para o formulário de login após o registro bem-sucedido
-        Alert.ShowAlert('Registration went sucessfully', 'alert alert-success alert-dismissible fade show');
-        // showAlert('Registration successful. Please log in.', 1500);
 
-    }).catch(error => {
-        console.error('Error:', error.message);
-        Alert.ShowAlert(`Registration failed. ${error.message}`, 'alert alert-danger alert-dismissible fade show');
-        // showAlert('Registration failed. Please try again.', 1500);
-    });
-});
+        // Log the form data in the console (simulate login processing)
+        console.log('Form Data:', body);
+    }
 
-// Eventos para alternar entre os formulários
-document.getElementById('showLoginForm').addEventListener('click', function (event) {
-    event.preventDefault();
-    ToggleRegisterToLogin();
-});
-document.getElementById('showRegisterForm').addEventListener('click', function (event) {
-    event.preventDefault();
-    ToggleLoginToRegister();
-});
+    #register(e) {
+        e.preventDefault();  // Prevent form from refreshing the page
+
+        console.log('Registering');
+        const body = {
+            "username": document.getElementById('username').value,
+            "first_name": document.getElementById('firstName').value,
+            "last_name": document.getElementById('lastName').value,
+            "password": document.getElementById('password').value
+        };
+
+        // Check if fields are empty
+        if (body.username === '' || body.first_name === '' || body.last_name === '' || body.password === '') {
+            new Alert('Error', 'All fields are required');
+            return;
+        }
+
+        // Log the form data in the console (simulate registration processing)
+        console.log('Form Data:', body);
+    }
+}
+
+const login = new Login('/Login/', null);

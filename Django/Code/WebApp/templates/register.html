@@ -1,77 +1,188 @@
+{% extends 'Base.html' %}
+
+{% block title %}HomePage{% endblock %}
+
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/Register/style.css' %}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <title>Login/Register</title>
-</head>
-<body>
-<div class="page-container" id="_AppLogin">
-    <div class="login-container" id="loginContainer">
-        <div class="row">
-          <div class="col-12 text-center login-header">Login</div>
-          <div class="col-12">
-            <form id="loginForm">
-              <div class="form-group mb-3">
-                <label for="loginUser">Username</label>
-                <input type="text" class="form-control" id="loginUser" placeholder="Enter username" required>
-              </div>
-              <div class="form-group mb-3">
-                <label for="loginPassword">Password</label>
-                <input type="password" class="form-control" id="loginPassword" placeholder="Password" required>
-              </div>
-              <div class="form-group form-check">
-                <input type="checkbox" class="form-check-input" id="rememberMe">
-                <label class="form-check-label" for="rememberMe">Remember me</label>
-              </div>
-              <button type="submit" class="btn btn-primary w-100">Login</button>
-              <div class="additional-options">
-                <a href="#" id="forgotPassword">Forgot Password?</a>
-                <a href="#" id="showRegisterForm">Register</a>
-              </div>
-            </form>
-          </div>
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/Register/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="body acrylicStyle border-0 h-100 d-flex justify-content-center align-content-center">
+  <div class="d-flex justify-content-center align-items-center w-75">
+    <div class="container w-50">
+      <div class="form-wrapper w-100">
+        <!-- Login Form -->
+        <div id="loginFormSection" class="form-section active slide-in-blurred-top">
+          <h1>Login</h1>
+          <p>Don't have an account? <a href="#" class="toggle-link" id="showRegisterForm">Create one</a></p>
+          <form id="loginForm">
+            <input type="text" id="loginUser" class="form-control" placeholder="Username" required />
+            <input type="password" id="loginPassword" class="form-control" placeholder="Password" required />
+            <button type="submit" class="btn create-account-btn">Login</button>
+          </form>
+          <p class="text-center">Login with</p>
+          <a class="btn bg-intra d-flex justify-content-center align-items-center" href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-6797340cf0815ac0286e74fb21bd6a3b9352ebf48cb8523c972b318e307f5be2&redirect_uri=https%3A%2F%2Flocalhost%2Fauth%2Fintra&response_type=code">
+            <img width="45" src="https://auth.42.fr/auth/resources/yyzrk/login/students/img/42_logo.svg" alt="">
+          </a>
         </div>
-      </div>
-      <div class="register-container hidden" id="registerContainer">
-        <div class="row">
-          <div class="col-12 text-center register-header">Register</div>
-          <div class="col-12">
-            <form id="registerForm">
-              <div class="form-group mb-3">
-                <label for="registerUser">Username</label>
-                <input type="text" class="form-control" id="registerUser" placeholder="Enter username" required>
-              </div>
-              <div class="form-group mb-3">
-                <label for="registerEmail">Email</label>
-                <input type="email" class="form-control" id="registerEmail" placeholder="Enter email" required>
-              </div>
-              <div class="form-group mb-3">
-                <label for="registerPassword">Password</label>
-                <input type="password" class="form-control" id="registerPassword" placeholder="Password" required>
-              </div>
-              <div class="form-group mb-3">
-                <label for="registerConfirmPassword">Confirm Password</label>
-                <input type="password" class="form-control" id="registerConfirmPassword" placeholder="Confirm password" required>
-              </div>
-              <button type="submit" class="btn btn-primary w-100">Register</button>
-              <div class="additional-options">
-                <a href="#" id="showLoginForm">Back to Login</a>
-              </div>
-            </form>
-          </div>
+
+        <!-- Register Form -->
+        <div id="registerFormSection" class="form-section">
+          <h1>Create an account</h1>
+          <p>Already have an account? <a href="#" class="toggle-link" id="showLoginForm">Log in</a></p>
+          <form id="registerForm">
+            <input type="text" id="username" class="form-control" placeholder="Username" />
+            <div class="input-group">
+              <input type="text" id="firstName" class="form-control" placeholder="First name" />
+              <input type="text" id="lastName" class="form-control" placeholder="Last name" />
+            </div>
+            <input type="password" id="password" class="form-control" placeholder="Enter your password" />
+            <button type="submit" class="btn create-account-btn">Create account</button>
+          </form>
+          <!-- Other logins -->
+          <p class="text-center">Register with</p>
+          <a class="btn bg-intra d-flex justify-content-center align-items-center" href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-6797340cf0815ac0286e74fb21bd6a3b9352ebf48cb8523c972b318e307f5be2&redirect_uri=https%3A%2F%2Flocalhost%2Fauth%2Fintra&response_type=code">
+            <img width="50" src="https://auth.42.fr/auth/resources/yyzrk/login/students/img/42_logo.svg" alt="">
+          </a>
         </div>
       </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="{% static 'js/Register/register.js' %}"></script>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const loginFormSection = document.getElementById('loginFormSection');
+  const registerFormSection = document.getElementById('registerFormSection');
+  const showRegisterForm = document.getElementById('showRegisterForm');
+  const showLoginForm = document.getElementById('showLoginForm');
+
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
 
 
+  let isTransitioning = false;
 
 
+  showRegisterForm.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!isTransitioning) {
+      isTransitioning = true;
+      loginFormSection.classList.remove('slide-in-blurred-top');
+      loginFormSection.classList.add('slide-out-blurred-top');
+      setTimeout(() => {
+        loginFormSection.classList.remove('active');
+        registerFormSection.classList.remove('slide-out-blurred-top');
+        registerFormSection.classList.add('slide-in-blurred-top');
+        registerFormSection.classList.add('active');
+        isTransitioning = false;
+      }, 450);
+    }
+  });
 
-</body>
-</html>
+  showLoginForm.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!isTransitioning) {
+      isTransitioning = true;
+      registerFormSection.classList.remove('slide-in-blurred-top');
+      registerFormSection.classList.add('slide-out-blurred-top');
+      setTimeout(() => {
+        registerFormSection.classList.remove('active');
+        loginFormSection.classList.remove('slide-out-blurred-top');
+        loginFormSection.classList.add('slide-in-blurred-top');
+        loginFormSection.classList.add('active');
+        isTransitioning = false;
+      }, 450);
+    }
+  });
+
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const username = document.getElementById('loginUser').value;
+    const password = document.getElementById('loginPassword').value;
+    console.table({ username, password });
+
+
+    const data = {
+      'username': username,
+      'password': password
+    }
+
+    fetch('{% url "login" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          console.error('Error:', data.error);
+        } else {
+          console.log('Submitted successfully!', data);
+          window.location.href = '{% url "Home" %}';
+        }
+      })
+      .catch(error => {
+        console.error('Error during fetch:', error);
+      });
+
+
+  });
+
+  registerForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const password = document.getElementById('password').value;
+    console.table({ username, firstName, lastName, password });
+
+    const data = {
+      'username': username,
+      'first_name': firstName,
+      'last_name': lastName,
+      'password': password
+    }
+
+    fetch('{% url "register" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          console.error('Error:', data.error);
+        } else {
+          console.log('Submitted successfully!', data);
+          window.location.href = '{% url "Home" %}';
+        }
+      })
+      .catch(error => {
+        console.error('Error during fetch:', error);
+      });
+  });
+
+</script>
+
+<!-- <script type="module" src="{% static 'js/Register/Register.js' %}"></script> -->
+
+{% endblock %}

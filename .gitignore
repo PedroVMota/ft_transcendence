@@ -1,0 +1,9 @@
+Django/Code/**/migrations
+system
+/media/*
+!/media/Auth/
+/media/Auth/*
+!/media/Auth/defaultAssets/
+!/media/Auth/defaultAssets/**
+*.zip
+sys

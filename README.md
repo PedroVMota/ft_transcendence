@@ -1,8 +1,9 @@
 # Transcendence Project README
 
 ## Table of Contents
-1. [Introduction](#introduction)
-2. [Key Components of Django](#key-components-of-django)
+1. [Modules](#Modules)
+2. [Introduction](#introduction)
+3. [Key Components of Django](#key-components-of-django)
    - [Models](#models)
    - [URLs](#urls)
    - [Views](#views)
@@ -10,15 +11,40 @@
    - [Middleware](#middleware)
    - [Forms](#forms)
    - [Static Files](#static-files)
-3. [Basic Django Commands](#basic-django-commands)
-4. [Migrations in Django](#migrations-in-django)
-5. [Transcendence Project Structure](#transcendence-project-structure)
-6. [Docker Concepts for the Project](#docker-concepts-for-the-project)
-7. [Setting Up and Running the Project](#setting-up-and-running-the-project)
-8. [Deployment](#deployment)
-9. [Conclusion](#conclusion)
+4. [Basic Django Commands](#basic-django-commands)
+5. [Migrations in Django](#migrations-in-django)
+6. [Transcendence Project Structure](#transcendence-project-structure)
+7. [Docker Concepts for the Project](#docker-concepts-for-the-project)
+8. [Setting Up and Running the Project](#setting-up-and-running-the-project)
+9. [Deployment](#deployment)
+10. [Conclusion](#conclusion)
 
 ---
+## Modules
+Here’s an improved table that includes details on each module's relevant aspects, highlighting whether each module is mandatory or optional according to the project structure.
+
+| **Module**               | **Mandatory** | **Type** | **Key Aspects**                                                                                       |
+|--------------------------|---------------|----------|-------------------------------------------------------------------------------------------------------|
+| **Web**                  | No            | Major    | Backend with Django framework, Ethereum blockchain for score storage, PostgreSQL integration          |
+|                          | No            | Minor    | Frontend toolkit with Bootstrap, enhanced database integration                                        |
+| **User Management**      | Yes           | Major    | Secure authentication (OAuth 2.0 with 42 API), friend system, profile customization                   |
+| **Gameplay**             | Yes           | Major    | Multiplayer gameplay with remote players, tournament matchmaking                                      |
+|                          | No            | Minor    | Customization options (power-ups, maps), live chat with interaction features                          |
+| **AI-Algo**              | No            | Major    | AI opponent without A* algorithm, simulates player behavior                                           |
+|                          | No            | Minor    | User and game statistics dashboards, user insights                                                    |
+| **Cybersecurity**        | Yes           | Major    | WAF/ModSecurity, HashiCorp Vault for secure secrets management                                        |
+|                          | No            | Minor    | GDPR compliance (user anonymization, data management), account deletion                               |
+|                          | Yes           | Major    | Two-Factor Authentication (2FA) and JWT for secure access                                             |
+| **DevOps**               | No            | Major    | Log management with ELK stack, microservices architecture for scalability                             |
+|                          | No            | Minor    | System monitoring with Prometheus and Grafana, alerting for performance issues                        |
+| **Gaming**               | No            | Major    | Addition of new games with user history and matchmaking                                               |
+|                          | No            | Minor    | Game customization across platform (maps, difficulty levels, etc.)                                    |
+| **Graphics**             | No            | Major    | Advanced 3D graphics with ThreeJS/WebGL for immersive gameplay                                        |
+| **Accessibility**        | No            | Minor    | Support for multiple devices, multi-language options, visually impaired accessibility, SSR integration |
+| **Server-Side Pong**     | Yes           | Major    | Server-side Pong with API, playable via CLI and web interface                                         |
+|                          | No            | Major    | CLI interaction with web players through API integration                                              |
+
+This table provides a clearer breakdown of each module’s features and highlights the mandatory elements required to achieve a complete project according to the guidelines. The focus is on a secure, multiplayer-enabled Pong platform, with options for expansion into advanced gameplay and improved user experience through additional, optional modules.
 
 ## Introduction
 
@@ -251,6 +277,52 @@ The Transcendence project is structured as follows:
 - **Sockets**: Manages WebSocket connections, consumers, and routing.
 - **static**: Contains static assets like CSS and JavaScript files.
 - **WebApp**: Contains the core web application logic, including models, views, templates, and
+
+- **GameComunication**: Contains the logic for handling game communication
+
+```json
+[
+    //Output \/
+    {
+        "PlayerOne": {
+            "xPercent": 0.5
+        },
+        "PlayerTwo": {
+            "xPercent": 0.5
+        },
+        "Ball": {
+            "xPercent": 0.5,
+            "yPercent": 0.5
+        },
+        "Score": {
+            "PlayerOne": 0,
+            "PlayerTwo": 0
+        },
+        "GameState": {
+            "GameRunning": true
+        }
+    },
+    //Input \/
+    {
+        "GameEvent": {
+            "PlayerOneScored": {
+                "Event": [ "Up", "Down"]
+            },
+            "PlayerTwoScored": {
+                "Event": [ "Up", "Down"]
+            },
+            "Event": [
+                "PlayerOneScored",
+                "PlayerTwoScored",
+                "PlayerOneWon",
+                "PlayerTwoWon",
+                "GamePaused",
+                "GameResumed"
+            ]
+        }
+    }
+]
+```
 
  migrations.
 - **Nginx**: Contains configuration files and Docker setup for the Nginx server.

@@ -1,14 +1,14 @@
-#Auth/models.py
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from Chat.models import currentChat
 import uuid
 import random
 import os
 
-# Create your models here.
 
 DEFAULT_IMAGE = 'Auth/defaultAssets/ProfilePicture.png'
+DEFAULT_BANNER = 'Auth/defaultAssets/ProfileBanner.png'
 
 def upload_to(instance, filename):
     extension = filename.split('.')[-1]
@@ -19,101 +19,146 @@ def upload_to(instance, filename):
 def RandomNumber(min=1000, max=9999):
     return random.randint(min, max)
 
-class Conversation(models.Model):
-    id = models.AutoField(primary_key=True)
-    AuthorOfTheMessage = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='AuthorOfTheMessage')
-    Message = models.TextField()
+
+class TrasationTable(models.Model):
+    TYPE = (
+        ('Deposit', 'Deposit'),
+        ('Transfer', 'Transfer'),
+    )
+
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
     create_date = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Conversation {self.id}"
-    
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    Description = models.CharField(max_length=255, null=True, blank=True)
+    type = models.CharField(max_length=10, choices=TYPE)
 
-
-class currentChat(models.Model):
-    id = models.AutoField(primary_key=True)
-    members = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True)
-    is_group = models.BooleanField(default=False)
-    create_date = models.DateTimeField(auto_now_add=True)
-    update_date = models.DateTimeField(auto_now=True)
-    currentMessage = models.ManyToManyField(Conversation, blank=True)
-    unique_id = models.UUIDField(default=uuid.uuid4, editable=False)  # Remove unique=True for now
 
     def __str__(self):
-        return f"Conversation {self.id}"
+        return self.uuid
     
-USERSTATES = (
-    (1, 'Online'),
-    (2, 'Offline'),
-)
+    def getDict(self):
+        return {
+            'uuid': self.uuid,
+            'amount': self.amount,
+            'type': self.type,
+            'Description': self.Description
+        }
+
+
+class UserWallet(models.Model):
+    User = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    TransactionsHistory = models.ManyToManyField(TrasationTable, blank=True)
+
+    def makeTransaction(self, amount: int, type: str, description: str) -> TrasationTable:
+        if type == 'Deposit':
+            self.balance += amount
+        elif type == 'Transfer':
+            self.balance -= amount
+        else:
+            raise ValueError("Invalid Transaction Type")
+        self.save()
+        transaction = TrasationTable.objects.create(amount=amount, type=type, Description=description)
+        self.TransactionsHistory.add(transaction)
+        self.save()
+        return transaction
+    
+    def getTransactions(self):
+        return [transaction.getDict() for transaction in self.TransactionsHistory.all()]
+    
+    def getBalance(self):
+        return self.balance
+    
+    def __str__(self):
+        return f"{self.User.username} Wallet"
 
 class MyUser(AbstractUser):
+    intraCode = models.CharField(max_length=2048, null=True, blank=True)
     profile_picture = models.ImageField(upload_to=upload_to, default=DEFAULT_IMAGE)
+    profile_banner = models.ImageField(upload_to=upload_to, default=DEFAULT_BANNER)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
-    about_me = models.TextField(null=True, blank=True)
-    create_date = models.DateTimeField(auto_now_add=True)
-    update_date = models.DateTimeField(auto_now=True)
-    friendlist = models.ManyToManyField('self', blank=True)
+
     userSocialCode = models.BigIntegerField(unique=True, null=True, blank=True)
+    Wallet = models.OneToOneField(UserWallet, on_delete=models.CASCADE, null=True, blank=True)
+
+    friendlist = models.ManyToManyField('self', blank=True)
     allChat = models.ManyToManyField(currentChat, blank=True)
-    state = models.IntegerField(choices=USERSTATES, default=2)
+
+    create_date = models.DateTimeField(auto_now_add=True)
+    email = models.EmailField(blank=True, unique=False, null=True)
+
+
+    #Statistics About the User
+    TotalOfGames = models.IntegerField(default=0)
+    NumberOfWins = models.IntegerField(default=0)
+    NumberOfLosses = models.IntegerField(default=0)
+
+    MMR = models.IntegerField(default=1) # Match Making Rank
+
+    HigherRank = models.IntegerField(default=1) # The Highest Rank the user has ever reached
+    DateOfHigherRank = models.DateTimeField(auto_now_add=True) # The Date the user reached the highest rank
+
+    # AllPlayedGames = 
+    def __add__user__(self, friend: 'MyUser'):
+        """Add a user to the friend list."""
+        if friend in self.friendlist.all():
+            raise ValueError("User is already a friend")
+        if friend == self:
+            raise ValueError("User cannot add themselves as a friend")
+        self.friendlist.add(friend)
+        chat: currentChat = currentChat.objects.create()
+        chat.members.add(self)
+        chat.members.add(friend)
+        self.allChat.add(chat)
+        self.save()
+        
+    def removeFriend(self, user: 'MyUser'):
+        if user not in self.friendlist.all():
+            pass
+        else:
+            self.friendlist.remove(user)
+            chats: currentChat = currentChat.objects.filter(members=user).filter(members=self)
+            for chat in chats:
+                chat.delete()
+            self.save()
+        self.allChat.filter(members=user).delete()
     
-    def getJson(self):
+    def isFriend(self, user: 'MyUser'):
+        for friend in self.friendlist.all():
+            if friend == user:
+                return True
+        return False
+
+
+    def getChatData(self):
+        return [chat.getDict() for chat in self.allChat.all()]
+
+    def getFriendList(self):
+        return [friend.username for friend in self.friendlist.all()]
+
+    def allChats(self):
+        return [chat.unique_id for chat in self.allChat.all()]
+    
+
+    def getDict(self):
         return {
-            'user_id': self.id,
-            'username': self.username,
-            'usercode': self.userSocialCode,
-            'email': self.email,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'profile_picture': self.profile_picture.url,
-            'about_me': self.about_me,
-            'create_date': self.create_date,
-            'update_date': self.update_date,
-            'friendlist': [friend.username for friend in self.friendlist.all()]
+            "Info": {
+                'first_name': self.first_name,
+                'last_name': self.last_name,
+                'userCode': self.userSocialCode,
+                "profile_picture": self.profile_picture.url,
+                "profile_banner": self.profile_banner.url,
+            },
+            "Chats": self.getChatData(),
         }
     
     def save(self, *args, **kwargs):
         if self.userSocialCode is None:
             self.userSocialCode = RandomNumber(min=1000, max=9999)
         super().save(*args, **kwargs)
-
-    def newImageUpdate(self, image):
-        self.profile_picture = image
-        self.save()
-
+    
     def __str__(self):
         return self.username
-
-class serverLogs(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
-    mehod = models.CharField(max_length=10, default='GET')
-    path = models.CharField(max_length=100, default='/')
-    status = models.BigIntegerField(default=0)
-    create_date = models.DateTimeField(auto_now_add=True)
-    update_date = models.DateTimeField(auto_now=True)
-    def __str__(self):
-        return self.user.username
-
-
-
-
-class FriendRequest(models.Model):
-    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='from_user')
-    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='to_user')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=10, choices=[('pending', 'Pending'), ('accepted', 'Accepted'), ('rejected', 'Rejected')], default='pending')
-    def __str__(self):
-        return f"{self.from_user.username} sent a friend request to {self.to_user.username}"
-
-
-
-class Notification(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    message = models.CharField(max_length=255)
-    is_read = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    def __str__(self):
-        return f"Notification for {self.user.username}: {self.message}"
