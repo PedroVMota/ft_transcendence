@@ -42,17 +42,14 @@
     </div>
 </div>
 <div class="body border-0">
-    <!-- Edit Profile Modal -->
     <div class="position-relative d-flex flex-column m-auto justify-content-center align-items-center">
         <div class="banner-cover d-flex justify-content-center align-items-center bg-centered-fixed pic-filter-theme rounded-5 z-n1"
             style="width: 100%; height: 300px; background-image: url('/media/{{ user.profile_banner }}'); background-size: cover; background-position: center;">
         </div>
 
-        <div style="width: 90%; margin: 0 auto;"
-            class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <div class="d-flex flex-column flex-md-row justify-content-center z-0" style="margin-top: -2em;">
-                <img src="/media/{{ user.profile_picture }}" alt="Profile Picture"
-                    class="profile-picture rounded-circle m-2 me-3" style="width: 100px; height: 100px;">
+        <div style="width: 90%; margin: 0 auto;" class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-center z-0" style="margin-top: -2em;">
+                    <img src="/media/{{ user.profile_picture }}" alt="Profile Picture" class="profile-picture rounded-circle m-2 me-3" style="width: 100px; height: 100px;" />
                 <div class="d-flex flex-column justify-content-center align-items-center align-items-md-start mt-lg-4">
                     <span class="text-white fs-4">{{ user.first_name }} {{ user.last_name }}</span>
                     <span class="text-white text-md-center fs-6">{{ user.userSocialCode }}</span>
@@ -60,8 +57,7 @@
             </div>
 
             {% if can_edit %}
-            <button class="btn acrylicStyle-button text-white" data-bs-toggle="modal"
-                data-bs-target="#editProfileModal">
+            <button class="btn acrylicStyle-button text-white" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                 Edit Profile
             </button>
             {% elif friend_request_status == 'accepted' %}
@@ -91,8 +87,7 @@
                         <div class="card bg-transparent border-0 p-3 text-white">
                             <h5 class="mb-3">Stats</h5>
                             <u><span><b>Matchmaking Rating:</b> <span>{{ user.MMR }}</span> </span></u>
-                            <u><span><b>Highest: </b>{{ user.HigherRank }} {{ user.DateOfHigherRank|date:"M d" }}
-                                </span> </u>
+                            <u><span><b>Highest: </b>{{ user.HigherRank }} {{ user.DateOfHigherRank|date:"M d" }} </span> </u>
                             <u><span><b>Games:</b> {{ user.TotalOfGames }}</span></u>
                             <u><span><b>W/L: </b>{{ user.NumberOfWins }} / {{ user.NumberOfLosses }}</span></u>
                         </div>

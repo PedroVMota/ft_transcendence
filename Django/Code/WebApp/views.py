@@ -173,6 +173,8 @@ def searchUser(request):
                 return JsonResponse({'error': 'User not found'}, status=400)
 
         if targetUser:
+            if(targetUser == request.user):
+                return JsonResponse({'error': 'Invalid request'}, status=400)
             user_dict = targetUser.getDict()
             friend_request = FriendRequest.objects.filter(from_user=request.user, to_user=targetUser).first()
             user_dict['friend_request_status'] = friend_request.status if friend_request else None
