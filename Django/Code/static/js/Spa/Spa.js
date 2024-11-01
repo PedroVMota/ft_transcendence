@@ -31,12 +31,6 @@ class Spa {
             console.error("Root element not found");
             return;
         }
-
-        this.#footer = document.getElementById("footer");
-        if (!this.#footer) {
-            console.error("Footer element not found");
-            return;
-        }
     }
 
     setTo(url) {

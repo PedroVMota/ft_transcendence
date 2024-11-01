@@ -55,12 +55,11 @@ nginx: ## Bring up only the Nginx (web) container
 # Remove all containers and images, but keep volumes
 fclean: ## Remove all containers and images, but keep volumes
 	@echo -e "$(BLUE)Removing all containers and images...$(NC)"
-	- docker rm -f $$(docker ps -a -q) || true
-	- docker rmi -f $$(docker images -q) || true
-	- docker network rm $$(docker network ls -q) || true
+	docker-compose down 
+	docker system prune -af --volumes 
 
 # Clean everything: containers, images, networks, and volumes
-clean: fclean ## Clean everything: containers, images, networks, and volumes
+purge: fclean ## Clean everything: containers, images, networks, and volumes
 	@echo -e "$(BLUE)Removing all volumes and networks...$(NC)"
 	- docker volume rm $$(docker volume ls -q) || true
 	- docker network rm $$(docker network ls -q) || true
