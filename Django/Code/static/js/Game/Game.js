@@ -16,12 +16,52 @@ export default class Game extends AComponent {
     #mouseX = 0;           // Captura a posição do mouse no eixo X
     #mouseY = 0;           // Captura a posição do mouse no eixo Y
     #cameraRotationSpeed = 0.005;  // Define a velocidade de rotação da câmera
-    #aiController = null;  // Referência à IA
+    #aiController = null;// Referência à IA
+    #socket = new WebSocket("wss://" + window.location.host + "/ws/Monitor/Game/");
+
     constructor(url, spaObject) {
         super(url, spaObject);
         this.#parentElement = document.getElementById("root");
         this.#spaObject = spaObject;
+
+        this.#socket.onmessage = (e) =>{
+            const data = JSON.parse(e.data);
+            const message = data['message'];
+
+            const updateScoreBar = (playerOne, playerTwo) =>
+            {
+                let pOneName = document.getElementById("player-one-name");
+                let pOneScore = document.getElementById("player-one-score");
+                let pTwoName = document.getElementById("player-two-name");
+                let pTwoScore = document.getElementById("player-two-score");
+
+                pOneName.textContent = playerOne['name'];
+                pOneScore.textContent = playerOne['score'];
+
+                pTwoName.textContent = playerTwo['name'];
+                pTwoScore.textContent = playerTwo['score'];
+            }
+
+            const updateGameState = (data) =>
+            {
+                // todo
+
+                console.log("updateGameState")
+            }
+
+            if (data['action'] === 'score-bar-update')
+            {
+                updateScoreBar(data['playerOne'], data['playerTwo']);
+            }
+            if (data['action'] === 'game-state-report')
+            {
+                updateGameState(data)
+            }
+
+            console.log(message);
+        };
     }
+
 
     render() {
         if (this.#gameflag) return; // Prevent re-initializing the game
@@ -40,6 +80,17 @@ export default class Game extends AComponent {
                     this.hideSpinner();
                     this.initializeGame(); // Inicializa o jogo após o conteúdo ser renderizado
                 }, 1000);
+
+                //let button = document.getElementById("websocket-request-button");
+                //let inputBox = document.getElementById("websocket-request-ip-form");
+
+                // button.addEventListener("click", () => {
+                //     this.#socket.send(JSON.stringify({
+                //         'message': inputBox.value
+                //     }));
+                //
+                //     console.log("click listener activated");
+                // });
             }
         }).catch((error) => {
             console.error(error);
@@ -99,9 +150,18 @@ export default class Game extends AComponent {
             camera.rotation.set(-1.571, -1.571, 0);
             console.log("Câmera movida para trás do lado verde")
         }
+
+        const requestUpdateScoreBar = () => {
+            this.#socket.send(JSON.stringify({
+                'action': "score-bar-update",
+                'message': "message"
+            }));
+        }
         
         const animate = () => {
             requestAnimationFrame(animate);
+
+            requestUpdateScoreBar();
     
             ball.update();
             ball.checkCollision(paddle1);
@@ -120,13 +180,26 @@ export default class Game extends AComponent {
             paddle2.move(direction);
         }
 
+        const sendKeyPress = (key) => {
+            // todo -> make this actually represent player and not be a static
+            let player = 0;
+
+            this.#socket.send(JSON.stringify({
+                'action': "key-press-notification",
+                'player': player,
+                'message': key
+            }));
+        }
+
         const handleCameraControls = () => {
             window.addEventListener('keydown', (event) => {
                 const cameraSpeed = 0.2; // Velocidade de movimentação da câmera
                 const rotationSpeed = 0.05; // Velocidade de rotação da câmera
-    
+
                 let cameraMoved = false; // Verifica se a câmera se moveu
-    
+
+                sendKeyPress(event.key)
+
                 switch (event.key) {
 
                     case 'q':
@@ -155,7 +228,7 @@ export default class Game extends AComponent {
                     camera.position.z += cameraSpeed; // Move a câmera para trás
                     cameraMoved = true;
                     break;
-        
+
                     case 'e':
                         camera.rotation.x -= 0.05; // Rotaciona a câmera para cima
                         cameraMoved = true;
@@ -186,7 +259,7 @@ export default class Game extends AComponent {
                     // Imprime as coordenadas da câmera e sua rotação
                     printCameraPositionAndRotation();
                 }
-    
+
                 // Atualiza o render após mudar a posição/rotação
                 renderer.render(scene, camera);
             });
@@ -239,20 +312,20 @@ export default class Game extends AComponent {
                     this.#mouseY = event.clientY;
                 }
             });
-    
+
             window.addEventListener('mouseup', () => {
                 this.#isMouseDown = false;
             });
-    
+
             window.addEventListener('mousemove', (event) => {
                 if (this.#isMouseDown) {
                     const deltaX = event.clientX - this.#mouseX;
                     const deltaY = event.clientY - this.#mouseY;
-    
+
                     // Ajusta a rotação da câmera com base no movimento do rato
                     camera.rotation.y -= deltaX * this.#cameraRotationSpeed;  // Rotação no eixo Y (horizontal)
                     camera.rotation.x -= deltaY * this.#cameraRotationSpeed;  // Rotação no eixo X (vertical)
-    
+
                     this.#mouseX = event.clientX;
                     this.#mouseY = event.clientY;
                 }

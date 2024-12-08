@@ -2,6 +2,18 @@
 
 <link rel="stylesheet" href="{% static '/css/ScoreBar.css' %}">
 
-<div id="scorebar-wrapper">
-    <button class="favorite styled" type="button">WebSocket Request</button>
+<div id="score-bar-wrapper">
+    <div class="score-player-section">
+        <label id="player-one-name" class="player-name-label">Player One</label>
+        <img src="{% static '/png/ScoreBarLeft.png' %}" alt="ALT" class="player-name-background"/>
+        <label id="player-one-score" class="player-score-label">0</label>
+    </div>
+    <div class="vs-image-wrapper">
+        <img class="vs-image" src="{% static '/png/Versus.png' %}">
+    </div>
+    <div class="score-player-section">
+        <label id="player-two-name" class="player-name-label">Player Two</label>
+        <img src="{% static '/png/ScoreBarRight.png' %}" alt="ALT" class="player-name-background"/>
+        <label id="player-two-score" class="player-score-label">0</label>
+    </div>
 </div>

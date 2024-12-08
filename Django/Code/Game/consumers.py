@@ -3,6 +3,9 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
 import json
+
+from Game.Game import gameInstance
+
 """
 [
     {
@@ -146,11 +149,12 @@ import json
 
 class MonitorGameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        print("connect")
         if self.scope["user"].is_anonymous:
             await self.close()
         # check if the user has a superuser status
-        if not self.scope["user"].is_superuser:
-            await self.close()
+            if not self.scope["user"].is_superuser:
+                await self.close()
         else:
             self.room_group_name = 'Monitor_Game'
 
@@ -159,7 +163,7 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 self.channel_name
             )
-            
+
             await self.accept()
 
             # Send a message back to the client confirming the connection
@@ -169,6 +173,8 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
             }))
 
     async def disconnect(self, close_code):
+        print("disconnect")
+
         # Send a disconnect message (optional)
         await self.send(text_data=json.dumps({
             "type": "websocket.close",
@@ -181,9 +187,48 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+    @staticmethod
+    def handle_score_bar_update(data):
+        player_one = {}
+        player_two = {}
+        player_one['name'] = 'Zé'
+        player_one['score'] = 0
+        player_two['name'] = 'Adilson'
+        player_two['score'] = 1
+        data['playerOne'] = player_one
+        data['playerTwo'] = player_two
+
+    @staticmethod
+    def handle_key_press_notification(player, key):
+        if player == 0:
+            gameInstance.playerOne.handle_key(key)
+        if player == 1:
+            gameInstance.playerTwo.handle_key(key)
+
+
+    @staticmethod
+    def report_game_state(data):
+        data["action"] = "game-state-report"
+        data["ball"] = gameInstance.ball.get_dict()
+        data["playerOne"] = gameInstance.playerOne.get_dict()
+        data["playerTwo"] = gameInstance.playerTwo.get_dict()
+
+
     async def receive(self, text_data):
+        print("receive")
         # Receive and process the incoming WebSocket message
         data = json.loads(text_data)
+
+        if data["action"] == "score-bar-update":
+            print("action is score-bar-update")
+            self.handle_score_bar_update(data)
+            print(data)
+
+        if data["action"] == "key-press-notification":
+            print("action is key-press-notification")
+            self.handle_key_press_notification(data["player"], data["message"])
+            self.report_game_state(data)
+            print(data)
 
         # Broadcast the message to all WebSocket connections in the group
         await self.channel_layer.group_send(
@@ -195,13 +240,16 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
         )
 
     async def websocket_message(self, event):
+        print("websoket_message")
         # This is called when a message is received from the group
         await self.send(text_data=json.dumps(event["message"]))
 
     async def websocket_accept(self, event):
+        print("websocket_accept")
         # Handle WebSocket connection accept event
         await self.send(text_data=json.dumps(event["message"]))
 
     async def websocket_close(self, event):
+        print("websocket_close")
         # Handle WebSocket connection close event
         await self.send(text_data=json.dumps(event["message"]))
