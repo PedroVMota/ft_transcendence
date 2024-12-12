@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.http import JsonResponse
+from django.http import HttpResponse,JsonResponse
 from Auth.models import MyUser
-from .models import Game, Tournament
+from .models import Game, Lobby
 import json
+from django.contrib.auth.decorators import login_required
 
 
 HTTP_CODES = {
@@ -91,37 +91,83 @@ HTTP_CODES = {
 }
 
 
-def CreateIndividualGame(request: HttpResponse):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid method"}, status=HTTP_CODES["CLIENT_ERROR"]["METHOD_NOT_ALLOWED"])
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "Unauthorized"}, status=HTTP_CODES["CLIENT_ERROR"]["UNAUTHORIZED"])
-    
-    try:
-        data = json.loads(request.body)
+@login_required
+def getLobbyInformation(request: HttpResponse):
+    if request.method == 'POST':
+        user = request.user
+        user_lobbies = Lobby.objects.filter(players=user)
+        
+        if user_lobbies.exists():
+            user_lobby = user_lobbies.first()
+            response = {
+                'error': 'You are already in a lobby',
+                'Lobby': user_lobby.getDict()
+            }
+            return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["CONFLICT"])
+        
         try:
-            newGame: Game = Game.objects.create(pOne=request.user)
-            newGame.save()
-            return JsonResponse({"game": newGame.getDict()}, status=HTTP_CODES["SUCCESS"]["CREATED"])
-        except:
-            return JsonResponse({"error": "Error creating game"}, status=HTTP_CODES["SERVER_ERROR"]["INTERNAL_SERVER_ERROR"])
+            body = json.loads(request.body)
+            LobbyName = body.get('LobbyName', '')
+        except json.JSONDecodeError:
+            LobbyName = ''
+
+        if not LobbyName:
+            response = {'error': 'LobbyName is required', 'Lobby': None}
+            return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+        
+        try:
+            lobbyInstance = Lobby.objects.get(name=LobbyName)
+        except Lobby.DoesNotExist:
+            print("All Lobbies: ", Lobby.objects.all())
+            response = {'error': 'Lobby not found', 'Lobby': None}
+            return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["NOT_FOUND"])
+        
+        response = {'Lobby': lobbyInstance.getDict()}
+        return JsonResponse(response, status=HTTP_CODES["SUCCESS"]["OK"])
+    
+    response = {'error': 'Invalid request method', 'Lobby': None}
+    return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
 
 
-    except:
-        return JsonResponse({"error": "Invalid JSON"}, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
-
-
-
-def locaIndex(request):
-    print(request.method)
-    if request.method != "GET":
-        return JsonResponse({"error": "Invalid method"}, status=HTTP_CODES["CLIENT_ERROR"]["METHOD_NOT_ALLOWED"])
-    # send the index.html
-    allGames = Game.objects.all()
-    allTournaments = Tournament.objects.all()
-    Objects = {
-        "Games": [ game.getDict() for game in allGames ],
-        "Tournaments": [ tournament.getDict() for tournament in allTournaments ]
-    }
-    print(Objects)
-    return render(request, "GameMonitor.html", Objects)
+@login_required
+def createLobby(request: HttpResponse):
+    if request.method == 'POST':
+        user = request.user
+        user_lobbies = Lobby.objects.filter(players=user)
+        
+        if user_lobbies.exists():
+            user_lobby = user_lobbies.first()
+            response = {
+                'error': 'You are already in a lobby',
+                'Lobby': user_lobby.getDict()
+            }
+            print("Response Body:", response)
+            return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["CONFLICT"])
+        
+        try:
+            body = json.loads(request.body)
+            print("Request Body:", body)
+        except json.JSONDecodeError:
+            response = {'error': 'Invalid JSON', 'Lobby': None}
+            print("Response Body:", response)
+            return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+        
+        lobbyName = body.get('LobbyName')
+        if not lobbyName:
+            response = {'error': 'LobbyName is required', 'Lobby': None}
+            print("Response Body:", response)
+            return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+        
+        lobby = Lobby(name=lobbyName)
+        lobby.save()
+        lobby.players.add(user)  # Add the user to the players list
+        response = {
+            'message': 'Lobby created and user added',
+            'Lobby': lobby.getDict()
+        }
+        print("Response Body:", response)
+        return JsonResponse(response, status=HTTP_CODES["SUCCESS"]["CREATED"])
+    
+    response = {'error': 'Invalid request method', 'Lobby': None}
+    print("Response Body:", response)
+    return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])

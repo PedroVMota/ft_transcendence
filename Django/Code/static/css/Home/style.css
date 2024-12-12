@@ -1,0 +1,68 @@
+/* Remove background colors from buttons */
+.btn-primary {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    color: inherit !important;
+}
+
+/* Remove card header background */
+.card-header {
+    background-color: transparent !important;
+    border-bottom: none !important;
+}
+
+/* Remove list group item background */
+.list-group-item {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+/* Style the chat messages container */
+#messages {
+    background-color: transparent;
+}
+
+/* Adjust placeholder color */
+::placeholder {
+    color: inherit;
+}
+
+.player-card {
+    position: relative;
+    width: 75px; /* Set the width of the card to 75px */
+    height: 75px; /* Set the height of the card to 75px */
+    border-radius: 50%; /* Make the card circular */
+    overflow: hidden; /* Ensure the image and overlay are contained within the circular card */
+}
+
+.player-card img {
+    width: 100%; /* Ensure the image takes up the full width of the card */
+    height: 100%; /* Ensure the image takes up the full height of the card */
+    display: block;
+    border-radius: 50%; /* Make the image circular */
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 50%; /* Make the overlay circular */
+}
+
+.player-card:hover .overlay {
+    opacity: 1;
+}
+
+.icon {
+    font-size: 1rem; /* Adjust as needed */
+    cursor: pointer;
+}

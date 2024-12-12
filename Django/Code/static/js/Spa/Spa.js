@@ -37,13 +37,17 @@ class Spa {
             console.error("Footer element not found");
             return;
         }
+
+        window.addEventListener('popstate', (event) => {
+            this.loadPage();
+        });
     }
 
     setTo(url) {
         console.log("Setting to URL:", url);
         this.#currentRoute?.destroy();
         this.#currentRoute = null;
-        this.#updateUrl(url);
+        window.history.pushState({}, url, window.location.origin + url);
         switch (url) {
             case "/":
                 console.log("Setting to Home");
@@ -64,6 +68,10 @@ class Spa {
             default:
                 console.log("CheckAnother Possible routes");
                 let isProfileWithId = url.match(/^\/profile\/\d+\/$/i);
+                console.table({
+                    "isProfileWithId": isProfileWithId,
+                    "url": url
+                })
                 if (isProfileWithId) {
                     console.log("Setting to Profile with ID");
                     let profileId = url.split("/")[2];
@@ -95,14 +103,6 @@ class Spa {
             console.error("Error during loadPage execution:", error);
         }
     }
-
-    #updateUrl(url) {
-        try {
-            window.history.pushState({}, url, window.location.origin + url);
-        } catch (error) {
-            console.error("Error updating URL:", error);
-        }
-    }
 }
 
 const spa = new Spa();
@@ -123,4 +123,5 @@ const reloadWindow = () => {
 };
 
 export { spa as default };
+export { Spa }
 export { reloadWindow };

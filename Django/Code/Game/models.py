@@ -68,74 +68,28 @@ class Game(models.Model):
         }
 
 
-
-TournamentStates = (
-    (0, 'Waiting'),
-    (1, 'In Progress'),
-    (2, 'Completed'),
-    (3, 'Cancelled'),
-)
-
-class Tournament(models.Model):
-    uniqueId = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    # Game Players
-    players = models.ManyToManyField(MyUser, related_name='tournaments') # Players in the tournament
-    maxPlayers = models.IntegerField(default=8) # Max players in the tournament
-    winner = models.ForeignKey(MyUser, related_name='won_tournaments', on_delete=models.SET_NULL, null=True, blank=True) # Winner of the tournament
-
-    state = models.IntegerField(choices=TournamentStates, default=0)  # State of the tournament
-
-    # Comunication System
-    WebSocketId = models.UUIDField(default=uuid.uuid4, editable=False, unique=True) # Unique ID for the WebSocket
-    WebSocketOfChat = models.ForeignKey(currentChat, related_name='tournament_chat', on_delete=models.CASCADE, null=True, blank=True)
-
-    # Game Info
-    award = models.DecimalField(max_digits=10, decimal_places=2) # Award for the winner
-    JoinCost = models.DecimalField(max_digits=10, decimal_places=2) # Cost to join the tournament
-
-    allMatches = models.ManyToManyField(Game, related_name='tournaments_matches', blank=True)
-
-
-    GameHistory = models.ManyToManyField(Game, related_name='tournaments', blank=True)
-
+class Lobby(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True) # Unique ID for the game
+    name = models.CharField(max_length=255, null=True, blank=True) # Name of the room
+    players = models.ManyToManyField(MyUser, related_name='players', blank=True) # Player One
+    game = models.ForeignKey(Game, related_name='game', on_delete=models.CASCADE, null=True, blank=True) # Player Two
+    def __str__(self):
+        return f"{self.name}"
+    
+    def getPlayerData(self):
+        return [player.getDict() for player in self.players.all()]
+    
+    def isAvailable(self):
+        return self.players.count() < 2 # If there are less than 2 players, the lobby is available
+    
 
     def getDict(self):
         return {
-            "uuid": str(self.uniqueId),
-            "players": [player.getDict() for player in self.players.all()],
-            "maxPlayers": self.maxPlayers,
-            "winner": self.winner.uuid if self.winner is not None else None,
-            "WebSocketId": self.WebSocketId,
-            "WebSocketOfChat": self.WebSocketOfChat.uuid if self.WebSocketOfChat is not None else None,
-            "award": self.award,
-            "JoinCost": self.JoinCost,
-            "allMatches": [match.uuid for match in self.allMatches.all()],
-            "GameHistory": [game.uuid for game in self.GameHistory.all()],
+            "uuid": str(self.id),
+            "Name": self.name,
+            "Players": self.getPlayerData(),
+            "Game": self.game.getDict() if self.game is not None else None,
         }
-
-
-    def __str__(self):
-        return f"{self.uniqueId}"
     
-    def join(self, user: MyUser):
-        if 0 > user.wallet.balance - self.JoinCost:
-            raise Exception("Not enough balance")
-        if self.players.filter(uuid=user.uuid).exists():
-            raise Exception("Already in the tournament")
-        if self.state != 0:
-            raise Exception("Tournament already started or finished")
-        user.Wallet.makeTransaction(self.JoinCost, 'Transfer', f"{self.uuid} Join Cost")
-        self.players.add(user)
-        self.award += self.JoinCost
-        self.save()
 
-    def leave(self, user: MyUser):
-        if not self.players.filter(uuid=user.uuid).exists():
-            raise Exception("Not in the tournament")
-        self.players.remove(user)
-
-    def eliminate(self, uuidOfUser: str):
-        user = MyUser.objects.get(uuid=uuidOfUser)
-        if not self.players.filter(uuid=user.uuid).exists():
-            raise Exception("Not in the tournament")
-        self.players.remove(user)
+    

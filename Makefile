@@ -16,6 +16,10 @@ help: ## Display this help message
 all: ## Build and run the entire Docker Compose environment
 	@echo -e "$(BLUE)Starting all services...$(NC)"
 	docker-compose up -d --build
+	@echo -e "$(GREEN)All services are up and running:$(NC)"
+	@echo -e "$(YELLOW)Django:$(NC) http://localhost:8000"
+	@echo -e "$(YELLOW)Nginx:$(NC) http://localhost:80"
+	@echo -e "$(YELLOW)Portainer:$(NC) http://localhost:9000"
 
 # Stop running containers
 stop: ## Stop running containers

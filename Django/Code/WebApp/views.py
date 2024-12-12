@@ -7,14 +7,34 @@ from Auth.models import MyUser
 from Notification.models import FriendRequest
 import json
 from utils import shell_colors
+from Game.Forms import LobbyForm
+from Game.models import Lobby
 
 def Menu(request):
     response = render(request, 'Components/Menu.html')
     return response
 
+
+
 @login_required
 def index(request):
-    return render(request, 'index.html', {'user': request.user})
+    user = request.user
+    user_lobbies = Lobby.objects.filter(players=user)
+    context = {'user': user}
+
+    if user_lobbies.exists():
+        # The user is already in a lobby
+        user_lobby = user_lobbies.first()
+        lobby_data = user_lobby.getDict()  # Assuming getDict() returns a dictionary representation
+        context['lobby'] = lobby_data
+        context['lobbyJson'] = json.dumps(lobby_data)
+    else:
+        # The user is not in a lobby, include the forms
+        lobby_form = LobbyForm()
+        context['form'] = lobby_form
+
+    return render(request, 'index.html', context)
+
 
 def login_register_view(request):
     if request.method == 'POST':
