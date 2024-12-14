@@ -114,11 +114,11 @@ class CloseSession(APIView):
 
 @login_required
 def update_user(request):
-    print(request.method)
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
     user = request.user
-    print(f"{shell_colors['BRIGHT_YELLOW']}Updating user: {user.username}{shell_colors['RESET']}")
+    print(f"Updating user: {user.username}")
+    
     if 'profile_picture' in request.FILES:
         user.profile_picture = request.FILES['profile_picture']
     if 'profile_banner' in request.FILES:
@@ -127,13 +127,13 @@ def update_user(request):
         user.first_name = request.POST['first_name']
     if 'last_name' in request.POST and request.POST['last_name']:
         user.last_name = request.POST['last_name']
-    print(f"{shell_colors['BRIGHT_GREEN']}User {user.username} updated successfully{shell_colors['RESET']}")
+    
     try:
-        print(f"{shell_colors['BRIGHT_GREEN']}Saving user: {user.username}{shell_colors['RESET']}")
-        user.save()  # Save only after checking all fields
+        user.save()
+        print(f"User {user.username} updated successfully")
         return JsonResponse({'message': 'User updated successfully.'}, status=200)
     except Exception as e:
-        print(f"{shell_colors['BRIGHT_RED']}Failed to update user. Reason: {e}{shell_colors['RESET']}")
+        print(f"Failed to update user. Reason: {e}")
         return JsonResponse({'error': f'Failed to update user. Reason: {e}'}, status=500)
 
     

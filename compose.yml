@@ -19,17 +19,14 @@ services:
     networks:
       - default
 
-
-    
   django:
     container_name: django
     build: ./Django
-    # command: bash -c "python manage.py makemigrations Auth && python manage.py makemigrations && python manage.py migrate && daphne -b 0.0.0.0 -p 8000 backend.asgi:application"
     command: bash -c "python manage.py makemigrations Auth Chat Game Notification WebApp && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./Django/Code/:/code/
     environment:
-    - DJANGO_SETTINGS_MODULE=backend.settings
+      - DJANGO_SETTINGS_MODULE=backend.settings
     depends_on:
       - db
       - redis-server
@@ -39,16 +36,16 @@ services:
       - default
     env_file:
       - .env
-    
+    ports:
+      - 8000:8000
 
   web:
     container_name: Nginx
     build: ./Nginx
     ports:
       - 443:443
-      - 80:443
-      - 3000:443
-      - 65535:443
+      - 80:80
+      - 3000:3000
     restart: always
     hostname: Nginx
     volumes:
@@ -60,28 +57,25 @@ services:
       - django
     env_file:
       - .env
-    
-  # pgadmin:
-  #   container_name: pgadmin
-  #   image: dpage/pgadmin4
-  #   ports:
-  #     - 5050:80
-  #   depends_on:
-  #     - db
-  #   volumes:
-  #     - pgadmin:/var/lib/pgadmin
-      
-    environment:
-      PGADMIN_DEFAULT_EMAIL: pgadmin@pgadmin.org
-      PGADMIN_DEFAULT_PASSWORD: pgadmin
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce
+    command: -H unix:///var/run/docker.sock
+    ports:
+      - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    restart: always
+    networks:
+      - default
 
 volumes:
   static_volume:
   pgadmin:
   postgres_data:
-
-
+  portainer_data:
 
 networks:
   default:
-

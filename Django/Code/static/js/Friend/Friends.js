@@ -16,11 +16,6 @@ export default class Friends extends AComponent {
 
     render() {
         const url = this.getUrl()
-        if(this.#parentElement.innerHTML !== ''){
-            this.#initializeEventListeners();
-            this.#visualizeProfile();
-            return ;
-        }
         this._getHtml(url).then((html) => {
             let doomResponse = new DOMParser().parseFromString(html, 'text/html');
             let rootContentHtml = doomResponse.getElementById('root').innerHTML;
