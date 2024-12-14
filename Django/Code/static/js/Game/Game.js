@@ -18,11 +18,29 @@ export default class Game extends AComponent {
     #cameraRotationSpeed = 0.005;  // Define a velocidade de rotação da câmera
     #aiController = null;// Referência à IA
     #socket = new WebSocket("wss://" + window.location.host + "/ws/Monitor/Game/");
+    #playerID = 0 // todo -> make this actually represent player and not be a static
 
     constructor(url, spaObject) {
         super(url, spaObject);
         this.#parentElement = document.getElementById("root");
         this.#spaObject = spaObject;
+
+        // event listener for window resize so that we convert display coordinates to back-end
+        window.addEventListener('resize', (event) =>
+        {
+            const w = document.documentElement.clientWidth;
+            const h = document.documentElement.clientHeight;
+
+            // we send the current window size to the back-end to handle
+            this.#socket.send(JSON.stringify({
+                'action': "window-resize-notification",
+                'player': this.#playerID,
+                'windowSize': {
+                    'w': w,
+                    'h': h
+                }
+            }))
+        })
 
         this.#socket.onmessage = (e) =>{
             const data = JSON.parse(e.data);
@@ -175,20 +193,39 @@ export default class Game extends AComponent {
         const movePaddle1 = (direction) => {
             paddle1.move(direction);
         }
-    
+
         const movePaddle2 = (direction) => {
             paddle2.move(direction);
         }
 
         const sendKeyPress = (key) => {
-            // todo -> make this actually represent player and not be a static
-            let player = 0;
+            let movementKeys = ['w', 'W', 's', 'S']
+            let cameraKeys
 
-            this.#socket.send(JSON.stringify({
-                'action': "key-press-notification",
-                'player': player,
-                'message': key
-            }));
+
+            // defining lambdas for different key families
+            const movementKeyLambda = (key) => {
+                this.#socket.send(JSON.stringify({
+                    'action': "movement-key-press-notification",
+                    'player': this.#playerID,
+                    'message': key
+                }));
+            }
+            const cameraKeyLambda = (key) => {
+                this.#socket.send(JSON.stringify({
+                    'action': "camera-key-press-notification",
+                    'player': this.#playerID,
+                    'message': key
+                }))
+            }
+
+            const myMap = new Map([
+                ['w', movementKeyLambda],
+                ['W', movementKeyLambda],
+                ['s', movementKeyLambda],
+                ['S', movementKeyLambda],
+            ]);
+
         }
 
         const handleCameraControls = () => {
@@ -267,6 +304,8 @@ export default class Game extends AComponent {
     
         // Controles das raquetes
         window.addEventListener('keydown', (event) => {
+
+
             if (event.key === 'ArrowUp') {
                 printCameraPositionAndRotation();
                 movePaddle1(1);

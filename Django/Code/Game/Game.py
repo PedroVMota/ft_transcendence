@@ -1,12 +1,13 @@
 
 
-from Game import Ball
-from Game import Player
+from Game.Ball import Ball
+from Game.Player import Player
 
 class Game:
     def __init__(self):
-        self.playerOne = Player.Player()
-        self.playerTwo = Player.Player()
-        self.ball = Ball.Ball()
+        self.playerOne = Player()
+        self.playerTwo = Player()
+        self.ball = Ball()
+
 
 gameInstance = Game()

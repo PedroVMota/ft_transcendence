@@ -1,12 +1,16 @@
 
+from Game.Window import Window
+from Game.Camera import Camera
 
 class Player:
     def __init__(self):
-        self.xPos = 0;
-        self.yPos = 0;
-        self.score = 0;
+        self.xPos = 0
+        self.yPos = 0
+        self.score = 0
+        self.window = Window()
+        self.camera = Camera()
 
-    def handle_key(self, key):
+    def handle_movement_key(self, key):
         if key == 'w':
             print("moving player up")
             self.xPos -= 1
@@ -14,10 +18,10 @@ class Player:
             print("moving player down")
             self.xPos += 1
 
-    def get_dict(self):
-        dict = {}
-        dict['x'] = self.xPos
-        dict['y'] = self.yPos
-        dict['score'] = self.score
+    def handle_camera_key(self, key):
 
-        return dict
+
+    def get_dict(self):
+        to_return = dict(x=self.xPos, y=self.yPos, score=self.score)
+
+        return to_return

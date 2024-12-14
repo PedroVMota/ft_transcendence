@@ -199,12 +199,16 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
         data['playerTwo'] = player_two
 
     @staticmethod
-    def handle_key_press_notification(player, key):
+    def handle_movement_key_press_notification(player, key):
         if player == 0:
-            gameInstance.playerOne.handle_key(key)
+            gameInstance.playerOne.handle_movement_key(key)
         if player == 1:
-            gameInstance.playerTwo.handle_key(key)
+            gameInstance.playerTwo.handle_movement_key(key)
 
+    @staticmethod
+    def handle_camera_key_press_notification(player, key):
+        if player == 0:
+            gameInstance.playerOne.camera.
 
     @staticmethod
     def report_game_state(data):
@@ -224,9 +228,9 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
             self.handle_score_bar_update(data)
             print(data)
 
-        if data["action"] == "key-press-notification":
-            print("action is key-press-notification")
-            self.handle_key_press_notification(data["player"], data["message"])
+        if data["action"] == "movement-key-press-notification":
+            print("action is movement-key-press-notification")
+            self.handle_movement_key_press_notification(data["player"], data["message"])
             self.report_game_state(data)
             print(data)
 

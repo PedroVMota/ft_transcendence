@@ -8,8 +8,6 @@ class Ball:
 
 
     def get_dict(self):
-        dict = {}
-        dict['x'] = self.xPos
-        dict['y'] = self.yPos
-        dict['direction'] = self.direction
-        dict['speed'] = self.speed
+        to_return = dict(x=self.xPos, y=self.yPos, direction=self.direction, speed=self.speed)
+
+        return to_return
