@@ -17,8 +17,11 @@ export default class Game extends AComponent {
     #mouseY = 0;           // Captura a posição do mouse no eixo Y
     #cameraRotationSpeed = 0.005;  // Define a velocidade de rotação da câmera
     #aiController = null;// Referência à IA
-    #socket = new WebSocket("wss://" + window.location.host + "/ws/Monitor/Game/");
+    #socket = new WebSocket("ws://" + window.location.host + "/ws/Monitor/Game/");
     #playerID = 0 // todo -> make this actually represent player and not be a static
+    #paddleOne = new Paddle(-4.5);
+    #paddleTwo = new Paddle(4.5, 0xff0000)
+    #ball = new Ball()
 
     constructor(url, spaObject) {
         super(url, spaObject);
@@ -62,12 +65,13 @@ export default class Game extends AComponent {
 
             const updateGameState = (data) =>
             {
-                // todo
+                this.#paddleOne.setPercentage(data['playerOne']);
+                this.#paddleTwo.setPercentage(data['playerTwo']);
 
                 console.log("updateGameState")
             }
 
-            if (data['action'] === 'score-bar-update')
+            if (data['action'] === 'score-bar-report')
             {
                 updateScoreBar(data['playerOne'], data['playerTwo']);
             }
@@ -76,7 +80,7 @@ export default class Game extends AComponent {
                 updateGameState(data)
             }
 
-            console.log(message);
+            //console.log(message);
         };
     }
 
@@ -117,10 +121,10 @@ export default class Game extends AComponent {
 
     initializeGame() {
         let scene, camera, renderer;
-        let paddle1, paddle2, ball, wallTop, wallBottom;
+        let ball, wallTop, wallBottom;
         const iaSpeed = 0.1; // Velocidade de movimentação da IA
         
-        const init = () => {
+            const init = () => {
             scene = new THREE.Scene();
             // Defina a posição e rotação da câmera para ficar inclinada atrás dos paddles
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
@@ -131,31 +135,26 @@ export default class Game extends AComponent {
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             this.#parentElement.appendChild(renderer.domElement); // Anexa o canvas ao elemento root
-            
-            // Criação das raquetes e da bola
-            paddle1 = new Paddle(-4.5); // Ajusta a posição do paddle1 no lado esquerdo
-            paddle2 = new Paddle(4.5, 0xff0000); // Ajusta a posição do paddle2 no lado direito
-            ball = new Ball();
-            
+
             // Criação das paredes superior e inferior
             wallTop = new Wall(2.5); // Parede superior
             wallBottom = new Wall(-2.5); // Parede inferior
             
             // Adicionando à cena
-            scene.add(paddle1.mesh);
-            scene.add(paddle2.mesh);
-            scene.add(ball.mesh);
+            scene.add(this.#paddleOne.mesh);
+            scene.add(this.#paddleTwo.mesh);
+            scene.add(this.#ball.mesh);
             scene.add(wallTop.mesh);
             scene.add(wallBottom.mesh);
             handleCameraControls();
             
-            this.#aiController = new AIController(paddle2, ball, paddle1, iaSpeed);   // Instancia da AI com paddle adversário
+            this.#aiController = new AIController(this.#paddleTwo, this.#ball, this.#paddleOne, iaSpeed);   // Instancia da AI com paddle adversário
 
             animate();
         }
         const printCameraPositionAndRotation = () => {
-            console.log(`Posição da câmera: X = ${camera.position.x}, Y = ${camera.position.y}, Z = ${camera.position.z}`);
-            console.log(`Rotação da câmera: X = ${camera.rotation.x}, Y = ${camera.rotation.y}, Z = ${camera.rotation.z}`);
+            //console.log(`Posição da câmera: X = ${camera.position.x}, Y = ${camera.position.y}, Z = ${camera.position.z}`);
+            //console.log(`Rotação da câmera: X = ${camera.rotation.x}, Y = ${camera.rotation.y}, Z = ${camera.rotation.z}`);
         }
         const moveCameraToPaddleTwo = () => {
             camera.position.set(8.5, -2.275957200481571e-15, -1.6);  // Coordenadas da posição
@@ -171,61 +170,53 @@ export default class Game extends AComponent {
 
         const requestUpdateScoreBar = () => {
             this.#socket.send(JSON.stringify({
-                'action': "score-bar-update",
-                'message': "message"
+                'action': "score-bar-update-request",
             }));
+        }
+
+        const requestGameState = () => {
+            this.#socket.send(JSON.stringify({
+                'action': "game-state-request"
+            }))
         }
         
         const animate = () => {
             requestAnimationFrame(animate);
 
-            requestUpdateScoreBar();
-    
-            ball.update();
-            ball.checkCollision(paddle1);
-            ball.checkCollision(paddle2);
+            //requestUpdateScoreBar();
 
-            this.#aiController.update();
+            requestGameState();
+
+            // todo remove
+            ball.update();
+            ball.checkCollision(this.#paddleOne);
+            ball.checkCollision(this.#paddleTwo);
+
+            //this.#aiController.update();
     
             renderer.render(scene, camera);
         }
     
         const movePaddle1 = (direction) => {
-            paddle1.move(direction);
+            let gameID = 3;
+            this.#socket.send(JSON.stringify({
+                    'action': "paddle-move-notification",
+                    'gameID': gameID,
+                    'player': 0,
+                    'direction': direction
+                }
+            ))
         }
 
         const movePaddle2 = (direction) => {
-            paddle2.move(direction);
-        }
-
-        const sendKeyPress = (key) => {
-            let movementKeys = ['w', 'W', 's', 'S']
-            let cameraKeys
-
-
-            // defining lambdas for different key families
-            const movementKeyLambda = (key) => {
-                this.#socket.send(JSON.stringify({
-                    'action': "movement-key-press-notification",
-                    'player': this.#playerID,
-                    'message': key
-                }));
-            }
-            const cameraKeyLambda = (key) => {
-                this.#socket.send(JSON.stringify({
-                    'action': "camera-key-press-notification",
-                    'player': this.#playerID,
-                    'message': key
-                }))
-            }
-
-            const myMap = new Map([
-                ['w', movementKeyLambda],
-                ['W', movementKeyLambda],
-                ['s', movementKeyLambda],
-                ['S', movementKeyLambda],
-            ]);
-
+            let gameID = 3;
+            this.#socket.send(JSON.stringify({
+                    'action': "paddle-move-notification",
+                    'gameID': gameID,
+                    'player': 1,
+                    'direction': direction
+                }
+            ))
         }
 
         const handleCameraControls = () => {
@@ -235,9 +226,8 @@ export default class Game extends AComponent {
 
                 let cameraMoved = false; // Verifica se a câmera se moveu
 
-                sendKeyPress(event.key)
-
-                switch (event.key) {
+                switch (event.key)
+                {
 
                     case 'q':
                         camera.position.set(0, 0, 10);

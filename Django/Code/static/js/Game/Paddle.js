@@ -8,10 +8,22 @@ export default class Paddle {
         this.mesh.position.x = positionX;
     }
 
-    move(direction) {
-        // Limitar o movimento do paddle dentro da área de jogo
-        let newPosition = this.mesh.position.y + direction * 0.1;
-        if (newPosition + 0.5 <= 2.5 && newPosition - 0.5 >= -2.5) { // Limites superior e inferior
+    // move(direction) {
+    //     // Limitar o movimento do paddle dentro da área de jogo
+    //     let newPosition = this.mesh.position.y + direction * 0.1;
+    //     if (newPosition + 0.5 <= 2.5 && newPosition - 0.5 >= -2.5) { // Limites superior e inferior
+    //         this.mesh.position.y = newPosition;
+    //     }
+    // }
+
+    setPercentage(yPercentage)
+    {
+        let yOffset = yPercentage * 0.04;
+
+        let newPosition = -2 + yOffset;
+
+        if (newPosition + 0.5 <= 2.5 && newPosition - 0.5 >= -2.5)
+        { // Limites superior e inferior
             this.mesh.position.y = newPosition;
         }
     }
