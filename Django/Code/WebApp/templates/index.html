@@ -153,6 +153,31 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 {% if lobby %}
 <script type="module">
+
+    const lobbyId = "{{ lobby.id }}";
+    const ws = new WebSocket(`wss://${window.location.host}/ws/Lobby/${lobbyId}/`);
+
+    ws.onopen = function () {
+        console.log('WebSocket connection established');
+    };
+
+    ws.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        const messagesDiv = document.getElementById('messages');
+        const newMessage = document.createElement('p');
+        newMessage.innerHTML = `<strong>Server:</strong> ${data.message}`;
+        messagesDiv.appendChild(newMessage);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    };
+
+    document.getElementById('chatForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value;
+        ws.send(JSON.stringify({ message }));
+        messageInput.value = '';
+    });
+
     import  spa  from "{% static 'js/Spa/Spa.js' %}";
 
     const lobby = {{ lobbyJson|safe }};

@@ -94,6 +94,12 @@ DATABASES = {
     },
 }
 
+
+REDIS_HOST = "redis-server"
+REDIS_PORT = 6379
+
+
+
 # Authentication and Authorization
 AUTH_USER_MODEL = 'Auth.MyUser'
 AUTH_PASSWORD_VALIDATORS = []

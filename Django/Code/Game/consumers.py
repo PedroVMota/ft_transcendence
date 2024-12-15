@@ -1,8 +1,11 @@
 # Sockets/consumers.py
 import json
+from channels.layers import get_channel_layer
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
-import json
+from Auth.models import MyUser
+from django.conf import settings
+import redis
 
 from Game.Game import gameInstance
 
@@ -147,7 +150,11 @@ from Game.Game import gameInstance
 }
 """
 
+
+
 class MonitorGameConsumer(AsyncWebsocketConsumer):
+
+    
     async def connect(self):
         print("connect")
         if self.scope["user"].is_anonymous:
@@ -253,3 +260,90 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
         print("websocket_close")
         # Handle WebSocket connection close event
         await self.send(text_data=json.dumps(event["message"]))
+
+
+
+
+
+redis_instance = redis.StrictRedis(
+    host=settings.REDIS_HOST,
+    port=settings.REDIS_PORT,
+    db=0
+)
+
+from asgiref.sync import sync_to_async
+
+
+
+LobbyData = {
+    "data" : {
+        "GAME_STATE": "Watting",
+        "SizeOfPlayers": 0,
+        "Player": {
+            "PlayerOne": None,
+            "PlayerTwo": None,
+        }
+    }
+}
+
+
+# re_path(r'ws/Lobby/(?P<lobby_id>[\w-]+)/$', consumers.LobbyConsumer.as_asgi()),
+class LobbyConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        # Accept the WebSocket connection
+        await self.accept()
+
+        # Redis key for the lobby
+        redis_key = f"lobby:{self.scope['url_route']['kwargs']['lobby_id']}"
+
+        # Fetch the existing data
+        existing_data = await sync_to_async(redis_instance.get)(redis_key)
+
+        if existing_data is None:
+            # Initialize the lobby data
+            lobby_data = LobbyData.copy()  # Avoid modifying the original LobbyData dictionary
+            lobby_data["data"]["SizeOfPlayers"] = 1  # Increment SizeOfPlayers for the first connection
+
+            # Save the initialized data to Redis
+            serialized_data = json.dumps(lobby_data)
+            await sync_to_async(redis_instance.set)(redis_key, serialized_data)
+
+            print(f"Initialized Lobby Data with player count incremented: {json.dump(serialized_data, indent=4)}")
+        else:
+            # Decode and load the existing data
+            decoded_result = existing_data.decode("utf-8")
+            lobby_data = json.loads(decoded_result)
+
+            # Increment the SizeOfPlayers
+            lobby_data["data"]["SizeOfPlayers"] += 1
+
+            # Save the updated data back to Redis
+            serialized_data = json.dumps(lobby_data)
+            await sync_to_async(redis_instance.set)(redis_key, serialized_data)
+
+            print(f"Updated Lobby Data with player count incremented: {serialized_data}")
+
+    async def disconnect(self, close_code):
+        # Redis key for the lobby
+        redis_key = f"lobby:{self.scope['url_route']['kwargs']['lobby_id']}"
+
+        # Fetch the existing data from Redis
+        existing_data = await sync_to_async(redis_instance.get)(redis_key)
+
+        if existing_data:
+            # Decode and load the existing data
+            decoded_result = existing_data.decode("utf-8")
+            lobby_data = json.loads(decoded_result)
+
+            # Decrement the SizeOfPlayers if greater than 0
+            if lobby_data["data"]["SizeOfPlayers"] > 0:
+                lobby_data["data"]["SizeOfPlayers"] -= 1
+
+            # Save the updated data back to Redis
+            updated_data = json.dumps(lobby_data)
+            await sync_to_async(redis_instance.set)(redis_key, updated_data)
+
+            print(f"Updated Lobby Data after disconnection: {updated_data}")
+        else:
+            print(f"Lobby data not found for key: {redis_key}")
+
