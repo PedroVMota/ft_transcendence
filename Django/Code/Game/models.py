@@ -21,21 +21,13 @@ GameType = (
 class Game(models.Model):
 
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True) # Unique ID for the game
-
     roomName = models.CharField(max_length=255, null=True, blank=True) # Name of the room
     pOne = models.ForeignKey(MyUser, related_name='First_Player', on_delete=models.CASCADE, null=True, blank=True) # Player One
     pTwo = models.ForeignKey(MyUser, related_name='Second_Player', on_delete=models.CASCADE, null=True, blank=True) # Player Two
-
     winner = models.ForeignKey(MyUser, related_name='won_games', on_delete=models.SET_NULL, null=True, blank=True) # Winner of the game
-
-
     state = models.IntegerField(choices=GameStates, default=0)  # State of the game
-
-
     webSocketId = models.UUIDField(default=uuid.uuid4, editable=False, unique=True) # Unique ID for the WebSocket
     webSocketChatID = models.UUIDField(default=uuid.uuid4, editable=False, unique=True) # Unique ID for the WebSocket Chat
-
-
     gameType = models.CharField(choices=GameType, default="Friendly", max_length=20) # Type of the game
 
 
@@ -62,8 +54,8 @@ class Game(models.Model):
             "PlayerTwo": self.pTwo.id if self.pTwo is not None else None,
             "Winner": self.winner.uuid if self.winner is not None else None,
             "State": self.state,
-            "WebSocketId": self.webSocketId,
-            "WebSocketChatID": self.webSocketChatID,
+            "WebSocketId": str(self.webSocketId),
+            "WebSocketChatID": str(self.webSocketChatID),
             "TypeGame": self.gameType,
         }
 
@@ -71,8 +63,15 @@ class Game(models.Model):
 class Lobby(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True) # Unique ID for the game
     name = models.CharField(max_length=255, null=True, blank=True) # Name of the room
-    players = models.ManyToManyField(MyUser, related_name='players', blank=True) # Player One
+    players = models.ManyToManyField(MyUser, related_name='players', ) # Player One
     game = models.ForeignKey(Game, related_name='game', on_delete=models.CASCADE, null=True, blank=True) # Player Two
+
+    def save(self, *args, **kwargs):
+        # Create a new game if one does not already exist
+        if self.game is None:
+            self.game = Game.objects.create()  # Adjust initialization with any required fields for Game
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.name}"
     
@@ -81,7 +80,6 @@ class Lobby(models.Model):
     
     def isAvailable(self):
         return self.players.count() < 2 # If there are less than 2 players, the lobby is available
-    
 
     def getDict(self):
         return {
