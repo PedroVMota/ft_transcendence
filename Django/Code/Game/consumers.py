@@ -112,6 +112,7 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
             self.report_score_bar(data)
 
         # Broadcast the message to all WebSocket connections in the group
+        print("sending data: ", data)
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -151,7 +152,7 @@ from asgiref.sync import sync_to_async
 
 LobbyData = {
     "data" : {
-        "GAME_STATE": "Watting",
+        "GAME_STATE": "Waitting",
         "SizeOfPlayers": 0,
         "Player": {
             "PlayerOne": None,

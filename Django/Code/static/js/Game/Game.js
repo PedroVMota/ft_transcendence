@@ -67,6 +67,8 @@ export default class Game extends AComponent {
             {
                 this.#paddleOne.setPercentage(data['playerOne']);
                 this.#paddleTwo.setPercentage(data['playerTwo']);
+                const ballData = data['ball'];
+                this.#ball.update(ballData['x'], ballData['y']);
 
                 console.log("updateGameState")
             }
@@ -121,7 +123,7 @@ export default class Game extends AComponent {
 
     initializeGame() {
         let scene, camera, renderer;
-        let ball, wallTop, wallBottom;
+        let wallTop, wallBottom;
         const iaSpeed = 0.1; // Velocidade de movimentação da IA
         
             const init = () => {
@@ -188,9 +190,9 @@ export default class Game extends AComponent {
             requestGameState();
 
             // todo remove
-            ball.update();
-            ball.checkCollision(this.#paddleOne);
-            ball.checkCollision(this.#paddleTwo);
+            //ball.update();
+            //ball.checkCollision(this.#paddleOne);
+            //ball.checkCollision(this.#paddleTwo);
 
             //this.#aiController.update();
     

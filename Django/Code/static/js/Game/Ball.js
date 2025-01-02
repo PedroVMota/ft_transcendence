@@ -9,25 +9,35 @@ export default class Ball {
         this.maxSpeed = 0.05; // Limite máximo de velocidade para a bola
     }
 
-    update() {
-        this.mesh.position.x += this.speed.x;
-        this.mesh.position.y += this.speed.y;
+    update(x, y) {
+        const nX = 9/200 * x;
+        const nY = 4/100 * y;
+
+        this.mesh.position.x = nX - 4.5;
+        this.mesh.position.y = nY - 2;
+        //this.mesh.position.x += this.speed.x;
+        //this.mesh.position.y += this.speed.y;
     
         // Colisão com as paredes superior e inferior (eixo Y)
-        if (this.mesh.position.y + this.geometry.parameters.radius >= 2.5 ||
-            this.mesh.position.y - this.geometry.parameters.radius <= -2.5) {
-            this.speed.y *= -1; // Inverte a direção no eixo Y ao colidir com uma parede
-        }
-    
-        // Colisão com as laterais (eixo X)
-        if (this.mesh.position.x + this.geometry.parameters.radius >= 4.5 ||
-            this.mesh.position.x - this.geometry.parameters.radius <= -4.5) {
-            this.reset();
-        }
+        // if (this.mesh.position.y + this.geometry.parameters.radius >= 2.5 ||
+        //     this.mesh.position.y - this.geometry.parameters.radius <= -2.5) {
+        //     this.speed.y *= -1; // Inverte a direção no eixo Y ao colidir com uma parede
+        // }
+        //
+        // // Colisão com as laterais (eixo X)
+        // if (this.mesh.position.x + this.geometry.parameters.radius >= 4.5 ||
+        //     this.mesh.position.x - this.geometry.parameters.radius <= -4.5) {
+        //     this.reset();
+        // }
+        //
+        // // Limita a velocidade da bola
+        // this.speed.x = Math.min(this.maxSpeed, Math.max(-this.maxSpeed, this.speed.x));
+        // this.speed.y = Math.min(this.maxSpeed, Math.max(-this.maxSpeed, this.speed.y));
+    }
 
-        // Limita a velocidade da bola
-        this.speed.x = Math.min(this.maxSpeed, Math.max(-this.maxSpeed, this.speed.x));
-        this.speed.y = Math.min(this.maxSpeed, Math.max(-this.maxSpeed, this.speed.y));
+    setPosition(ball)
+    {
+
     }
     
     reset() {

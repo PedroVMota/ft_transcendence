@@ -14,18 +14,18 @@ class Player:
         self.lock = Lock()
 
     def handle_paddle_movement(self, direction):
-        if direction > 0 and self.yPos >= 1:
+        if direction < 0 and self.yPos >= 1:
             print("moving player down")
 
             self.lock.acquire()
-            self.yPos -= 1
+            self.yPos -= 2
             self.lock.release()
 
-        elif direction < 0 and self.yPos <= 99:
+        elif direction > 0 and self.yPos <= 99:
             print("moving player up")
 
             self.lock.acquire()
-            self.yPos += 1
+            self.yPos += 2
             self.lock.release()
 
     def get_pos(self):

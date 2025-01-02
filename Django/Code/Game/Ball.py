@@ -1,7 +1,7 @@
 
 from threading import Lock
 
-from math import sin, cos, dist, pi
+from math import sin, cos, atan, pi
 from unicodedata import normalize
 
 
@@ -10,7 +10,7 @@ class Ball:
         self.xPos = 100
         self.yPos = 50
         self.direction = pi # angle
-        self.speed = 0
+        self.speed = 1
         self.lock = Lock()
 
 
@@ -19,9 +19,8 @@ class Ball:
         self.xPos += self.speed * cos(self.direction)
 
 
-
     def normalize_direction_angle(self):
-        new_direction_angle = self.direction % (pi * 2)
+        new_direction_angle = self.direction % pi
 
         self.direction = new_direction_angle
 
@@ -32,13 +31,16 @@ class Ball:
 
 
     def check_collision(self, pos):
-        distance_to_paddle = dist(pos, self.yPos)
+        distance_to_paddle = pos - self.yPos
+        print("distance to paddle is: ", abs(distance_to_paddle))
 
         if abs(distance_to_paddle) < 10:
-            old_direction_abs = 2 * pi - self.direction
+            new_x = cos(self.direction)
+            new_y = -sin(self.direction)
+            new_angle = atan(new_y / new_x)
+            self.direction = new_angle
             self.normalize_direction_angle()
-            self.direction = 2 * pi - (old_direction_abs * (10 - distance_to_paddle) / 10)
-            self.normalize_direction_angle() # todo: check this logic
+            print("changing angle to :", self.direction)
             return True
         else:
             return False
