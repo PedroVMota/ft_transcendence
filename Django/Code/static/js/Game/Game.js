@@ -185,7 +185,7 @@ export default class Game extends AComponent {
         const animate = () => {
             requestAnimationFrame(animate);
 
-            //requestUpdateScoreBar();
+            requestUpdateScoreBar();
 
             requestGameState();
 

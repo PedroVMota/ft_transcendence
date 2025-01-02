@@ -31,22 +31,25 @@ class GameLoop(threading.Thread):
             self.game.ball.lock.acquire()
             self.game.playerOne.lock.acquire()
             self.game.playerTwo.lock.acquire()
+            ## locks ^
             self.game.ball.tick()
             if cos(self.game.ball.direction) < 0:
                 if self.game.ball.xPos <= 2:
-                    if not self.game.ball.check_collision(self.game.playerOne.yPos):
-                        self.game.ball.reset_coordinates()
+                    if not self.game.ball.check_collision_x_axis(self.game.playerOne.yPos):
+                        self.game.ball.reset_coordinates_and_speed()
                         self.game.playerTwo.score += 1
             else:
                 if 198 <= self.game.ball.xPos:
-                    if not self.game.ball.check_collision(self.game.playerTwo.yPos):
-                        self.game.ball.reset_coordinates()
+                    if not self.game.ball.check_collision_x_axis(self.game.playerTwo.yPos):
+                        self.game.ball.reset_coordinates_and_speed()
                         self.game.playerOne.score += 1
+            self.game.ball.check_collisions_y_axis()
+            ## locks v
             self.game.ball.lock.release()
             self.game.playerOne.lock.release()
             self.game.playerTwo.lock.release()
 
-            sleep(0.03)
+            sleep(0.01)
 
 
 class GameInstance:
