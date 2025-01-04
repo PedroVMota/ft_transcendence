@@ -69,7 +69,7 @@ class Spa {
             default:
                 console.log("CheckAnother Possible routes");
                 let isProfileWithId = url.match(/^\/profile\/\d+\/$/i);
-                let isLobbyWithId = url.match(/^\/lobby\/\d+\/$/i)
+                let isLobbyWithId = url.match(/^\/Lobby\/[0-9a-f]{32}\/$/i) // ^Lobby/[0-9a-f]{32}$
                 console.table({
                     "isProfileWithId": isProfileWithId,
                     "url": url
