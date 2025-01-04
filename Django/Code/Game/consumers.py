@@ -269,3 +269,32 @@ class MonitorLobbyConsumer(AsyncWebsocketConsumer):
         print("websoket_message")
         # This is called when a message is received from the group
         await self.send(text_data=json.dumps(event["message"]))
+
+
+# re_path(r'ws/Monitor/Lobby/(?P<lobby_id>[\w-]+)/$', consumers.LobbyConsumer.as_asgi()),
+class LobbyConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user: MyUser = self.scope['user']
+        self.id = self.scope['url_route']['kwargs']['lobby_id']
+        self.room_group_name = f'lobby_{self.id}'
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+        await self.accept()
+        welcomeMsg = {
+            'type': 'welcome_message',
+            'message': f"You have joined the lobby {self.room_group_name}"
+        }
+        await self.send(text_data=json.dumps(welcomeMsg))
+        print(welcomeMsg['message'])
+
+    async def disconnect(self, close_code):
+        # remove the user from the group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    async def receive(self, text_data):
+        pass
