@@ -106,7 +106,7 @@ def getLobbyInformation(request: HttpResponse):
                 'error': 'You are already in a lobby',
                 'Lobby': user_lobby.getDict()
             }
-            return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["CONFLICT"])
+            return JsonResponse(response, status=HTTP_CODES["SUCCESS"]["OK"])
         
         try:
             body = json.loads(request.body)
@@ -145,7 +145,7 @@ def createLobby(request: HttpResponse):
                 'Lobby': user_lobby.getDict()
             }
             print("Response Body:", response)
-            return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["CONFLICT"])
+            return JsonResponse(response, status=HTTP_CODES["SUCCESS"]["OK"])
         
         try:
             body = json.loads(request.body)

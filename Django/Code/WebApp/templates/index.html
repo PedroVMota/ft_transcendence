@@ -52,6 +52,7 @@
     console.log('Hello');
     const lobbyId = "{{ lobby.uuid }}";
     import  spa from "{% static 'js/Spa/Spa.js' %}";
+    import { reloadWindow } from "{% static 'js/Spa/Spa.js' %}";
 
     // Form submissions
     document.getElementById('createLobbyForm').addEventListener('submit', function(event) {
@@ -68,12 +69,13 @@
             },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
-        .then(data => {
-            console.table(data);
-            if(spa) {
-                spa.setTo(`/Lobby/${data.uuid}`);
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
+            return response.json();
+        }).then(data => {
+            spa.setTo(`/Lobby/${data.Lobby.uuid}`);
         })
         .catch(error => console.error('Error:', error));
     });

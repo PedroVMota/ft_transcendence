@@ -21,7 +21,7 @@ class Spa {
             const profileId = url.split("/")[2];
             return new Profile(url, this, false, profileId);
         }],
-        [/^\/Lobby\/[0-9a-f]{32}$/, (url) => {
+        [/^\/Lobby\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\/?$/, (url) => {
             const lobbyId = url.split("/")[2];
             return new Lobby(url, this, lobbyId);
         }]
@@ -50,15 +50,16 @@ class Spa {
 
     setTo(url) {
         console.log("Navigating to:", url);
-        this.#currentRoute?.destroy();
+        this.#currentRoute?.destroy(); // Clean up the previous route
         this.#currentRoute = null;
-
+    
         // Update history
-        window.history.pushState({}, url, window.location.origin + url);
-
+        window.history.pushState({}, "", window.location.origin + url);
+    
         // Match route dynamically
         for (const [route, handler] of this.#routes) {
-            if (typeof routes === "string" && route === url) {
+            console.log("Route:", route);
+            if (typeof route === "string" && route === url) {
                 this.#currentRoute = handler();
                 break;
             } else if (route instanceof RegExp && route.test(url)) {
@@ -66,11 +67,11 @@ class Spa {
                 break;
             }
         }
-
+    
         if (this.#currentRoute) {
-            this.#currentRoute.render();
+            this.#currentRoute.render(); // Render the matched route
         } else {
-            
+            console.error("No route found for:", url);
         }
     }
 
