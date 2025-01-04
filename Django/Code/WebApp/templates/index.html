@@ -255,7 +255,6 @@
                         'Content-Type': 'application/json',
                         'X-CSRFToken': `{{ csrf_token }}`,
                     },
-                    body: JSON.stringify(lobbyId)
                 })
             } else if (data.error) {
                 alert(data.error);

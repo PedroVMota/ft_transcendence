@@ -1,5 +1,5 @@
-import AComponent from "../Spa/AComponent";
-import spa from "../Spa/Spa";
+import AComponent from "../Spa/AComponent.js";
+import spa from "../Spa/Spa.js";
 
 export default class Lobby extends AComponent {
     #webSocket = null

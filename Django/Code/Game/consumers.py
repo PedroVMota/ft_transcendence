@@ -10,8 +10,6 @@ import redis
 from Game.Game import gameInstance
 
 class MonitorGameConsumer(AsyncWebsocketConsumer):
-
-    
     async def connect(self):
         print("connect")
         if self.scope["user"].is_anonymous:

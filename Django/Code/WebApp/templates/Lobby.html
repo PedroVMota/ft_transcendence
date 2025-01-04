@@ -4,10 +4,8 @@
 {% block title %}Lobby{% endblock %}
 
 {% block content %}
-    
-{{ lobby|safe }}
+ 
 <div class="body acrylicStyle border-0 w-100">
-    {% if lobby %}
         <!-- Lobby View -->
         <div id="lobbyContainer" class="container mt-5">
             <div class="row">
@@ -48,45 +46,6 @@
                 </div>
             </div>
         </div>
-    {% else %}
-        <!-- Lobby Forms -->
-        <div id="formsContainer" class="container mt-5">
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h2>Create a Lobby</h2>
-                        </div>
-                        <div class="card-body">
-                            <form id="createLobbyForm" method="post">
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <input type="text" name="LobbyName" class="form-control" id="createName" placeholder="Lobby Name">
-                                </div>
-                                <button class="btn" type="submit">Create Lobby</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h2>Join a Lobby</h2>
-                        </div>
-                        <div class="card-body">
-                            <form id="joinLobbyForm" method="post">
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <input type="text" name="LobbyName" class="form-control" id="joinName" placeholder="Enter Lobby Name">
-                                </div>
-                                <button class="btn" type="submit">Join Lobby</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
 </div>
 {% endblock %}
 {% block scripts %}
