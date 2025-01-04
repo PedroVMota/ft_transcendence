@@ -70,8 +70,7 @@ class Spa {
         if (this.#currentRoute) {
             this.#currentRoute.render();
         } else {
-            console.error(`No matching route found for URL: ${url}`);
-            self.setTo("/")
+            
         }
     }
 
@@ -85,6 +84,7 @@ class Spa {
             }
         } catch (error) {
             console.error("Error during loadPage execution:", error);
+            
         }
     }
 }
