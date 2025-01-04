@@ -58,7 +58,7 @@ class Spa {
 
         // Match route dynamically
         for (const [route, handler] of this.#routes) {
-            if (typeof route === "string" && route === url) {
+            if (typeof routes === "string" && route === url) {
                 this.#currentRoute = handler();
                 break;
             } else if (route instanceof RegExp && route.test(url)) {
@@ -71,6 +71,7 @@ class Spa {
             this.#currentRoute.render();
         } else {
             console.error(`No matching route found for URL: ${url}`);
+            self.setTo("/")
         }
     }
 
