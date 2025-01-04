@@ -171,3 +171,14 @@ def createLobby(request: HttpResponse):
     response = {'error': 'Invalid request method', 'Lobby': None}
     print("Response Body:", response)
     return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+
+@login_required
+def MyLobby(request, lobby_id=None):
+    if request.method == 'GET':
+        print(" ==== GET LOBBY ==== ")
+
+    try:
+        lobby = Lobby.objects.get(id=lobby_id)
+    except Lobby.DoesNotExist:
+        return render(request, 'Lobby.html',
+            {'lobby': None}) # todo -> what here?

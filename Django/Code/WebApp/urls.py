@@ -1,5 +1,6 @@
 from django.urls import path, re_path
 from . import views
+from Game import views as GameViews
 
 
 urlpatterns = [
@@ -11,4 +12,5 @@ urlpatterns = [
     re_path(r'^Profile/(?:(?P<socialCode>\d+)/)?$', views.Profile, name='Profile'),  # Make socialCode optional
     path('Friends/', views.Friends, name='Friends'),
     path('Game/', views.Game, name='Game'),
+    re_path(r'^Lobby/(?:(?P<lobby_id>\d+)/)?$', GameViews.MyLobby, name='Lobby'),
 ] 

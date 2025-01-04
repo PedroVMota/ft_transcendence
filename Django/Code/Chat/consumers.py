@@ -46,6 +46,10 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         # Save the new message to the database
         await self.save_message(self.user, self.room_name, message)
 
+        if data["action"] == "message-sent-on-lobby":
+            data["action"] = "message-written-on-backend"
+            
+
         # Send the message to the room group
         print({
             'type': 'chat_message',

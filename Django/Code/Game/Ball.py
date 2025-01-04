@@ -28,8 +28,6 @@ class Ball:
 
     def normalize_direction_angle(self, pipi):
         self.direction = atan2(sin(self.direction), cos(self.direction))
-        print("changing angle to :", self.direction)
-
 
     def reset_coordinates_and_speed(self):
         self.xPos = 100
@@ -50,7 +48,6 @@ class Ball:
 
     def check_collision_x_axis(self, pos):
         distance_to_paddle = pos - self.yPos
-        print("distance to paddle is: ", abs(distance_to_paddle))
 
         if abs(distance_to_paddle) < 12:
             offset = distance_to_paddle / 12

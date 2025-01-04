@@ -169,6 +169,7 @@ def searchUser(request):
         targetUserName = ""
         targetSocialCode = ""
         bodyRequest = json.loads(request.body)
+        print(bodyRequest)
         try:
             targetUserName = bodyRequest['username']
         except KeyError:

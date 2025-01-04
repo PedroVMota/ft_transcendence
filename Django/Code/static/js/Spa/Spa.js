@@ -3,6 +3,7 @@ import Home from "../Home/Home.js";
 import Friends from "../Friend/Friends.js";
 import Profile from "../profile/profile.js";
 import Game from "../Game/Game.js";
+import Lobby from "../Lobby/Lobby.js"
 
 class Spa {
     #menu = null;
@@ -68,6 +69,7 @@ class Spa {
             default:
                 console.log("CheckAnother Possible routes");
                 let isProfileWithId = url.match(/^\/profile\/\d+\/$/i);
+                let isLobbyWithId = url.match(/^\/lobby\/\d+\/$/i)
                 console.table({
                     "isProfileWithId": isProfileWithId,
                     "url": url
@@ -77,7 +79,15 @@ class Spa {
                     let profileId = url.split("/")[2];
                     this.#currentRoute = new Profile(url, this, false, profileId);
                     this.#currentRoute.render();  // Ensure the render method is called to attach event listeners
-                } else {
+                }
+                else if (isLobbyWithId)
+                {
+                    console.log("Setting to Lobby with ID");
+                    let lobbyId = url.split("/")[2];
+                    this.#currentRoute = new Lobby(url, this, lobbyId);
+                    this.#currentRoute.render();
+                }
+                else {
                     console.error("Unknown URL");
                     return;
                 }

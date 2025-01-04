@@ -99,7 +99,7 @@
                         <form id="chatForm" class="mt-3">
                             {% csrf_token %}
                             <div class="input-group">
-                                <input type="text" id="messageInput" class="form-control" placeholder="Type a message" autocomplete="off">
+                                <label for="messageInput"></label><input type="text" id="messageInput" class="form-control" placeholder="Type a message" autocomplete="off">
                                 <button type="submit" class="btn">Send</button>
                             </div>
                         </form>
@@ -154,8 +154,9 @@
 {% if lobby %}
 <script type="module">
 
-    const lobbyId = "{{ lobby.id }}";
-    const ws = new WebSocket(`wss://${window.location.host}/ws/Lobby/${lobbyId}/`);
+    const lobbyId = "{{ lobby.uuid }}";
+    console.log("lobbt Id is:" + lobbyId)
+    const ws = new WebSocket("ws://" + window.location.host + "/ws/Monitor/Lobby/" + lobbyId + "/");
 
     ws.onopen = function () {
         console.log('WebSocket connection established');
@@ -166,35 +167,49 @@
         const messagesDiv = document.getElementById('messages');
         const newMessage = document.createElement('p');
         newMessage.innerHTML = `<strong>Server:</strong> ${data.message}`;
-        messagesDiv.appendChild(newMessage);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        if (data['action'] === 'lobby-message-submission')
+        {
+            newMessage.innerHTML = data['message'];
+            console.log("message arrived from web socket")
+            messagesDiv.appendChild(newMessage);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;   
+        }
+        console.log('something');
     };
 
     document.getElementById('chatForm').addEventListener('submit', function (event) {
         event.preventDefault();
         const messageInput = document.getElementById('messageInput');
         const message = messageInput.value;
-        ws.send(JSON.stringify({ message }));
+        console.log(message);
+        ws.send(JSON.stringify({
+            'action': 'message-sent-on-lobby',
+            'lobby': lobbyId,
+            'message': message
+        }));
         messageInput.value = '';
     });
 
-    import  spa  from "{% static 'js/Spa/Spa.js' %}";
+    import spa  from "{% static 'js/Spa/Spa.js' %}";
 
     const lobby = {{ lobbyJson|safe }};
 
     // Chat functionality
-    document.getElementById('chatForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const message = document.getElementById('messageInput').value;
-        const messagesDiv = document.getElementById('messages');
+    //document.getElementById('chatForm').addEventListener('submit', function(event) {
+    //    event.preventDefault();
+    //    const message = document.getElementById('messageInput').value;
+    //    const messagesDiv = document.getElementById('messages');
 
         // Display the message locally (replace with socket logic later)
-        const newMessage = document.createElement('p');
-        newMessage.innerHTML = `<strong>You:</strong> ${message}`;
-        messagesDiv.appendChild(newMessage);
-        document.getElementById('messageInput').value = '';
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    });
+    //    const newMessage = document.createElement('p');
+        //newMessage.innerHTML = `<strong>You:</strong> ${message}`;
+    //    console.log(message);
+    //    newMessage.innerHTML = message;
+    //     console.log("message submitted");
+    //    messagesDiv.appendChild(newMessage);
+    //    document.getElementById('messageInput').value = '';
+    //    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    //});
 
     const overlays = document.querySelectorAll('.overlay');
     console.log(overlays);
@@ -213,6 +228,7 @@
 {% else %}
 <script type="module">
     console.log('Hello');
+    const lobbyId = "{{ lobby.uuid }}";
     import  spa from "{% static 'js/Spa/Spa.js' %}";
 
     // Form submissions
@@ -223,17 +239,24 @@
         };
 
         fetch('/Game/api/lobby/create/', {
-            method: 'POST',
+            method: 'POST', 
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}',
+                'X-CSRFToken': `{{ csrf_token }}`,
             },
             body: JSON.stringify(data)
         })
         .then(response => response.json())
         .then(data => {
             if (data.Lobby) {
-                location.reload();
+                fetch('/Lobby/' + lobbyId + '/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': `{{ csrf_token }}`,
+                    },
+                    body: JSON.stringify(lobbyId)
+                })
             } else if (data.error) {
                 alert(data.error);
             }
@@ -243,15 +266,15 @@
 
     document.getElementById('joinLobbyForm').addEventListener('submit', function(event) {
         event.preventDefault();
+        console.log('attemption to join a lobby')
         const data = {
             'LobbyName': document.getElementById('joinName').value,
         };
-
+        console.log(JSON.stringify(data));
         fetch('/Game/api/lobby/information/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}',
             },
             body: JSON.stringify(data)
         })

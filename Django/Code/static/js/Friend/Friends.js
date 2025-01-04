@@ -260,10 +260,10 @@ export default class Friends extends AComponent {
                         <small class="text-muted fs-6 text-white-50">${user.Info.userCode}</small>
                     </div>
                 </div>
-                <span id="goto_Profile" data-profile="${user.Info.userCode}" class="btn btn-sm"><i class="fas fa-eye text-white"></i></span>
+                <span data-role="profile-entrypoint" data-profile="${user.Info.userCode}" class="btn btn-sm"><i class="fas fa-eye text-white"></i></span>
             `;
             searchResultsList.appendChild(userItem);
-            let goto_Profile = document.querySelectorAll("#goto_Profile");
+            let goto_Profile = document.querySelectorAll('[data-role="profile-entrypoint"]');
             for (let i = 0; i < goto_Profile.length; i++) {
                 goto_Profile[i].addEventListener('click', (e) => {
                     e.preventDefault();

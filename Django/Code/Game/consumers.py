@@ -163,12 +163,34 @@ LobbyData = {
 
 
 # re_path(r'ws/Lobby/(?P<lobby_id>[\w-]+)/$', consumers.LobbyConsumer.as_asgi()),
-class LobbyConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        # Accept the WebSocket connection
-        await self.accept()
+class MonitorLobbyConsumer(AsyncWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self.room_group_name = 'Monitor Lobby'
 
-        # Redis key for the lobby
+    async def connect(self):
+        if self.scope["user"].is_anonymous:
+            await self.close()
+        # check if the user has a superuser status
+            if not self.scope["user"].is_superuser:
+                await self.close()
+        else:
+            self.room_group_name = 'Monitor_Game'
+
+            # Add the WebSocket connection to the group
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name
+            )
+
+            await self.accept()
+
+            # Send a message back to the client confirming the connection
+            await self.send(text_data=json.dumps({
+                "type": "websocket.accept",
+                "message": "You are now connected!"
+            }))
+
         redis_key = f"lobby:{self.scope['url_route']['kwargs']['lobby_id']}"
 
         # Fetch the existing data
@@ -183,7 +205,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             serialized_data = json.dumps(lobby_data)
             await sync_to_async(redis_instance.set)(redis_key, serialized_data)
 
-            print(f"Initialized Lobby Data with player count incremented: {json.dump(serialized_data, indent=4)}")
+            #print(f"Initialized Lobby Data with player count incremented: {json.dump(serialized_data, indent=4)}")
         else:
             # Decode and load the existing data
             decoded_result = existing_data.decode("utf-8")
@@ -222,3 +244,30 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         else:
             print(f"Lobby data not found for key: {redis_key}")
 
+
+    @staticmethod
+    def handle_lobby_message(data):
+        data["action"] = "lobby-message-submission"
+
+
+
+    async def receive(self, text_data=None, bytes_data=None):
+        print("receive")
+        print(text_data)
+        data=json.loads(text_data)
+
+        if data["action"] == "message-sent-on-lobby":
+            self.handle_lobby_message(data)
+
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "websocket.message",
+                "message": data
+            }
+        )
+
+    async def websocket_message(self, event):
+        print("websoket_message")
+        # This is called when a message is received from the group
+        await self.send(text_data=json.dumps(event["message"]))

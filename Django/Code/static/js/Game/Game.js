@@ -28,23 +28,6 @@ export default class Game extends AComponent {
         this.#parentElement = document.getElementById("root");
         this.#spaObject = spaObject;
 
-        // event listener for window resize so that we convert display coordinates to back-end
-        window.addEventListener('resize', (event) =>
-        {
-            const w = document.documentElement.clientWidth;
-            const h = document.documentElement.clientHeight;
-
-            // we send the current window size to the back-end to handle
-            this.#socket.send(JSON.stringify({
-                'action': "window-resize-notification",
-                'player': this.#playerID,
-                'windowSize': {
-                    'w': w,
-                    'h': h
-                }
-            }))
-        })
-
         this.#socket.onmessage = (e) =>{
             const data = JSON.parse(e.data);
             const message = data['message'];
@@ -81,8 +64,6 @@ export default class Game extends AComponent {
             {
                 updateGameState(data)
             }
-
-            //console.log(message);
         };
     }
 
@@ -104,17 +85,6 @@ export default class Game extends AComponent {
                     this.hideSpinner();
                     this.initializeGame(); // Inicializa o jogo após o conteúdo ser renderizado
                 }, 1000);
-
-                //let button = document.getElementById("websocket-request-button");
-                //let inputBox = document.getElementById("websocket-request-ip-form");
-
-                // button.addEventListener("click", () => {
-                //     this.#socket.send(JSON.stringify({
-                //         'message': inputBox.value
-                //     }));
-                //
-                //     console.log("click listener activated");
-                // });
             }
         }).catch((error) => {
             console.error(error);
@@ -188,13 +158,6 @@ export default class Game extends AComponent {
             requestUpdateScoreBar();
 
             requestGameState();
-
-            // todo remove
-            //ball.update();
-            //ball.checkCollision(this.#paddleOne);
-            //ball.checkCollision(this.#paddleTwo);
-
-            //this.#aiController.update();
     
             renderer.render(scene, camera);
         }

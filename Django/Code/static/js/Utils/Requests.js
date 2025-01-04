@@ -31,6 +31,7 @@ class Requests {
         try {
             const response = await fetch(url, options);
             if (!response.ok) {
+                // todo -> exception must be caught
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const contentType = response.headers.get("content-type");

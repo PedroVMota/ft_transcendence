@@ -68,6 +68,7 @@ class Lobby(models.Model):
 
     def save(self, *args, **kwargs):
         # Create a new game if one does not already exist
+        print("SAVING LOBBY MODULE")
         if self.game is None:
             self.game = Game.objects.create()  # Adjust initialization with any required fields for Game
         super().save(*args, **kwargs)
