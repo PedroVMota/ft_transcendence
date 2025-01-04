@@ -67,6 +67,16 @@ export default class Lobby extends AComponent {
 
             let jsonMsg = JSON.parse(event.data);
 
+            if (jsonMsg['action'] === 'lobby-message-submission')
+            {
+                let msgDiv = document.getElementById('messages');
+                let newMsg = document.createElement('p');
+                newMsg.innerHTML = `<strong>Notification:</strong> ${jsonMsg['message']}`;
+                msgDiv.appendChild(newMsg);
+
+                msgDiv.appendChild(newMsg);
+                msgDiv.scrollTop = msgDiv.scrollHeight;
+            }
 
             console.log(jsonMsg);
             let type = jsonMsg['type'];
@@ -81,7 +91,6 @@ export default class Lobby extends AComponent {
                 msgDiv.scrollTop = msgDiv.scrollHeight;
                 
             }
-        
         };
     
         this.#webSocket.onerror = function (error) {
@@ -96,18 +105,18 @@ export default class Lobby extends AComponent {
 
     #setEventHandlers()
     {
-        document.getElementById('chatForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const messageInput = document.getElementById('messageInput');
-        const message = messageInput.value;
-        console.log(message);
-        ws.send(JSON.stringify({
-            'action': 'message-sent-on-lobby',
-            'lobby': lobbyId,
-            'message': message
-        }));
-        messageInput.value = '';
-        });
+        document.getElementById('chatForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value;
+            console.log(message);
+            this.#webSocket.send(JSON.stringify({
+                'action': 'message-sent-on-lobby',
+                'lobby': this.#lobbyId,
+                'message': message
+            }));
+            messageInput.value = '';
+        })
 
         const overlays = document.querySelectorAll('.overlay');
         console.log(overlays);
