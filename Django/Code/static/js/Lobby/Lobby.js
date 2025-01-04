@@ -63,16 +63,25 @@ export default class Lobby extends AComponent {
     
         this.#webSocket.onmessage = function (event) {
             console.log(`Message arrived: ${event.data}`);
-            const data = JSON.parse(event.data);
-            const messagesDiv = document.getElementById('messages');
-            const newMessage = document.createElement('p');
-            newMessage.innerHTML = `<strong>Server:</strong> ${data.message}`;
-            if (data['action'] === 'lobby-message-submission') {
-                newMessage.innerHTML = data['message'];
-                console.log("Message arrived from WebSocket");
+
+
+            let jsonMsg = JSON.parse(event.data);
+
+
+            console.log(jsonMsg);
+            let type = jsonMsg['type'];
+            if(type === 'notification')
+            {
+                let msgDiv = document.getElementById('messages');
+                let newMsg = document.createElement('p');
+                newMsg.innerHTML = `<strong>Notification:</strong> ${jsonMsg['message']}`;
+                msgDiv.appendChild(newMsg);
+
+                msgDiv.appendChild(newMsg);
+                msgDiv.scrollTop = msgDiv.scrollHeight;
+                
             }
-            messagesDiv.appendChild(newMessage);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        
         };
     
         this.#webSocket.onerror = function (error) {
