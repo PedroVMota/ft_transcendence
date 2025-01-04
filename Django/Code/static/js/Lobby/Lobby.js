@@ -1,5 +1,4 @@
 import AComponent from "../Spa/AComponent.js";
-import spa from "../Spa/Spa.js";
 
 export default class Lobby extends AComponent {
     #webSocket = null
@@ -9,7 +8,11 @@ export default class Lobby extends AComponent {
     constructor(url, spaObject, lobbyID)
     {
         super(url, spaObject);
-        this.#webSocket = new WebSocket("ws://" + window.location.host + "/ws/Monitor/Lobby/" + lobbyID + "/");
+        let protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        let host = window.location.host;
+        let path = "/ws/Monitor/Lobby/" + lobbyID + "/";
+        
+        this.#webSocket = new WebSocket(`${protocol}://${host}${path}`);
         this.#parentElement = document.getElementById("root");
         this.#lobbyId = lobbyID;
     }
@@ -19,6 +22,8 @@ export default class Lobby extends AComponent {
         console.log("Rendering Lobby");
 
         if (this.#parentElement.innerHTML !== ''){
+            this.#setWebSocketEventHandlers();
+            this.#setEventHandlers();
             console.log("Parent element not empty");
             return;
         }
@@ -32,6 +37,9 @@ export default class Lobby extends AComponent {
                 const root = newDom.getElementById("root");
                 if (!root)
                 {
+                    console.log("Root element not found in fetched HTML");
+                    this.#setWebSocketEventHandlers();
+                    this.#setEventHandlers();
                     console.error("Root not found in fetched HTML");
                     return;
                 }
@@ -44,28 +52,35 @@ export default class Lobby extends AComponent {
             .catch((error) => {
                 console.error("Error fetching HTML: ", error);
             })
+        
     }
 
-    #setWebSocketEventHandlers()
-    {
-        this.#webSocket.onmessage = function ()
-        {
+    #setWebSocketEventHandlers() {
+        console.log("Setting WebSocket event handlers");
+        this.#webSocket.onopen = function () {
             console.log('WebSocket connection established');
         };
-
+    
         this.#webSocket.onmessage = function (event) {
+            console.log(`Message arrived: ${event.data}`);
             const data = JSON.parse(event.data);
             const messagesDiv = document.getElementById('messages');
             const newMessage = document.createElement('p');
             newMessage.innerHTML = `<strong>Server:</strong> ${data.message}`;
-            if (data['action'] === 'lobby-message-submission')
-            {
+            if (data['action'] === 'lobby-message-submission') {
                 newMessage.innerHTML = data['message'];
-            console.log("message arrived from web socket")
+                console.log("Message arrived from WebSocket");
+            }
             messagesDiv.appendChild(newMessage);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-        console.log('something');
+        };
+    
+        this.#webSocket.onerror = function (error) {
+            console.error("WebSocket error: ", error);
+        };
+    
+        this.#webSocket.onclose = function () {
+            console.log('WebSocket connection closed');
         };
     }
 
