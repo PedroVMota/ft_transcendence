@@ -9,102 +9,75 @@ class Spa {
     #menu = null;
     #content = null;
     #footer = null;
-    #routes = ["/", "/Profile/", "/Friends/", "/Login/", '/Logout/', '/Game/', /^\/Profile\/\d+$/]; // Add a regex for profile IDs
     #currentRoute = null;
-    #contentClass = {
-        "/": new Home("/", this),
-        "/Profile/": new Profile("/Profile/", this),
-        "/Friends/": new Friends("/Friends/", this),
-        "/Game/": new Game("/Game/", this),
-    };
+
+    // Routes as a Map for easier handling
+    #routes = new Map([
+        ["/", () => new Home("/", this)],
+        ["/Profile/", () => new Profile("/Profile/", this)],
+        ["/Friends/", () => new Friends("/Friends/", this)],
+        ["/Game/", () => new Game("/Game/", this)],
+        [/^\/Profile\/\d+$/, (url) => {
+            const profileId = url.split("/")[2];
+            return new Profile(url, this, false, profileId);
+        }],
+        [/^\/Lobby\/[0-9a-f]{32}$/, (url) => {
+            const lobbyId = url.split("/")[2];
+            return new Lobby(url, this, lobbyId);
+        }]
+    ]);
 
     constructor() {
         this.#menu = new Menu('/Menu/', this);
         if (!this.#menu) {
             throw new Error("Menu initialization failed");
-        }
-        else{
+        } else {
             this.#menu.render();
         }
 
         this.#content = document.getElementById("root");
         if (!this.#content) {
-            console.error("Root element not found");
-            return;
+            throw new Error("Root element not found");
         }
 
         this.#footer = document.getElementById("footer");
         if (!this.#footer) {
             console.error("Footer element not found");
-            return;
         }
 
-        window.addEventListener('popstate', (event) => {
-            this.loadPage();
-        });
+        window.addEventListener('popstate', () => this.loadPage());
     }
 
     setTo(url) {
-        console.log("Setting to URL:", url);
+        console.log("Navigating to:", url);
         this.#currentRoute?.destroy();
         this.#currentRoute = null;
+
+        // Update history
         window.history.pushState({}, url, window.location.origin + url);
-        switch (url) {
-            case "/":
-                console.log("Setting to Home");
-                this.#currentRoute = this.#contentClass["/"];
+
+        // Match route dynamically
+        for (const [route, handler] of this.#routes) {
+            if (typeof route === "string" && route === url) {
+                this.#currentRoute = handler();
                 break;
-            case "/Profile/":
-                console.log("Setting to Profile");
-                this.#currentRoute = this.#contentClass["/Profile/"];
+            } else if (route instanceof RegExp && route.test(url)) {
+                this.#currentRoute = handler(url);
                 break;
-            case "/Friends/":
-                console.log("Setting to Friends");
-                this.#currentRoute = this.#contentClass["/Friends/"];
-                break;
-            case "/Game/":
-                console.log("Setting to Game");
-                this.#currentRoute = this.#contentClass["/Game/"];
-                break;
-            default:
-                console.log("CheckAnother Possible routes");
-                let isProfileWithId = url.match(/^\/profile\/\d+\/$/i);
-                let isLobbyWithId = url.match(/^\/Lobby\/[0-9a-f]{32}\/$/i) // ^Lobby/[0-9a-f]{32}$
-                console.table({
-                    "isProfileWithId": isProfileWithId,
-                    "url": url
-                })
-                if (isProfileWithId) {
-                    console.log("Setting to Profile with ID");
-                    let profileId = url.split("/")[2];
-                    this.#currentRoute = new Profile(url, this, false, profileId);
-                    this.#currentRoute.render();  // Ensure the render method is called to attach event listeners
-                }
-                else if (isLobbyWithId)
-                {
-                    console.log("Setting to Lobby with ID");
-                    let lobbyId = url.split("/")[2];
-                    this.#currentRoute = new Lobby(url, this, lobbyId);
-                    this.#currentRoute.render();
-                }
-                else {
-                    console.error("Unknown URL");
-                    return;
-                }
-                break;
+            }
         }
+
         if (this.#currentRoute) {
             this.#currentRoute.render();
+        } else {
+            console.error(`No matching route found for URL: ${url}`);
         }
     }
-
-
 
     loadPage() {
         try {
             const url = window.location.pathname;
             if (url) {
-
                 this.setTo(url);
             } else {
                 console.error("No URL found to load page");
@@ -132,6 +105,4 @@ const reloadWindow = () => {
     }
 };
 
-export { spa as default };
-export { Spa }
-export { reloadWindow };
+export { spa as default, Spa, reloadWindow };
