@@ -45,6 +45,15 @@ class Game(models.Model):
             raise Exception("Game is full")
         self.save()
 
+    def removePlayer(self, user: MyUser):
+        if user in [self.pOne, self.pTwo]:
+            if user == self.pOne:
+                self.pOne = None
+            elif user == self.pTwo:
+                self.pTwo = None
+        else:
+            raise Exception("User is not in the game")
+
     def getDict(self):
         return {
             "uuid": str(self.id),
@@ -77,13 +86,21 @@ class Lobby(models.Model):
         return f"{self.name}"
 
     def joinPlayer(self, user: MyUser):
-        if user in self.players:
+        if self.players.filter(id=user.id).exists():
             raise Exception("Already in the game")
-        if self.players < 2:
-            self.players.add(user)
-            self.game.join(user)
+        else:
+            if len(self.players.all()) < 2:
+                self.players.add(user)
+                self.game.joinPlayer(user)
+                print("added player to lobby")
         self.save()
 
+    def disconnectPlayer(self, user: MyUser):
+        if self.players.filter(id=user.id).exists():
+            self.players.remove(user)
+            self.game.removePlayer(user)
+        else:
+            raise Exception("User is not in the game")
 
     
     def getPlayerData(self):

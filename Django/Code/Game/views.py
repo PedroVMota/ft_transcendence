@@ -176,7 +176,6 @@ def createLobby(request: HttpResponse):
     print("Response Body:", response)
     return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
 
-
 @login_required
 def MyLobby(request, lobby_id=None):
     if request.method == 'GET':
@@ -189,16 +188,16 @@ def MyLobby(request, lobby_id=None):
                 lobby = Lobby.objects.get(id=lobby_id)
                 players = lobby.players.all()
 
-                # check if the user is already in the lobb
-                if (players.filter(id=request.user.id)).exists():
-                    if (len(players) == 1):
-                        print("adding player one as: ", players[0], "of type", type(players[0]))
-                        pOne = players[0].getDict()
-                    if (len(players) == 2):
-                        print("adding player two as: ", players[1])
-                        pTwo = players[1].getDict()
-                else:
+                # check if the user is already in the lobby
+                if not (players.filter(id=request.user.id)).exists():
                     lobby.joinPlayer(request.user)
+
+                if len(players) == 1:
+                    print("adding player one as: ", players[0], "of type", type(players[0]))
+                    pOne = players[0].getDict()
+                if len(players) == 2:
+                    print("adding player two as: ", players[1])
+                    pTwo = players[1].getDict()
 
             except Lobby.DoesNotExist:
                 print("Lobby not found", lobby_id)
