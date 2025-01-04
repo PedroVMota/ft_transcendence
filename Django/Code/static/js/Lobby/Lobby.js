@@ -71,7 +71,7 @@ export default class Lobby extends AComponent {
             {
                 let msgDiv = document.getElementById('messages');
                 let newMsg = document.createElement('p');
-                newMsg.innerHTML = `<strong>Notification:</strong> ${jsonMsg['message']}`;
+                newMsg.innerHTML = `<strong>${jsonMsg['user']}</strong> ${jsonMsg['message']}`;
                 msgDiv.appendChild(newMsg);
 
                 msgDiv.appendChild(newMsg);
@@ -86,7 +86,6 @@ export default class Lobby extends AComponent {
                 let newMsg = document.createElement('p');
                 newMsg.innerHTML = `<strong>Notification:</strong> ${jsonMsg['message']}`;
                 msgDiv.appendChild(newMsg);
-
                 msgDiv.appendChild(newMsg);
                 msgDiv.scrollTop = msgDiv.scrollHeight;
                 

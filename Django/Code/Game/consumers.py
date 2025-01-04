@@ -244,8 +244,9 @@ class MonitorLobbyConsumer(AsyncWebsocketConsumer):
 
 
     @staticmethod
-    def handle_lobby_message(data):
+    def handle_lobby_message(data, user):
         data["action"] = "lobby-message-submission"
+        data["user"] = user['first_name']
 
 
 
@@ -253,9 +254,11 @@ class MonitorLobbyConsumer(AsyncWebsocketConsumer):
         print("receive")
         print(text_data)
         data=json.loads(text_data)
-
+        user = await sync_to_async(self.scope["user"].getDict)()
+        print("consumer.receive printing its scope: ", user)
+        #await sync_to_async(redis_instance.set)(redis_key, serialized_data)
         if data["action"] == "message-sent-on-lobby":
-            self.handle_lobby_message(data)
+            self.handle_lobby_message(data, user['Info'])
 
         await self.channel_layer.group_send(
             self.room_group_name,
