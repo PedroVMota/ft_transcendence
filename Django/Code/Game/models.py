@@ -75,6 +75,16 @@ class Lobby(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+    def joinPlayer(self, user: MyUser):
+        if user in self.players:
+            raise Exception("Already in the game")
+        if self.players < 2:
+            self.players.add(user)
+            self.game.join(user)
+        self.save()
+
+
     
     def getPlayerData(self):
         return [player.getDict() for player in self.players.all()]

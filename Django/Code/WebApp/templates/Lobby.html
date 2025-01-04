@@ -71,22 +71,32 @@
                 <div class="col-md-8">
                     <div class="card mb-4 bg-transparent border-0">
                         <div class="card-header px-0">
-                            <h2 class="card-title text-white">Lobby: {{ lobby.Name }}</h2>
-                            <p class="card-subtitle text-white-50">Lobby ID: {{ lobby.uuid }}</p>
+                            <h2 class="card-title text-white">Lobby: {{ lobby.name }}</h2>
+                            <p class="card-subtitle text-white-50">Lobby ID: {{ lobby.id }}</p>
                         </div>
                     </div>
                     <h3 class="text-white">Players</h3>
                     <div class="row">
-                        {% for player in lobby.Players %}
-                            <div class="col-md-4 mb-3">
-                                <div class="card player-card bg-transparent position-relative border-0">
-                                    <img src="{{ player.Info.profile_picture }}" alt="Profile Picture" class="card-img-top">
-                                    <div class="overlay" data-user-code="{{ player.Info.userCode }}">
-                                        <i class="icon">Profile</i>
+                            {% if first_player %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card player-card bg-transparent position-relative border-0">
+                                      <img src="{{ first_player.Info.profile_picture }}" alt="Profile Picture" class="card-img-top">
+                                      <div class="overlay" data-user-code="{{ first_player.Info.userCode }}">
+                                          <i class="icon">Profile</i>
+                                      </div>
                                     </div>
                                 </div>
-                            </div>
-                        {% endfor %}
+                            {% endif %}
+                            {% if second_player %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card player-card bg-transparent position-relative border-0">
+                                        <img src="{{ second_player.Info.profile_picture }}" alt="Profile Picture" class="card-img-top">
+                                        <div class="overlay" data-user-code="{{ second_player.Info.userCode }}">
+                                            <i class="icon">Profile</i>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
                     </div>
                 </div>
                 <div class="col-md-4">

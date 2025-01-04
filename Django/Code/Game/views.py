@@ -188,20 +188,28 @@ def MyLobby(request, lobby_id=None):
             try:
                 lobby = Lobby.objects.get(id=lobby_id)
                 players = lobby.players.all()
-                if (len(players) == 1):
-                    print("adding player one as: ", players[0])
-                    pOne = players[0]
-                if (len(players) == 2):
-                    print("adding player two as: ", players[1])
-                    pTwo = players[1]
+
+                # check if the user is already in the lobb
+                if (players.filter(id=request.user.id)).exists():
+                    if (len(players) == 1):
+                        print("adding player one as: ", players[0], "of type", type(players[0]))
+                        pOne = players[0].getDict()
+                    if (len(players) == 2):
+                        print("adding player two as: ", players[1])
+                        pTwo = players[1].getDict()
+                else:
+                    lobby.joinPlayer(request.user)
+
             except Lobby.DoesNotExist:
                 print("Lobby not found", lobby_id)
                 return redirect("/")
+
             data = {
-                'lobby_data': lobby,
+                'lobby': lobby,
                 'first_player': pOne,
                 'second_player': pTwo
             }
+            print("rendering Lobby.html with following data: ", data)
             return render(request, 'Lobby.html', data)
 
     else:
