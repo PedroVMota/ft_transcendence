@@ -28,7 +28,7 @@ export default class Lobby extends AComponent {
         this._getHtml(url)
             .then((html) => {
                 const newDom = new DOMParser().parseFromString(html, 'text/html');
-
+                document.head.innerHTML = newDom.head.innerHTML;
                 const root = newDom.getElementById("root");
                 if (!root)
                 {
