@@ -186,16 +186,21 @@ def MyLobby(request, lobby_id=None):
             lobby = None
             try:
                 lobby = Lobby.objects.get(id=lobby_id)
+
                 players = lobby.players.all()
 
                 # check if the user is already in the lobby
                 if not (players.filter(id=request.user.id)).exists():
                     lobby.joinPlayer(request.user)
 
+                players = lobby.players.all()
+
                 if len(players) == 1:
                     print("adding player one as: ", players[0], "of type", type(players[0]))
                     pOne = players[0].getDict()
                 if len(players) == 2:
+                    print("adding player one as: ", players[0], "of type", type(players[0]))
+                    pOne = players[0].getDict()
                     print("adding player two as: ", players[1])
                     pTwo = players[1].getDict()
 
