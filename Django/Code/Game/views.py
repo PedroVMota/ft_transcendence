@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse,JsonResponse
+from norminette.rules.check_operators_spacing import lnests
+
 from Auth.models import MyUser
 from .models import Game, Lobby
 
@@ -160,6 +162,7 @@ def createLobby(request: HttpResponse):
             return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
         
         lobby = Lobby(name=lobbyName)
+        print("saving lobby with Id: ", lobby.id)
         lobby.save()
         lobby.players.add(user)  # Add the user to the players list
         response = {
@@ -185,9 +188,14 @@ def MyLobby(request, lobby_id=None):
             try:
                 lobby = Lobby.objects.get(id=lobby_id)
                 players = lobby.players.all()
-                pOne = players[0]
-                pTwo = players[1]
+                if (len(players) == 1):
+                    print("adding player one as: ", players[0])
+                    pOne = players[0]
+                if (len(players) == 2):
+                    print("adding player two as: ", players[1])
+                    pTwo = players[1]
             except Lobby.DoesNotExist:
+                print("Lobby not found", lobby_id)
                 return redirect("/")
             data = {
                 'lobby_data': lobby,
@@ -196,8 +204,9 @@ def MyLobby(request, lobby_id=None):
             }
             return render(request, 'Lobby.html', data)
 
-    try:
-        lobby = Lobby.objects.get(id=lobby_id)
-    except Lobby.DoesNotExist:
-        return render(request, 'Lobby.html',
-            {'lobby': None}) # todo -> what here?
+    else:
+        response = {
+            'error': 'Invalid request method',
+            'Lobby': None
+        }
+        return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
