@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse,JsonResponse
 from Auth.models import MyUser
 from .models import Game, Lobby
+
 import json
 from django.contrib.auth.decorators import login_required
 
@@ -172,10 +173,28 @@ def createLobby(request: HttpResponse):
     print("Response Body:", response)
     return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
 
+
 @login_required
 def MyLobby(request, lobby_id=None):
     if request.method == 'GET':
         print(" ==== GET LOBBY ==== ")
+        if request.user.is_authenticated:
+            pOne = None
+            pTwo = None
+            lobby = None
+            try:
+                lobby = Lobby.objects.get(id=lobby_id)
+                players = lobby.players.all()
+                pOne = players[0]
+                pTwo = players[1]
+            except Lobby.DoesNotExist:
+                return redirect("/")
+            data = {
+                'lobby_data': lobby,
+                'first_player': pOne,
+                'second_player': pTwo
+            }
+            return render(request, 'Lobby.html', data)
 
     try:
         lobby = Lobby.objects.get(id=lobby_id)
