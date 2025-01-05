@@ -86,7 +86,7 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
 
     @staticmethod
     def handle_paddle_move(data):
-        if gameInstance.loop.game.running:
+        if gameInstance.loop.game.playing:
             if data["player"] == 0:
                 gameInstance.loop.game.playerOne.handle_paddle_movement(data["direction"])
             elif data["player"] == 1:
@@ -186,7 +186,8 @@ class MultiplayerGame(AsyncWebsocketConsumer):
             player_one = game_model_dict["PlayerOne"]
             player_two = game_model_dict["PlayerTwo"]
 
-            activeGames[self.room_group_name] = GameInstance(player_one['Info']['userCode'], player_two['Info']['userCode'])
+            activeGames[self.room_group_name] = GameInstance(player_one['Info']['userCode'], player_two['Info']['userCode']
+                                                             ,player_one['Info']['first_name'], player_two['Info']['first_name'])
             # Send a message back to the client confirming the connection
             await self.send(text_data=json.dumps({
                 "type": "websocket.accept",
@@ -210,7 +211,7 @@ class MultiplayerGame(AsyncWebsocketConsumer):
         )
 
     async def handle_paddle_move(self, data):
-        if activeGames[self.room_group_name].loop.game.running:
+        if activeGames[self.room_group_name].loop.game.playing:
             user = await sync_to_async(self.scope["user"].getDict)()
             user_code = user["Info"]["userCode"]
             print("received handle_paddle_move from user: ", user_code)
@@ -232,14 +233,24 @@ class MultiplayerGame(AsyncWebsocketConsumer):
     def report_score_bar(self, data):
         player_one = {}
         player_two = {}
-        player_one['name'] =  activeGames[self.room_group_name].loop.game.playerOne.name
+        player_one['name'] =  activeGames[self.room_group_name].playerOneName
         player_one['score'] =  activeGames[self.room_group_name].loop.game.playerOne.score
-        player_two['name'] =  activeGames[self.room_group_name].loop.game.playerTwo.name
+        player_two['name'] =  activeGames[self.room_group_name].playerTwoName
         player_two['score'] =  activeGames[self.room_group_name].loop.game.playerTwo.score
         data['action'] = 'score-bar-report'
         data['playerOne'] = player_one
         data['playerTwo'] = player_two
 
+
+    def check_for_victories(self, data):
+        if activeGames[self.room_group_name].loop.game.playerOne.score >= 5:
+            data["action"] = "game-win"
+            data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
+            activeGames[self.room_group_name].loop.game.playing = False
+        elif activeGames[self.room_group_name].loop.game.playerTwo.score >= 5:
+            data["action"] = "game-win"
+            data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
+            activeGames[self.room_group_name].loop.game.playing = False
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -252,6 +263,17 @@ class MultiplayerGame(AsyncWebsocketConsumer):
 
         if data["action"] == "score-bar-update-request":
             self.report_score_bar(data)
+
+        if data["action"] == "check-for-victory":
+            self.check_for_victories(data)
+
+        if data["action"] == "request-pause-play":
+            print("request-pause-play")
+            if activeGames[self.room_group_name].loop.game.playing:
+                activeGames[self.room_group_name].loop.game.playing = False
+            else:
+                activeGames[self.room_group_name].loop.game.playing = True
+
 
         # Broadcast the message to all WebSocket connections in the group
         #print("sending data: ", data)

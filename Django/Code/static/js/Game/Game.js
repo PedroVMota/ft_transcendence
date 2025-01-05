@@ -74,6 +74,10 @@ export default class Game extends AComponent {
             {
                 updateGameState(data)
             }
+            if (data['action'] === 'game-win')
+            {
+                console.log("winning player was: ", data["victoriousPlayer"])
+            }
         };
     }
 
@@ -161,6 +165,12 @@ export default class Game extends AComponent {
                 'action': "game-state-request"
             }))
         }
+
+        const checkForVictories = () => {
+            this.#socket.send(JSON.stringify({
+                'action': "check-for-victory"
+            }))
+        }
         
         const animate = () => {
             requestAnimationFrame(animate);
@@ -168,6 +178,8 @@ export default class Game extends AComponent {
             requestUpdateScoreBar();
 
             requestGameState();
+
+            checkForVictories();
     
             renderer.render(scene, camera);
         }
@@ -211,6 +223,10 @@ export default class Game extends AComponent {
 
                 switch (event.key)
                 {
+                    case 'p':
+                        this.#socket.send(JSON.stringify({
+                            'action': 'request-pause-play'
+                        }))
 
                     case 'q':
                         camera.position.set(0, 0, 10);

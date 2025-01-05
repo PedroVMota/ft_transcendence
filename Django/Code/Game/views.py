@@ -228,12 +228,9 @@ def MyLobby(request, lobby_id=None):
                 players = lobby.players.all()
 
                 if len(players) == 1:
-                    print("adding player one as: ", players[0], "of type", type(players[0]))
                     pOne = players[0].getDict()
                 if len(players) == 2:
-                    print("adding player one as: ", players[0], "of type", type(players[0]))
                     pOne = players[0].getDict()
-                    print("adding player two as: ", players[1])
                     pTwo = players[1].getDict()
 
             except Lobby.DoesNotExist:
@@ -258,7 +255,9 @@ def MyLobby(request, lobby_id=None):
 @login_required
 def MyGame(request, game_id=None):
     if request.method == 'GET':
-        print(" ==== GET GAME ==== ")
-        print("request is: ", request)
+        print("get/game request is: ", request)
 
-    return render(request, 'Game.html', {'game_id': game_id})
+    return render(request, 'Game.html',
+                  {
+                      'game_id': game_id
+                  })
