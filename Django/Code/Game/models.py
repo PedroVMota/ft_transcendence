@@ -58,9 +58,9 @@ class Game(models.Model):
         return {
             "uuid": str(self.id),
             "RoomName": self.roomName,
-            "PlayerOne":  self.pOne.id if self.pOne is not None else None,
+            "PlayerOne":  self.pOne.getDict() if self.pOne is not None else None,
             
-            "PlayerTwo": self.pTwo.id if self.pTwo is not None else None,
+            "PlayerTwo": self.pTwo.getDict() if self.pTwo is not None else None,
             "Winner": self.winner.uuid if self.winner is not None else None,
             "State": self.state,
             "WebSocketId": str(self.webSocketId),

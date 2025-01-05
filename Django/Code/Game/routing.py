@@ -8,10 +8,8 @@ websocket_urlpatterns = [
 
 
 
-
-
-
     re_path(r'ws/Monitor/Lobby/(?P<lobby_id>[\w-]+)/$', consumers.MonitorLobbyConsumer.as_asgi()),
+    re_path(r'ws/Game/(?P<game_id>[\w-]+)$', consumers.MultiplayerGame.as_asgi())
 
 
 ]

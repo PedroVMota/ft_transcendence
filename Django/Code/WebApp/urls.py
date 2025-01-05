@@ -15,4 +15,6 @@ urlpatterns = [
     #re_path(r'^Lobby/(?:(?P<lobby_id>\d+)/)?$', GameViews.MyLobby, name='Lobby'),
 
     path("Lobby/<str:lobby_id>", GameViews.MyLobby, name='Lobby'),
+    path("Lobby/api/game/get/", GameViews.getGame, name='createGame'),
+    path("Game/<str:game_id>/", GameViews.MyGame, name='Game'),
 ] 

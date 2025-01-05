@@ -17,16 +17,26 @@ export default class Game extends AComponent {
     #mouseY = 0;           // Captura a posição do mouse no eixo Y
     #cameraRotationSpeed = 0.005;  // Define a velocidade de rotação da câmera
     #aiController = null;// Referência à IA
-    #socket = new WebSocket("ws://" + window.location.host + "/ws/Monitor/Game/");
+    #socket = null;
     #playerID = 0 // todo -> make this actually represent player and not be a static
     #paddleOne = new Paddle(-4.5);
     #paddleTwo = new Paddle(4.5, 0xff0000)
     #ball = new Ball()
+    #coOp = true
 
-    constructor(url, spaObject) {
+    constructor(url, spaObject, coop=true, gameId=null) {
         super(url, spaObject);
         this.#parentElement = document.getElementById("root");
         this.#spaObject = spaObject;
+        this.#coOp = coop;
+        if (gameId != null)
+        {
+            this.#socket = new WebSocket("ws://" + window.location.host + "/ws/Game/" + gameId);
+        }
+        else
+        {
+             this.#socket = new WebSocket("ws://" + window.location.host + "/ws/Monitor/Game/");
+        }
 
         this.#socket.onmessage = (e) =>{
             const data = JSON.parse(e.data);
@@ -184,6 +194,14 @@ export default class Game extends AComponent {
             ))
         }
 
+        const moveAgnosticPaddle = (direction) => {
+            this.#socket.send(JSON.stringify({
+                    'action': "paddle-move-notification",
+                    'direction': direction
+                }
+            ))
+        }
+
         const handleCameraControls = () => {
             window.addEventListener('keydown', (event) => {
                 const cameraSpeed = 0.2; // Velocidade de movimentação da câmera
@@ -263,21 +281,49 @@ export default class Game extends AComponent {
 
             if (event.key === 'ArrowUp') {
                 printCameraPositionAndRotation();
-                movePaddle1(1);
+                if (this.#coOp)
+                {
+                    movePaddle1(1);
+                }
+                else
+                {
+                    moveAgnosticPaddle(1);
+                }
                 event.preventDefault(); // Impede o comportamento padrão da seta (scroll)
             }
             if (event.key === 'ArrowDown') {
                 printCameraPositionAndRotation();
-                movePaddle1(-1);
+                if (this.#coOp)
+                {
+                    movePaddle1(-1);
+                }
+                else
+                {
+                    moveAgnosticPaddle(-1);
+                }
                 event.preventDefault(); // Impede o comportamento padrão da seta (scroll)
             }
             if (event.key === 'w' || event.key === 'W') {
                 printCameraPositionAndRotation();
-                movePaddle2(1);
+                if (this.#coOp)
+                {
+                    movePaddle2(1);
+                }
+                else
+                {
+                    moveAgnosticPaddle(1);
+                }
             }
             if (event.key === 's' || event.key === 'S') {
                 printCameraPositionAndRotation();
-                movePaddle2(-1);
+                if (this.#coOp)
+                {
+                    movePaddle2(-1);
+                }
+                else
+                {
+                    moveAgnosticPaddle(-1);
+                }
             }
             if (event.key === 'z') {
                 // Zoom in (aproxima da cena)

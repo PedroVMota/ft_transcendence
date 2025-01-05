@@ -4,6 +4,7 @@ export default class Lobby extends AComponent {
     #webSocket = null
     #parentElement = null
     #lobbyId = ''
+    #spa = null
 
     constructor(url, spaObject, lobbyID)
     {
@@ -15,6 +16,7 @@ export default class Lobby extends AComponent {
         this.#webSocket = new WebSocket(`${protocol}://${host}${path}`);
         this.#parentElement = document.getElementById("root");
         this.#lobbyId = lobbyID;
+        this.#spa = spaObject;
     }
 
     render()
@@ -120,15 +122,49 @@ export default class Lobby extends AComponent {
         const overlays = document.querySelectorAll('.overlay');
         console.log(overlays);
         overlays.forEach(overlay => {
-            overlay.addEventListener('click', function() {
+            overlay.addEventListener('click', () => {
                 console.log(overlay.dataset.userCode);
-                spa.setTo('/Profile/' + overlay.dataset.userCode + "/");
+                this.#spa.setTo('/Profile/' + overlay.dataset.userCode + "/");
             });
         });
 
         window.addEventListener('popstate', (event) => {
-            spa.loadPage();
+            this.#spa.loadPage();
         });
+
+        document.getElementById("start-game-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            const url = 'api/game/get/';
+            const data = {
+                'uuid': this.#lobbyId,
+            };
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (!response.ok)
+                {
+                    throw new Error('Network response was not ok');
+                }
+                else
+                {
+                    console.log("successfully replied");
+                    return response.json();
+                }
+            }).then(responseData => {
+                const gameUrl = '/Game/' + responseData['gameId'] + '/';
+                console.log('setting to -> ', gameUrl);
+                this.#spa.setTo(gameUrl);
+            })
+        })
+    }
+
+    destroy() {
+        this.#parentElement.innerHTML = '';
     }
 
 }

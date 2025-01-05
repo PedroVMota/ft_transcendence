@@ -24,6 +24,10 @@ class Spa {
         [/^\/Lobby\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\/?$/, (url) => {
             const lobbyId = url.split("/")[2];
             return new Lobby(url, this, lobbyId);
+        }],
+        [/^\/Game\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\/?$/, (url) => {
+            const gameId = url.split("/")[2];
+            return new Game(url, this, false, gameId);
         }]
     ]);
 

@@ -53,12 +53,17 @@ class GameLoop(threading.Thread):
 
 
 class GameInstance:
-    def __init__(self):
+    def __init__(self, p1=None, p2=None):
         self.loop = GameLoop()
         self.loop.start()
+        if p1 and p2:
+            self.playerOne = p1
+            self.playerTwo = p2
 
     def __del__(self):
         self.loop.game.running = False
         self.loop.join()
 
-gameInstance = GameInstance()
+gameInstance = GameInstance() # this one is for coop
+
+activeGames = {}

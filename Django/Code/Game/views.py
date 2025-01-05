@@ -5,6 +5,8 @@ from norminette.rules.check_operators_spacing import lnests
 from Auth.models import MyUser
 from .models import Game, Lobby
 
+#from Game.Game import activeGames
+
 import json
 from django.contrib.auth.decorators import login_required
 
@@ -164,7 +166,7 @@ def createLobby(request: HttpResponse):
         lobby = Lobby(name=lobbyName)
         print("saving lobby with Id: ", lobby.id)
         lobby.save()
-        lobby.players.add(user)  # Add the user to the players list
+        lobby.joinPlayer(user)  # Add the user to the players list
         response = {
             'message': 'Lobby created and user added',
             'Lobby': lobby.getDict()
@@ -175,6 +177,36 @@ def createLobby(request: HttpResponse):
     response = {'error': 'Invalid request method', 'Lobby': None}
     print("Response Body:", response)
     return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+
+@login_required
+def getGame(request):
+    if request.method == 'POST':
+        print("creating game")
+
+        body = json.loads(request.body)
+        print("Request Body:", body)
+
+        lobby = Lobby.objects.get(id=body['uuid'])
+        if len(lobby.players.all()) == 2:
+            lobby_dict = lobby.getDict()
+            game_id = lobby_dict['Game']['uuid']
+            print("gameId is: ", game_id)
+
+            response = {
+                'gameId': game_id,
+            }
+
+            return JsonResponse(response, status=HTTP_CODES["SUCCESS"]["CREATED"])
+        else:
+            response = {'error': 'Lobby must have two players', 'Lobby': None}
+            return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+
+    response = {
+        'error': 'Invalid request method',
+        'Lobby': None
+    }
+    return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+
 
 @login_required
 def MyLobby(request, lobby_id=None):
@@ -222,3 +254,11 @@ def MyLobby(request, lobby_id=None):
             'Lobby': None
         }
         return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+
+@login_required
+def MyGame(request, game_id=None):
+    if request.method == 'GET':
+        print(" ==== GET GAME ==== ")
+        print("request is: ", request)
+
+    return render(request, 'Game.html', {'game_id': game_id})
