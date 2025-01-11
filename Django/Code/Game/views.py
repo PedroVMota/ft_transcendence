@@ -257,7 +257,11 @@ def MyGame(request, game_id=None):
     if request.method == 'GET':
         print("get/game request is: ", request)
 
-    return render(request, 'Game.html',
-                  {
-                      'game_id': game_id
-                  })
+        lobby = Lobby.objects.filter(game=game_id)
+        if lobby.game.id == game_id:
+            return render(request, 'Game.html',
+                      {
+                          'game_id': game_id
+                    })
+        else:
+            return redirect("/")
