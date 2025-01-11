@@ -109,6 +109,18 @@ logs: ## View logs of containers in real time (Usage: make logs [service=service
 		docker-compose logs -f $(service); \
 	fi
 
+logs_container: ## View logs of a specific container in real time (Usage: make logs_container container=container_name)
+	@if [ -z "$(container)" ]; then \
+		echo -e "$(RED)Error: container name is required.$(NC)"; \
+		exit 1; \
+	fi
+	@echo -e "$(BLUE)Displaying logs from $(YELLOW)$(container)$(NC) container...$(NC)"; \
+	while true; do \
+		docker logs -f $(container); \
+		echo -e "$(RED)Container $(container) stopped. Restarting log display...$(NC)"; \
+		sleep 2; \
+	done
+
 # Remove all Docker Compose content related to this project
 removeAll: ## Remove all Docker Compose content related to this project
 	@echo -e "$(BLUE)Removing all Docker Compose content...$(NC)"
