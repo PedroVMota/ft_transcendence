@@ -156,9 +156,15 @@ export default class Lobby extends AComponent {
                     return response.json();
                 }
             }).then(responseData => {
-                const gameUrl = '/Game/' + responseData['gameId'] + '/';
-                console.log('setting to -> ', gameUrl);
-                this.#spa.setTo(gameUrl);
+                if (!responseData['error']) {
+                    const gameUrl = '/Game/' + responseData['gameId'] + '/';
+                    console.log('setting to -> ', gameUrl);
+                    this.#spa.setTo(gameUrl);
+                }
+                else
+                {
+                    window.alert(responseData['error']);
+                }
             })
         })
     }
