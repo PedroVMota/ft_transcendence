@@ -16,5 +16,6 @@ urlpatterns = [
 
     path("Lobby/<str:lobby_id>", GameViews.MyLobby, name='Lobby'),
     path("Lobby/api/game/get/", GameViews.getGame, name='createGame'),
+    path("Lobby/api/lobby/leave/", GameViews.leaveLobby, name='createGame'),
     path("Game/<str:game_id>/", GameViews.MyGame, name='Game'),
 ] 

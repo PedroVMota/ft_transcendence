@@ -96,9 +96,14 @@ class Lobby(models.Model):
         self.save()
 
     def disconnectPlayer(self, user: MyUser):
+        print("========= DISCONNECT PLAYER =========")
         if self.players.filter(id=user.id).exists():
             self.players.remove(user)
             self.game.removePlayer(user)
+            if self.game.pOne is None and self.game.pTwo is None:
+                self.game.delete()
+            if self.players.count() == 0:
+                self.delete()
         else:
             raise Exception("User is not in the game")
 

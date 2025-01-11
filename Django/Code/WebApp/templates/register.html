@@ -45,7 +45,9 @@
           <a class="btn bg-intra d-flex justify-content-center align-items-center" href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-6797340cf0815ac0286e74fb21bd6a3b9352ebf48cb8523c972b318e307f5be2&redirect_uri=https%3A%2F%2Flocalhost%2Fauth%2Fintra&response_type=code">
             <img width="50" src="https://auth.42.fr/auth/resources/yyzrk/login/students/img/42_logo.svg" alt="">
           </a>
+          <div id="feedback_server" class="text-danger"></div>
         </div>
+
       </div>
     </div>
   </div>
@@ -163,8 +165,10 @@
       body: JSON.stringify(data)
     })
       .then(response => {
+        // console.log(response.json());
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+
+          throw new Error(response.status);
         }
         return response.json();
       })
@@ -177,7 +181,9 @@
         }
       })
       .catch(error => {
-        console.error('Error during fetch:', error);
+        if(error.message == '400'){
+          document.getElementById('feedback_server').innerHTML = 'Username already taken';
+        }
       });
   });
 
@@ -186,3 +192,5 @@
 <!-- <script type="module" src="{% static 'js/Register/Register.js' %}"></script> -->
 
 {% endblock %}
+
+
