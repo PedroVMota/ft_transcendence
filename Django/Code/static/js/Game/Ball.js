@@ -1,9 +1,9 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js';
 
 export default class Ball {
-    constructor() {
+    constructor(color) {
         this.geometry = new THREE.SphereGeometry(0.1, 32, 32);
-        this.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        this.material = new THREE.MeshBasicMaterial({ color: color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.speed = { x: 0.01, y: 0.01 };
         this.maxSpeed = 0.05; // Limite máximo de velocidade para a bola

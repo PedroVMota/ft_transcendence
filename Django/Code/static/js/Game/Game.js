@@ -19,9 +19,9 @@ export default class Game extends AComponent {
     #aiController = null;// Referência à IA
     #socket = null;
     #playerID = 0 // todo -> make this actually represent player and not be a static
-    #paddleOne = new Paddle(-4.5);
-    #paddleTwo = new Paddle(4.5, 0xff0000)
-    #ball = new Ball()
+    #paddleOne = null;
+    #paddleTwo = new Paddle(4.5, 0xff0000);
+    #ball = null;
     #coOp = true
 
     constructor(url, spaObject, coop=true, gameId=null) {
@@ -29,7 +29,14 @@ export default class Game extends AComponent {
         this.#parentElement = document.getElementById("root");
         this.#spaObject = spaObject;
         this.#coOp = coop;
+
+        const savedColor = localStorage.getItem('selectedColor') || '#00ff00'; // Default to green if no color is saved
+        this.#paddleOne = new Paddle(-4.5, savedColor);
+
+        const savedBallColor = localStorage.getItem('ballColor') || '#ffffff'; // Default to white if no color is saved
+        this.#ball = new Ball(savedBallColor);
         if (gameId != null)
+            
         {
             this.#socket = new WebSocket("ws://" + window.location.host + "/ws/Game/" + gameId);
         }

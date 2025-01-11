@@ -199,6 +199,29 @@ export default class Lobby extends AComponent {
                 this.#spa.setTo("/");
             })
         })
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const colorPicker = document.getElementById('colorPicker');
+            const ballColorPicker = document.getElementById('ballColorPicker');
+    
+            // Load saved colors from local storage
+            const savedColor = localStorage.getItem('selectedColor');
+            const savedBallColor = localStorage.getItem('ballColor');
+            if (savedColor) {
+                colorPicker.value = savedColor;
+            }
+            if (savedBallColor) {
+                ballColorPicker.value = savedBallColor;
+            }
+    
+            // Save colors to local storage on change
+            colorPicker.addEventListener('input', (event) => {
+                localStorage.setItem('selectedColor', event.target.value);
+            });
+            ballColorPicker.addEventListener('input', (event) => {
+                localStorage.setItem('ballColor', event.target.value);
+            });
+        });
     }
 
     destroy() {
