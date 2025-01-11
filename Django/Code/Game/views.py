@@ -184,19 +184,30 @@ def getGame(request):
         print("creating game")
 
         body = json.loads(request.body)
-        print("Request Body:", body)
-
+        user = request.user.getDict()
         lobby = Lobby.objects.get(id=body['uuid'])
         if len(lobby.players.all()) == 2:
             lobby_dict = lobby.getDict()
-            game_id = lobby_dict['Game']['uuid']
-            print("gameId is: ", game_id)
+            player_one_user_code = lobby_dict['Players'][0]["Info"]["userCode"]
+            player_two_user_code = lobby_dict['Players'][1]["Info"]["userCode"]
+            user_code = user["Info"]["userCode"]
 
-            response = {
-                'gameId': game_id,
-            }
+            print("requesting user:", user_code, "player1:", player_one_user_code, "player2:", player_two_user_code)
 
-            return JsonResponse(response, status=HTTP_CODES["SUCCESS"]["CREATED"])
+            if user_code == player_one_user_code or user_code == player_two_user_code:
+                game_id = lobby_dict['Game']['uuid']
+
+                response = {
+                    'gameId': game_id,
+                }
+                return JsonResponse(response, status=HTTP_CODES["SUCCESS"]["CREATED"])
+            else:
+                response = {
+                    'error': 'player must be in the lobby',
+                    'Lobby': None,
+
+                }
+                return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
         else:
             response = {'error': 'Lobby must have two players', 'Lobby': None}
             return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
@@ -257,11 +268,30 @@ def MyGame(request, game_id=None):
     if request.method == 'GET':
         print("get/game request is: ", request)
 
-        lobby = Lobby.objects.filter(game=game_id)
-        if lobby.game.id == game_id:
-            return render(request, 'Game.html',
-                      {
-                          'game_id': game_id
-                    })
+        user = request.user.getDict()
+        lobby = Lobby.objects.filter(game=game_id).get()
+        print("received game id ", game_id)
+        print("lobby game id", lobby.game.id)
+        if str(lobby.game.id) == str(game_id):
+            lobby_dict = lobby.getDict()
+            player_one_user_code = lobby_dict['Players'][0]["Info"]["userCode"]
+            player_two_user_code = lobby_dict['Players'][1]["Info"]["userCode"]
+            user_code = user["Info"]["userCode"]
+
+            if user_code == player_one_user_code or user_code == player_two_user_code:
+                return render(request, 'Game.html',
+                          {
+                              'game_id': game_id
+                            })
+            else:
+                print("redirecting to: /")
+                return redirect("/")
         else:
+            print("redirecting")
             return redirect("/")
+    else:
+        response = {
+            'error': 'Invalid request method',
+            'Lobby': None
+        }
+        return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
