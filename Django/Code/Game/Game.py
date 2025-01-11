@@ -5,7 +5,7 @@ import threading
 from Game.Ball import Ball
 from Game.Player import Player
 
-from math import cos
+from math import cos, tan, pi
 from time import sleep
 
 from WebApp.views import searchUser
@@ -57,8 +57,42 @@ class GameLoop(threading.Thread):
             sleep(0.01)
 
 
+class AILoop(threading.Thread):
+    def __init__(self, gameRef):
+        super().__init__()
+        self.game: Game = gameRef
+
+    def predict_ball_position(self):
+        predicted_position = (200 - self.game.ball.xPos) * tan(self.game.ball.direction)
+
+        print("ball x pos = :", self.game.ball.xPos, "predicted pos: ", predicted_position + 50)
+
+        return predicted_position + 50
+
+    def run(self):
+        while True:
+            if self.game.running and self.game.playing:
+                self.game.ball.lock.acquire()
+                self.game.playerTwo.lock.acquire()
+                if cos(self.game.ball.direction) > 0:
+                    offset = self.predict_ball_position() - self.game.playerTwo.yPos
+                    print("got offset: ", offset)
+                    if offset < -5:
+                        self.game.playerTwo.lock.release()
+                        self.game.playerTwo.handle_paddle_movement(-1)
+                        self.game.playerTwo.lock.acquire()
+                    elif offset > 5:
+                        self.game.playerTwo.lock.release()
+                        self.game.playerTwo.handle_paddle_movement(1)
+                        self.game.playerTwo.lock.acquire()
+                self.game.ball.lock.release()
+                self.game.playerTwo.lock.release()
+            print("ai loop running")
+            sleep(1)
+
+
 class GameInstance:
-    def __init__(self, p1=None, p2=None, p1Name='Plyer One', p2Name='Plyer Two'):
+    def __init__(self, p1=None, p2=None, p1Name='Plyer One', p2Name='Plyer Two', aiIncluded=False):
         self.loop = GameLoop()
         self.loop.start()
         if p1 and p2:
@@ -68,11 +102,20 @@ class GameInstance:
             self.playerOneName = p1Name
         if p2Name:
             self.playerTwoName = p2Name
+        if aiIncluded:
+            self.aiLoop = AILoop(self.loop.game)
+            self.aiLoop.start()
+
+
 
     def __del__(self):
         self.loop.game.running = False
         self.loop.join()
+        self.aiLoop.join()
+
 
 gameInstance = GameInstance() # this one is for coop
 
 activeGames = {}
+
+aiGames = {}
