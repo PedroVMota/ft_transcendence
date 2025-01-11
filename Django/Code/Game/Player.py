@@ -6,13 +6,13 @@ from Game.Camera import Camera
 
 class Player:
     def __init__(self):
-        self.yPos = 0
+        self.yPos = 50
         self.score = 0
         self.name = 'default'
         self.window = Window()
         self.camera = Camera()
         self.lock = Lock()
-        self.speed = 4
+        self.speed = 5
 
     def handle_paddle_movement(self, direction):
         if direction < 0 and self.yPos >= 1:

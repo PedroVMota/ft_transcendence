@@ -10,7 +10,7 @@ class Ball:
         self.xPos = 100
         self.yPos = 50
         self.direction = pi # angle
-        self.speed = 1
+        self.speed = 0.5
         self.lock = Lock()
 
 
@@ -33,6 +33,7 @@ class Ball:
         self.xPos = 100
         self.yPos = 50
         self.speed = 1
+        self.direction = pi
 
 
     def check_collisions_y_axis(self):
