@@ -69,19 +69,21 @@ class UserRegistrationView(View):
     def post(self, request):
         User = get_user_model()
         try:
-            # Parse the incoming JSON body
             body = json.loads(request.body)
-            # Extract the necessary fields from the data object in the request body
             username = body.get('username')
             first_name = body.get('first_name')
             last_name = body.get('last_name')
             password = body.get('password')
-            # Check if any of the required fields are missing
+
             if not username or not first_name or not last_name or not password:
+                
                 return JsonResponse({'error': 'All fields are required: username, first_name, last_name, password'}, status=400)
             # Hash the password before creating the user
             hashed_password = make_password(password)
             # Create and save the new user
+            if(MyUser.objects.filter(username=username).exists()):
+                # throw new Error(`Registration failed: ${response.status}`);
+                return JsonResponse({'error': 'User already exists'}, status=400)
             new_user = MyUser.objects.create(
                 username=username,
                 password=hashed_password,

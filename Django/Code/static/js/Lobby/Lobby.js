@@ -1,5 +1,6 @@
 import AComponent from "../Spa/AComponent.js";
 
+
 export default class Lobby extends AComponent {
     #webSocket = null
     #parentElement = null
@@ -62,7 +63,7 @@ export default class Lobby extends AComponent {
         this.#webSocket.onopen = function () {
             console.log('WebSocket connection established');
         };
-    
+        let saveSpa = this.#spa;
         this.#webSocket.onmessage = function (event) {
             console.log(`Message arrived: ${event.data}`);
 
@@ -85,11 +86,19 @@ export default class Lobby extends AComponent {
             if(type === 'notification')
             {
                 let msgDiv = document.getElementById('messages');
+                if(!msgDiv)
+                    return;
                 let newMsg = document.createElement('p');
                 newMsg.innerHTML = `<strong>Notification:</strong> ${jsonMsg['message']}`;
                 msgDiv.appendChild(newMsg);
                 msgDiv.appendChild(newMsg);
                 msgDiv.scrollTop = msgDiv.scrollHeight;
+                
+                if (jsonMsg['data'] !== undefined){
+                    
+                    saveSpa.setTo(window.location.pathname);
+                    return;
+                }
                 
             }
         };
@@ -167,6 +176,29 @@ export default class Lobby extends AComponent {
                 }
             })
         })
+
+        document.getElementById("leave-game-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            const url = 'api/lobby/leave/';
+            const data = {
+                'id': this.#lobbyId,
+            };
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (!response.ok)
+                    throw new Error('Network response was not ok');
+                return response.json();
+            }).then(responseData => {
+                this.#webSocket.close();
+                this.#spa.setTo("/");
+            })
+        })
     }
 
     destroy() {
@@ -174,3 +206,4 @@ export default class Lobby extends AComponent {
     }
 
 }
+

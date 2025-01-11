@@ -7,6 +7,7 @@ from django.utils.decorators import sync_only_middleware
 
 from Auth.models import MyUser
 from Game.models import Game as GameModel
+from Game.models import Lobby as LobbyModel
 from django.conf import settings
 import redis
 
@@ -304,37 +305,61 @@ class MultiplayerGame(AsyncWebsocketConsumer):
 # re_path(r'ws/Lobby/(?P<lobby_id>[\w-]+)/$', consumers.LobbyConsumer.as_asgi()),
 class MonitorLobbyConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        print('self room group name: ', self.scope['url_route']['kwargs'])
         if self.scope["user"].is_anonymous:
             await self.close()
-        # check if the user has a superuser status
             if not self.scope["user"].is_superuser:
                 await self.close()
         else:
             self.room_group_name = self.scope['url_route']['kwargs']['lobby_id']
-
-            # Add the WebSocket connection to the group
             await self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name
             )
-
             await self.accept()
 
-            # Send a message back to the client confirming the connection
-            await self.send(text_data=json.dumps({
-                "type": "websocket.accept",
-                "message": "You are now connected!"
-            }))
+            lobbyusers = await sync_to_async(lambda: list(LobbyModel.objects.filter(players=self.scope['user'])))()
+            if lobbyusers:
+                print("User already in the lobby")
+                return
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "notification",
+                    "message": f"Player {self.scope['user'].first_name} has joined the lobby",
+                    "data": {
+                        "userCode": self.scope['user'].userSocialCode,
+                        "first_name": self.scope['user'].first_name,
+                        "last_name": self.scope['user'].last_name,
+                        "profile_picture": self.scope['user'].profile_picture.url,
+                    }
+                }
+            )
 
-
+    async def notification(self, event):
+        message = event['message']
+        data = event['data']
+        await self.send(text_data=json.dumps({
+            'type': 'notification',
+            'message': message,
+            'data': data
+        }))
 
     async def disconnect(self, close_code):
         # Redis key for the lobby
         redis_key = f"lobby:{self.scope['url_route']['kwargs']['lobby_id']}"
-
         # Fetch the existing data from Redis
         existing_data = await sync_to_async(redis_instance.get)(redis_key)
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "notification",
+                "message": f"Player {self.scope['user'].first_name} has left the lobby",
+                "data": {}
+            }
+        )
+        lobbyID = self.scope['url_route']['kwargs']['lobby_id']
+        lobby = await sync_to_async(LobbyModel.objects.get)(id=lobbyID)
+        await sync_to_async(lobby.disconnectPlayer)(self.scope['user'])
 
         if existing_data:
             # Decode and load the existing data
@@ -348,6 +373,8 @@ class MonitorLobbyConsumer(AsyncWebsocketConsumer):
             # Save the updated data back to Redis
             updated_data = json.dumps(lobby_data)
             await sync_to_async(redis_instance.set)(redis_key, updated_data)
+
+           
 
             print(f"Updated Lobby Data after disconnection: {updated_data}")
         else:
@@ -399,6 +426,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
+        
         # Send welcome message
         welcomeMsg = {
             'type': 'notification',

@@ -268,6 +268,9 @@ def MyGame(request, game_id=None):
     if request.method == 'GET':
         print("get/game request is: ", request)
 
+    return render(request, 'Game.html',{
+        'game_id': game_id
+    })
         user = request.user.getDict()
         lobby = Lobby.objects.filter(game=game_id).get()
         print("received game id ", game_id)
@@ -295,3 +298,23 @@ def MyGame(request, game_id=None):
             'Lobby': None
         }
         return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+
+
+@login_required
+def leaveLobby(request):
+    if request.method != 'POST':
+        print("Invalid request method")
+        return JsonResponse({'error': 'Invalid request method'}, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+    print(" ==== LEAVE LOBBY ==== ")
+    body = json.loads(request.body)
+    User: MyUser = request.user
+    print("User is: ", User)
+
+    try:
+        lobby = Lobby.objects.get(players=User)
+        lobby.disconnectPlayer(User)
+        return JsonResponse({'message': 'Player left lobby'}, status=HTTP_CODES["SUCCESS"]["OK"])
+    except Lobby.DoesNotExist:
+        return JsonResponse({'error': 'Lobby not found'}, status=HTTP_CODES["CLIENT_ERROR"]["NOT_FOUND"])
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
