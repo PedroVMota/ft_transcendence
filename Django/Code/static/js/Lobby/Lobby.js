@@ -178,7 +178,6 @@ export default class Lobby extends AComponent {
                 }
             })
         })
-
         document.getElementById("leave-game-button").addEventListener('click', (event) => {
             event.preventDefault();
             const url = 'api/lobby/leave/';
@@ -201,6 +200,7 @@ export default class Lobby extends AComponent {
                 this.#spa.setTo("/");
             })
         })
+
 
         document.addEventListener('DOMContentLoaded', (event) => {
             const colorPicker = document.getElementById('colorPicker');
