@@ -5,6 +5,8 @@ from Game.Window import Window
 from Game.Camera import Camera
 
 class Player:
+    speed: int
+
     def __init__(self):
         self.yPos = 50
         self.score = 0

@@ -5,7 +5,7 @@ import threading
 from Game.Ball import Ball
 from Game.Player import Player
 
-from math import cos, tan, pi
+from math import cos, tan, fabs
 from time import sleep
 
 from WebApp.views import searchUser
@@ -63,11 +63,37 @@ class AILoop(threading.Thread):
         self.game: Game = gameRef
 
     def predict_ball_position(self):
-        predicted_position = (200 - self.game.ball.xPos) * tan( self.game.ball.direction)
+        predicted_position = (200 - self.game.ball.xPos) * tan(self.game.ball.direction)
 
-        print("ball x pos = :", self.game.ball.xPos, "predicted pos: ", predicted_position + 50)
+        print("[predict_ball_position]")
+        print("ball pos: {", self.game.ball.xPos, ",", self.game.ball.yPos, "}")
+        print("ball angle:", self.game.ball.direction)
+        print("predicted pos: ", predicted_position + 50)
+        predicted_position += 50
 
-        return predicted_position + 50
+        while predicted_position > 200 or predicted_position < 0:
+            if predicted_position > 200:
+                predicted_position = 200 - (predicted_position - 200)
+            elif  predicted_position < 0:
+                predicted_position = fabs(predicted_position) - 200
+
+        return predicted_position
+
+    def make_ai_moves(self, target_position):
+        offset_to_target = self.game.playerOne.yPos - target_position
+        number_of_steps = offset_to_target / self.game.playerTwo.speed
+        while number_of_steps:
+            if offset_to_target < -5:
+                self.game.playerTwo.lock.release()
+                self.game.playerTwo.handle_paddle_movement(-1)
+                self.game.playerTwo.lock.acquire()
+            elif offset_to_target > 5:
+                self.game.playerTwo.lock.release()
+                self.game.playerTwo.handle_paddle_movement(1)
+                self.game.playerTwo.lock.acquire()
+            number_of_steps -= 1
+            sleep(1/number_of_steps)
+
 
     def run(self):
         while True:
@@ -88,7 +114,7 @@ class AILoop(threading.Thread):
                 self.game.ball.lock.release()
                 self.game.playerTwo.lock.release()
             print("ai loop running")
-            sleep(1)
+            #sleep(1)
 
 
 class GameInstance:
