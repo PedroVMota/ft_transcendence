@@ -74,10 +74,11 @@ class Menu extends AComponent {
     }
 
     #renderFriendRequests = (data) => {
+        console.table(data);
         let notificationsList = document.getElementById("notificationsMenu");
         let notificationBadge = document.getElementById("notificationBadge");
 
-        if(notificationBadge === undefined || notificationsList === undefined){
+        if(notificationBadge === null || notificationsList === null){
             return;
         }
     
@@ -88,7 +89,10 @@ class Menu extends AComponent {
             console.log("Condition 2: ", data.friend_requests.length);
         } else {
             notificationBadge.textContent = data.friend_requests.length;
+            console.log("Condition 3: ", data.friend_requests);
+            notificationsList.innerHTML = ''; // Clear existing notifications
             data.friend_requests.forEach((friendRequest) => {
+                console.log("Friend Request: ", friendRequest);
                 let notification = document.createElement('a');
                 notification.classList.add('dropdown-item');
                 notification.href = '#';
@@ -108,16 +112,19 @@ class Menu extends AComponent {
                     </div>
                 `;
                 notificationsList.appendChild(notification);
+
+                document.getElementById("notificationsMenu").style.display == "block" ? console.log("Block") : console.log("None");
+                document.getElementById("notificationsMenu").style.display == "block" ? document.getElementById("notificationsMenu").style.display = "none" : document.getElementById("notificationsMenu").style.display = "block";
     
                 // Add event listeners to buttons
                 document.getElementById(`acceptRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
                     e.preventDefault();
-                    let requestId = e.target.getAttribute("data-request"); // Corrected data-request attribute
+                    let requestId = e.target.getAttribute("data-request");
                     this.#manageFriendRequest(e, requestId, "accept");
                 });
                 document.getElementById(`denyRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
                     e.preventDefault();
-                    let requestId = e.target.getAttribute("data-request"); // Corrected data-request attribute
+                    let requestId = e.target.getAttribute("data-request");
                     this.#manageFriendRequest(e, requestId, "reject"); 
                 });
             });
@@ -196,12 +203,29 @@ class Menu extends AComponent {
             friends.addEventListener("click", (e) => this.navigateTo(e, "/Friends/"));
             logout.addEventListener("click", (e) => this.#logout(e));
             notificationsDropdown.addEventListener("click", (e) => {
+                console.log("Notifications clicked");
                 this.#numberofNotifications = 0;
                 this.#decoratorToggle();
-                Requests.get('/auth/token/friend/request/get/', this.#defaultHeader).then((data) => {
+                // Requests.get('/auth/token/friend/request/get/', this.#defaultHeader).then((data) => {
+                    // let notificationsList = document.getElementById("notificationsMenu");
+                    // notificationsList.innerHTML = '';
+                    // this.#renderFriendRequests(data);
+                // }).catch((error) => {
+                    // console.error(error);
+                // }
+
+                fetch('/auth/token/friend/request/get/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Assuming you have a getCookie function to retrieve CSRF tokens
+                    }
+                }).then((response) => {
+                    return response.json();
+                }).then((data) => {
+                    console.log(data);
                     let notificationsList = document.getElementById("notificationsMenu");
                     notificationsList.innerHTML = '';
-        
                     this.#renderFriendRequests(data);
                 }).catch((error) => {
                     console.error(error);

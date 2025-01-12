@@ -455,7 +455,8 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 		# Remove the user from the group
 		goodbyeMsg = {
 			'type': 'notification',
-			'message': f"{self.user.username} has left the lobby"
+			'message': f"{self.user.username} has left the lobby",
+			'data': {}
 		}
 		await self.channel_layer.group_send(
 			self.room_group_name,

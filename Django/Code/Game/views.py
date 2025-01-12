@@ -227,38 +227,33 @@ def getGame(request):
 @login_required
 def MyLobby(request, lobby_id=None):
 	if request.method == 'GET':
-		print(" ==== GET LOBBY ==== ")
+		
 		if request.user.is_authenticated:
+	
 			pOne = None
 			pTwo = None
 			lobby = None
 			try:
 				lobby = Lobby.objects.get(id=lobby_id)
-
 				players = lobby.players.all()
-
-				# check if the user is already in the lobby
+				if(lobby.isFull() and not (players.filter(id=request.user.id)).exists()):
+					return redirect("/")
 				if not (players.filter(id=request.user.id)).exists():
 					lobby.joinPlayer(request.user)
-
 				players = lobby.players.all()
-
 				if len(players) == 1:
 					pOne = players[0].getDict()
 				if len(players) == 2:
 					pOne = players[0].getDict()
 					pTwo = players[1].getDict()
-
 			except Lobby.DoesNotExist:
 				print("Lobby not found", lobby_id)
 				return redirect("/")
-
 			data = {
 				'lobby': lobby,
 				'first_player': pOne,
 				'second_player': pTwo
 			}
-			print("rendering Lobby.html with following data: ", data)
 			return render(request, 'Lobby.html', data)
 
 	else:
@@ -299,34 +294,24 @@ def MyGame(request, game_id=None):
 			'Lobby': None
 		}
 		return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
-	if request.method == 'GET':
-		print("get/game request is: ", request)
-
-	return render(request, 'Game.html',{
-		'game_id': game_id
-	})
 
 
 @login_required
-def leaveLobby(request):
-	if request.method != 'POST':
-		print("Invalid request method")
-		return JsonResponse({'error': 'Invalid request method'}, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
-	print(" ==== LEAVE LOBBY ==== ")
-	body = json.loads(request.body)
-	User: MyUser = request.user
-	print("User is: ", User)
-
-	try:
-		
-		lobby = Lobby.objects.get(players=User)
-		print("Dictionary of lobby: ", lobby.getDict())
-		lobby.disconnectPlayer(User)
-		print(f"========== LEFT LOBBY {User.first_name} ==========")
-		return JsonResponse({'message': 'Player left lobby'}, status=HTTP_CODES["SUCCESS"]["OK"])
-	except Lobby.DoesNotExist:
-		return JsonResponse({'error': 'Lobby not found'}, status=HTTP_CODES["CLIENT_ERROR"]["NOT_FOUND"])
-	except Exception as e:
-		return JsonResponse({'error': str(e)}, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
-
+def leave_lobby(request):
+    print("[LEAVE LOBBY] User")
+    user = request.user  # Ensure the user is obtained from the request
+    print(f"[LEAVE LOBBY] User: {user.id}")
+    try:
+        print("[LEAVE LOBBY] Try")
+        lobby = Lobby.objects.get(players=user)
+        print("[LEAVE LOBBY] Lobby")
+        lobby.disconnectPlayer(user)
+        print("[LEAVE LOBBY] Disconnect")
+        return JsonResponse({'message': 'Player left lobby'}, status=HTTP_CODES["SUCCESS"]["OK"])
+    except Lobby.DoesNotExist:
+        print("[LEAVE LOBBY] Lobby not found")
+        return JsonResponse({'error': 'Lobby not found'}, status=HTTP_CODES["CLIENT_ERROR"]["NOT_FOUND"])
+    except Exception as e:
+        print(f"[LEAVE LOBBY] Failed to leave lobby: {str(e)}")
+        return JsonResponse({'error': 'Failed to leave lobby'}, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
 	

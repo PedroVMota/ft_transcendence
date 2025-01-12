@@ -96,6 +96,9 @@ class Lobby(models.Model):
                 print("added player to lobby")
         self.save()
 
+    def isFull(self):
+        return self.players.count() == 2
+
     def disconnectPlayer(self, user: MyUser):
         print("========= DISCONNECT PLAYER =========")
         if self.players.filter(id=user.id).exists():
@@ -110,6 +113,7 @@ class Lobby(models.Model):
             if self.players.count() == 0:
                 print("No players left in the lobby, deleting the lobby")
                 self.delete()
+                return
             self.save()
         else:
             pass
