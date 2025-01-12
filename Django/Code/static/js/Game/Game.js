@@ -186,7 +186,7 @@ export default class Game extends AComponent {
         const animate = () => {
             requestAnimationFrame(animate);
 
-            if (!this.#finished)
+            if (true)
             {
                 requestUpdateScoreBar();
 
@@ -199,10 +199,8 @@ export default class Game extends AComponent {
         }
     
         const movePaddle1 = (direction) => {
-            let gameID = 3;
             this.#socket.send(JSON.stringify({
                     'action': "paddle-move-notification",
-                    'gameID': gameID,
                     'player': 0,
                     'direction': direction
                 }
@@ -213,9 +211,7 @@ export default class Game extends AComponent {
             let gameID = 3;
             this.#socket.send(JSON.stringify({
                     'action': "paddle-move-notification",
-                    'gameID': gameID,
-                    'player': 1,
-                    'direction': direction
+                    'player': 0,
                 }
             ))
         }
@@ -238,12 +234,10 @@ export default class Game extends AComponent {
                 switch (event.key)
                 {
                     case 'p':
-                        if (!this.#finished)
-                        {
-                            this.#socket.send(JSON.stringify({
+                        console.log("sending to web socket")
+                        this.#socket.send(JSON.stringify({
                             'action': 'request-pause-play'
-                            }))
-                        }
+                        }))
 
                     case 'q':
                         camera.position.set(0, 0, 10);
