@@ -13,6 +13,28 @@ class Menu extends AComponent {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken')
         };
+    #showNotifications = false;
+    #deployNotifications = false;
+
+
+
+    watchNotifications = () => {
+        let notificationsDropdown = document.getElementById("notificationsDropdown");
+        let notificationsMenu = document.getElementById("notificationsMenu");
+    
+        if (notificationsDropdown === null || notificationsMenu === null) {
+            return;
+        } else {
+            setInterval(() => {
+                console.log(`Notifications: ${this.#showNotifications}\n`);
+                if (this.#showNotifications) {
+                    notificationsMenu.style.display = "block";
+                } else {
+                    notificationsMenu.style.display = "none";
+                }
+            }, 500);
+        }
+    }
 
     // Increase the number of notifications or messages
     Increase = (Target, event) => {
@@ -77,17 +99,14 @@ class Menu extends AComponent {
         let notificationsList = document.getElementById("notificationsMenu");
         let notificationBadge = document.getElementById("notificationBadge");
 
-        if(notificationBadge === undefined || notificationsList === undefined){
-            return;
-        }
+        if(notificationBadge === null || notificationsList === null) { return; }
     
         if (data.friend_requests === undefined || data.friend_requests.length === 0) {
             notificationsList.innerHTML = `<li><span class="dropdown-item-text">No new notifications</span></li>`;
             notificationBadge.textContent = '0';
-            console.log("Condition 1: ", data.friend_requests);
-            console.log("Condition 2: ", data.friend_requests.length);
         } else {
             notificationBadge.textContent = data.friend_requests.length;
+            notificationsList.innerHTML = ''; // Clear existing notifications
             data.friend_requests.forEach((friendRequest) => {
                 let notification = document.createElement('a');
                 notification.classList.add('dropdown-item');
@@ -108,16 +127,18 @@ class Menu extends AComponent {
                     </div>
                 `;
                 notificationsList.appendChild(notification);
+
+               
     
                 // Add event listeners to buttons
                 document.getElementById(`acceptRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
                     e.preventDefault();
-                    let requestId = e.target.getAttribute("data-request"); // Corrected data-request attribute
+                    let requestId = e.target.getAttribute("data-request");
                     this.#manageFriendRequest(e, requestId, "accept");
                 });
                 document.getElementById(`denyRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
                     e.preventDefault();
-                    let requestId = e.target.getAttribute("data-request"); // Corrected data-request attribute
+                    let requestId = e.target.getAttribute("data-request");
                     this.#manageFriendRequest(e, requestId, "reject"); 
                 });
             });
@@ -173,6 +194,7 @@ class Menu extends AComponent {
     }
 
     render() {
+
         let url = this.getUrl();
         this._getHtml(url).then((html) => {
             let profile = document.getElementById("nav-profile");
@@ -196,12 +218,27 @@ class Menu extends AComponent {
             friends.addEventListener("click", (e) => this.navigateTo(e, "/Friends/"));
             logout.addEventListener("click", (e) => this.#logout(e));
             notificationsDropdown.addEventListener("click", (e) => {
+                console.log("Notifications clicked");
                 this.#numberofNotifications = 0;
                 this.#decoratorToggle();
-                Requests.get('/auth/token/friend/request/get/', this.#defaultHeader).then((data) => {
+
+                if(document.getElementById("notificationsMenu").style.display == "block"){
+                    this.#showNotifications = false;
+                } else {
+                    this.#showNotifications = true;
+                }
+                fetch('/auth/token/friend/request/get/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Assuming you have a getCookie function to retrieve CSRF tokens
+                    }
+                }).then((response) => {
+                    return response.json();
+                }).then((data) => {
+                    console.log(data);
                     let notificationsList = document.getElementById("notificationsMenu");
                     notificationsList.innerHTML = '';
-        
                     this.#renderFriendRequests(data);
                 }).catch((error) => {
                     console.error(error);
@@ -209,6 +246,10 @@ class Menu extends AComponent {
                 );
             });
         });
+        if(this.#deployNotifications === false){
+            this.watchNotifications();
+            this.#deployNotifications = true;
+        }
     }
 
     destroy() {

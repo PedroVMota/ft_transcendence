@@ -54,6 +54,7 @@ class Game(models.Model):
                 self.pTwo = None
         else:
             raise Exception("User is not in the game")
+        self.save()
 
     def getDict(self):
         return {
@@ -96,17 +97,27 @@ class Lobby(models.Model):
                 print("added player to lobby")
         self.save()
 
+    def isFull(self):
+        return self.players.count() == 2
+
     def disconnectPlayer(self, user: MyUser):
         print("========= DISCONNECT PLAYER =========")
         if self.players.filter(id=user.id).exists():
+            print(f"[DISCONNECT PLAYER] User {user.id} exists in the lobby")
             self.players.remove(user)
+            print(f"[DISCONNECT PLAYER] User {user.id} removed from the lobby")
             self.game.removePlayer(user)
+            print(f"[DISCONNECT PLAYER] User {user.id} removed from the game")
             if self.game.pOne is None and self.game.pTwo is None:
+                print("[DISCONNECT PLAYER] Both players are None, deleting the game")
                 self.game.delete()
             if self.players.count() == 0:
+                print("No players left in the lobby, deleting the lobby")
                 self.delete()
+                return
+            self.save()
         else:
-            raise Exception("User is not in the game")
+            pass
 
     
     def getPlayerData(self):

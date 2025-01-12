@@ -18,7 +18,7 @@ def Menu(request):
     return response
 
 
-
+from datetime import datetime
 @login_required
 def index(request):
     print(" ====  INDEX REQUEST ====")
@@ -30,9 +30,14 @@ def index(request):
         # The user is already in a lobby
         user_lobby = user_lobbies.first()
         lobby_data = user_lobby.getDict()
+
+        for key, value in lobby_data.items():
+            if isinstance(value, datetime):
+                lobby_data[key] = value.strftime('%Y-%m-%d %H:%M:%S')
         context['lobby'] = lobby_data
         context['lobbyJson'] = json.dumps(lobby_data)
         # /Lobby/6f6aeb32-9b41-4b2c-be5d-1769f2c87628
+        print(f"Redirecting to /Lobby/{user_lobby.id}")
         return redirect(f'/Lobby/{user_lobby.id}')
 
     else:

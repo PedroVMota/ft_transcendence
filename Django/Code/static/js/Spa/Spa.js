@@ -17,8 +17,9 @@ class Spa {
         ["/Profile/", () => new Profile("/Profile/", this)],
         ["/Friends/", () => new Friends("/Friends/", this)],
         ["/Game/", () => new Game("/Game/", this)],
-        [/^\/Profile\/\d+$/, (url) => {
+        [/^\/Profile\/\d+\/?$/, (url) => {
             const profileId = url.split("/")[2];
+            console.log(`Matched Profile route with ID: ${profileId}`);
             return new Profile(url, this, false, profileId);
         }],
         [/^\/Lobby\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\/?$/, (url) => {
