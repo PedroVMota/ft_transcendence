@@ -13,6 +13,28 @@ class Menu extends AComponent {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken')
         };
+    #showNotifications = false;
+    #deployNotifications = false;
+
+
+
+    watchNotifications = () => {
+        let notificationsDropdown = document.getElementById("notificationsDropdown");
+        let notificationsMenu = document.getElementById("notificationsMenu");
+    
+        if (notificationsDropdown === null || notificationsMenu === null) {
+            return;
+        } else {
+            setInterval(() => {
+                console.log(`Notifications: ${this.#showNotifications}\n`);
+                if (this.#showNotifications) {
+                    notificationsMenu.style.display = "block";
+                } else {
+                    notificationsMenu.style.display = "none";
+                }
+            }, 500);
+        }
+    }
 
     // Increase the number of notifications or messages
     Increase = (Target, event) => {
@@ -74,25 +96,18 @@ class Menu extends AComponent {
     }
 
     #renderFriendRequests = (data) => {
-        console.table(data);
         let notificationsList = document.getElementById("notificationsMenu");
         let notificationBadge = document.getElementById("notificationBadge");
 
-        if(notificationBadge === null || notificationsList === null){
-            return;
-        }
+        if(notificationBadge === null || notificationsList === null) { return; }
     
         if (data.friend_requests === undefined || data.friend_requests.length === 0) {
             notificationsList.innerHTML = `<li><span class="dropdown-item-text">No new notifications</span></li>`;
             notificationBadge.textContent = '0';
-            console.log("Condition 1: ", data.friend_requests);
-            console.log("Condition 2: ", data.friend_requests.length);
         } else {
             notificationBadge.textContent = data.friend_requests.length;
-            console.log("Condition 3: ", data.friend_requests);
             notificationsList.innerHTML = ''; // Clear existing notifications
             data.friend_requests.forEach((friendRequest) => {
-                console.log("Friend Request: ", friendRequest);
                 let notification = document.createElement('a');
                 notification.classList.add('dropdown-item');
                 notification.href = '#';
@@ -113,8 +128,7 @@ class Menu extends AComponent {
                 `;
                 notificationsList.appendChild(notification);
 
-                document.getElementById("notificationsMenu").style.display == "block" ? console.log("Block") : console.log("None");
-                document.getElementById("notificationsMenu").style.display == "block" ? document.getElementById("notificationsMenu").style.display = "none" : document.getElementById("notificationsMenu").style.display = "block";
+               
     
                 // Add event listeners to buttons
                 document.getElementById(`acceptRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
@@ -180,6 +194,7 @@ class Menu extends AComponent {
     }
 
     render() {
+
         let url = this.getUrl();
         this._getHtml(url).then((html) => {
             let profile = document.getElementById("nav-profile");
@@ -206,14 +221,12 @@ class Menu extends AComponent {
                 console.log("Notifications clicked");
                 this.#numberofNotifications = 0;
                 this.#decoratorToggle();
-                // Requests.get('/auth/token/friend/request/get/', this.#defaultHeader).then((data) => {
-                    // let notificationsList = document.getElementById("notificationsMenu");
-                    // notificationsList.innerHTML = '';
-                    // this.#renderFriendRequests(data);
-                // }).catch((error) => {
-                    // console.error(error);
-                // }
 
+                if(document.getElementById("notificationsMenu").style.display == "block"){
+                    this.#showNotifications = false;
+                } else {
+                    this.#showNotifications = true;
+                }
                 fetch('/auth/token/friend/request/get/', {
                     method: 'GET',
                     headers: {
@@ -233,6 +246,10 @@ class Menu extends AComponent {
                 );
             });
         });
+        if(this.#deployNotifications === false){
+            this.watchNotifications();
+            this.#deployNotifications = true;
+        }
     }
 
     destroy() {

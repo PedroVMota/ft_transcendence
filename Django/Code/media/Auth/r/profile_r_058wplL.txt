@@ -1,0 +1,311 @@
+import UIKit
+import GeoFire
+
+extension UIImage {
+    func resized(to size: CGSize) -> UIImage? {
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { _ in
+            self.draw(in: CGRect(origin: .zero, size: size))
+        }
+    }
+}
+
+
+protocol DriverStatusDelegate: AnyObject {
+    func didChangeDriverStatus(btn: UIButton, textLabel: UILabel);
+}
+
+
+class StatusButtonLogic: UIButton{
+    var startImage: UIImage? = UIImage(named: "PopStart")?.resize(withSize: CGSize(width: 80, height: 80))
+    var stopImage: UIImage? =  UIImage(named: "PopStop")?.resize(withSize: CGSize(width: 80, height: 80))
+    
+    func setOn(){
+        self.setImage(stopImage, for: .normal)
+    }
+    
+    func setOff(){
+        self.setImage(startImage, for: .normal)
+    }
+}
+
+
+
+
+
+class DriverData: UIView, APIViewProtocol, DragThingActionProtocol {
+    //MARK: - Driver Delegate
+    weak var delegate: DriverStatusDelegate?
+    
+    var startImage: UIImage? = UIImage(named: "PopStart")?.resize(withSize: CGSize(width: 80, height: 80))
+    var stopImage: UIImage? =  UIImage(named: "PopStop")?.resize(withSize: CGSize(width: 80, height: 80))
+    
+    //MAKR - FireBase Comunication
+    weak var geoFire: GeoFire?
+    weak var geoFireRef: DatabaseReference?
+    //MARK - API Protocol
+    var apiInteractor: APIInteractorProtocol?
+    func onAPIComplete(_ response: ResponseEnum,for API : APIEnums) {}
+    func onFailure(error: String,for API : APIEnums) {}
+    
+    // MARK: - References to the main Screen
+    var driverdata: ProfileModel?
+    
+    
+    var strLatitude: String = ""
+    var strLongitude: String = ""
+    var status = ""
+    
+    // MARK: - Rereference To of buttons
+    
+    
+    
+    
+    // MARK: - Outlets19
+    @IBOutlet weak var StatusButton: StatusButtonLogic! // Purple button
+    @IBOutlet weak var DriverDataBody: UIView! // White Body
+    @IBOutlet weak var ViewOne: UIView!
+    @IBOutlet weak var ViewTwo: UIView!
+    @IBOutlet weak var ViewThree: UIView!
+    @IBOutlet weak var ViewFour: UIView!
+    @IBOutlet weak var ViewFive: UIView!
+    @IBOutlet weak var ViewSix: UIView!
+    @IBOutlet weak var earn_week_label: UILabel!
+    @IBOutlet weak var earn_daily_label: UILabel!
+    @IBOutlet weak var vehicle_label: UILabel!
+    @IBOutlet weak var rating_label: UILabel!
+    @IBOutlet weak var driver_reference_label: UILabel!
+    @IBOutlet weak var passager_reference_label: UILabel!
+    @IBOutlet weak var labelofweek: UILabel!
+    @IBOutlet weak var labelofdaily: UILabel!
+    @IBOutlet weak var labelofplate: UILabel!
+    @IBOutlet weak var labelofrating: UILabel!
+    @IBOutlet weak var labelofcodereference: UILabel!
+    @IBOutlet weak var labelofcodereferencerider: UILabel!
+    
+    
+    lazy var lang : LanguageProtocol = {
+        return Language.default.object
+    }()
+    
+    
+    
+    // MARK: - Properties
+    private var dragThing: DragThing?
+    lazy var appDelegate  = UIApplication.shared.delegate as! AppDelegate
+    
+    // Heights for collapsed and expanded states
+    private let collapsedHeight: CGFloat = 80
+    private let expandedHeight: CGFloat = 450
+    
+    // MARK: - Update Location
+    var driverLocationTimer: Timer?
+    var isTimerStopped: Bool = false
+    
+    
+    
+    // MARK: - Initialization
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+        
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        commonInit()
+    }
+    
+    
+    private func commonInit() {
+        self.apiInteractor = APIInteractor(self)
+        guard let view = loadFromNib() else {
+            fatalError("DriverData: Failed to load view from Nib")
+        }
+        addSubview(view)
+        view.frame = self.bounds
+        view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            view.topAnchor.constraint(equalTo: self.topAnchor),
+            view.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            view.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            view.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+        ])
+        
+        
+        self.appDelegate.pushManager.registerForRemoteNotification()
+        
+        setupView()
+    }
+    
+    private func loadFromNib() -> UIView? {
+        let nibName = String(describing: type(of: self))
+        return Bundle.main.loadNibNamed(nibName, owner: self, options: nil)?.first as? UIView
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+    }
+    
+    // MARK: - Setup
+    private func setupView() {
+        // Set up the Status Button
+        setupStatusButton()
+        
+        // Initialize and configure DragThing
+        guard let driverDataBody = self.DriverDataBody else { return }
+        
+        
+        
+        self.dragThing = DragThing(
+            parentView: driverDataBody,
+            targetView: driverDataBody,
+            collapsedHeight: self.collapsedHeight,
+            expandedHeight: self.expandedHeight
+        )
+
+
+        dragThing?.actionDelegate = self
+        dragThing?.mainHeadingLabel.textColor = .ThemeMain
+        dragThing?.subHeadingLabel.textColor = .gray
+        self.DriverDataBody.clipsToBounds = true
+        
+        dragThing?.subHeadingLabel.text = "A sua nova app de mobilidade urbana!"
+        self.DriverDataBody.clipsToBounds = true
+        
+        if let dragThing = dragThing {
+            driverDataBody.addSubview(dragThing)
+            dragThing.translatesAutoresizingMaskIntoConstraints = false
+            
+            // Constrain DragThing to the top of DriverDataBody
+            NSLayoutConstraint.activate([
+                dragThing.leadingAnchor.constraint(equalTo: driverDataBody.leadingAnchor),
+                dragThing.trailingAnchor.constraint(equalTo: driverDataBody.trailingAnchor),
+                dragThing.topAnchor.constraint(equalTo: driverDataBody.topAnchor),
+                dragThing.heightAnchor.constraint(equalToConstant: 80) // Adjust the height as needed
+            ])
+        }
+        
+        
+        
+        self.labelofweek.font = iApp.PopFont.Extrabold.font(size: 12)
+        self.labelofdaily.font = iApp.PopFont.Extrabold.font(size: 12)
+        self.labelofplate.font = iApp.PopFont.Extrabold.font(size: 12)
+        self.labelofrating.font = iApp.PopFont.Extrabold.font(size: 12)
+        self.labelofcodereference.font = iApp.PopFont.Extrabold.font(size: 10)
+        self.labelofcodereferencerider.font = iApp.PopFont.Extrabold.font(size: 10)
+        
+        
+        
+        self.labelofweek.text = self.lang.earningWeekly
+        self.labelofdaily.text = self.lang.earningDaily
+        self.labelofplate.text = self.lang.vehiclePlate
+        self.labelofrating.text = self.lang.youRate
+        self.labelofcodereference.text = self.lang.yourDriverReference
+        self.labelofcodereferencerider.text = self.lang.yourClientReferenceCode
+        
+        
+        
+        
+    }
+    
+    private func setupStatusButton() {
+        // Apply constraints to fix dimensions and maintain a 1:1 ratio
+        self.StatusButton.translatesAutoresizingMaskIntoConstraints = false
+        self.applyCornerRadiusToViews()
+//        NSLayoutConstraint.activate([
+//            // Center horizontally to the Safe Area
+////            self.StatusButton.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor),
+//            
+//            // Fixed width and height of 80
+//            self.StatusButton.widthAnchor.constraint(equalToConstant: 80),
+//            self.StatusButton.heightAnchor.constraint(equalToConstant: 80),
+//        ])
+//        
+        // Set corner radius to make it circular (half of width/height)
+        DispatchQueue.main.async { [weak self] in
+            
+            
+            guard let self = self else { return }
+            self.StatusButton.layer.cornerRadius = self.StatusButton.frame.height / 2
+            self.StatusButton.clipsToBounds = true
+            
+            // Configure image scaling
+            self.StatusButton.imageView?.contentMode = .scaleAspectFit
+            self.StatusButton.contentHorizontalAlignment = .center
+            self.StatusButton.contentVerticalAlignment = .center
+            
+            // Add padding to ensure the image fits properly inside
+            let padding: CGFloat = 5 // Adjust as needed
+            self.StatusButton.imageEdgeInsets = UIEdgeInsets(top: padding, left: padding, bottom: padding, right: padding)
+            
+            if(Constants().GETVALUE(keyname: TRIP_STATUS) == "Online")
+            {
+                self.StatusButton.setImage(self.stopImage, for: .normal)
+            }
+            else{
+                self.StatusButton.setImage(self.startImage, for: .normal)
+            }
+        }
+    }
+    
+    private func applyCornerRadiusToViews() {
+        ViewOne.cornerRadius = 5
+        ViewTwo.cornerRadius = 5
+        ViewThree.cornerRadius = 5
+        ViewFour.cornerRadius = 5
+        ViewFour.cornerRadius = 5
+        ViewFive.cornerRadius  = 5
+        ViewSix.cornerRadius = 5
+    }
+    
+    
+    public func setMainHeading(str: String){
+        self.dragThing?.mainHeadingLabel.text = str;
+    }
+    
+    
+    
+    @IBAction func statusButtonTapped(_ sender: UIButton) {
+        guard let delegate = delegate else {
+            Console.error("There is a nil on delegate!")
+            return
+        }
+        
+        
+        // Safely unwrap and send labelUI to the delegate
+        if let labelUI: UILabel = self.dragThing?.mainHeadingLabel {
+            delegate.didChangeDriverStatus(btn: self.StatusButton, textLabel: labelUI)
+        } else {
+            Console.error("Error: dragThing's mainHeadingLabel is nil")
+        }
+    }
+    
+    func onClose() {}
+    
+    
+    func onOpen() {
+    
+        self.apiInteractor?.getRequest(for: APIEnums.getDriverProfile)
+            .responseJSON({ (json) in
+                UberSupport.shared.removeProgressInWindow()
+                if json.isSuccess{
+                    do {   
+                        self.driverdata = try? ProfileModel(json: json)
+                        self.earn_week_label.text = self.driverdata?.earningsByWeek
+                        self.earn_daily_label.text = self.driverdata?.earningsByDay
+                        self.vehicle_label.text = self.driverdata?.vehicle_no
+                        self.driver_reference_label.text = self.driverdata?.referral_code
+                        self.rating_label.text = self.driverdata?.rating
+                    }
+                    catch let error as NSError {
+                         AppDelegate.shared.createToastMessage(error.localizedDescription)
+                    }
+                }
+            }
+        )
+    }
+    
+}
