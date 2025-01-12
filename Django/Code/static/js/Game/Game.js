@@ -23,6 +23,7 @@ export default class Game extends AComponent {
     #paddleTwo = new Paddle(4.5, 0xff0000);
     #ball = null;
     #coOp = true
+    #finished = false
 
     constructor(url, spaObject, coop=true, gameId=null) {
         super(url, spaObject);
@@ -84,6 +85,11 @@ export default class Game extends AComponent {
                 console.log("winning player was: ", data["victoriousPlayer"])
             }
         };
+
+        this.#socket.onclose =  (e) =>
+        {
+            this.#finished = true;
+        }
     }
 
 
@@ -180,20 +186,21 @@ export default class Game extends AComponent {
         const animate = () => {
             requestAnimationFrame(animate);
 
-            requestUpdateScoreBar();
+            if (true)
+            {
+                requestUpdateScoreBar();
 
-            requestGameState();
+                requestGameState();
 
-            checkForVictories();
+                checkForVictories();
+            }
     
             renderer.render(scene, camera);
         }
     
         const movePaddle1 = (direction) => {
-            let gameID = 3;
             this.#socket.send(JSON.stringify({
                     'action': "paddle-move-notification",
-                    'gameID': gameID,
                     'player': 0,
                     'direction': direction
                 }
@@ -204,9 +211,7 @@ export default class Game extends AComponent {
             let gameID = 3;
             this.#socket.send(JSON.stringify({
                     'action': "paddle-move-notification",
-                    'gameID': gameID,
-                    'player': 1,
-                    'direction': direction
+                    'player': 0,
                 }
             ))
         }
@@ -229,6 +234,7 @@ export default class Game extends AComponent {
                 switch (event.key)
                 {
                     case 'p':
+                        console.log("sending to web socket")
                         this.#socket.send(JSON.stringify({
                             'action': 'request-pause-play'
                         }))

@@ -152,6 +152,8 @@ def Profile(request, socialCode=None):
         game_list_as_p2 = GameHistoryModel.objects.filter(playerTwo__userSocialCode=socialCode)
 
         game_list = game_list_as_p1 | game_list_as_p2
+        print("game list is:", game_list, "game list size: ", len(game_list))
+
         return render(request, 'Profile.html', {
             'user': userData,
             'friendList': friendList,

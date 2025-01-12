@@ -5,7 +5,7 @@ import threading
 from Game.Ball import Ball
 from Game.Player import Player
 
-from math import cos, tan, fabs
+from math import cos, tan, fabs, ceil
 from time import sleep
 
 from WebApp.views import searchUser
@@ -71,42 +71,62 @@ class AILoop(threading.Thread):
         # print("predicted pos: ", predicted_position + 50)
         predicted_position += 50
 
-        while predicted_position > 200 or predicted_position < 0:
-            if predicted_position > 200:
-                predicted_position = 200 - (predicted_position - 200)
+        while predicted_position > 100 or predicted_position < 0:
+            if predicted_position > 100:
+                predicted_position = 100 - (predicted_position - 100)
             elif  predicted_position < 0:
-                predicted_position = fabs(predicted_position) - 200
+                predicted_position = fabs(predicted_position)
+
+        print("returning predicted position as:", predicted_position)
 
         return predicted_position
 
     def make_ai_moves(self, target_position):
         offset_to_target = self.game.playerOne.yPos - target_position
-        number_of_steps = offset_to_target / self.game.playerTwo.speed
+        number_of_steps = ceil(fabs(offset_to_target) / self.game.playerTwo.speed)
         print("number_of_steps:", number_of_steps)
-        while number_of_steps > 0:
-            if offset_to_target < -5:
+        original_n_of_steps = number_of_steps
+        if number_of_steps <= 0:
+            self.game.ball.lock.release()
+            self.game.playerTwo.lock.release()
+            sleep(1)
+            self.game.ball.lock.acquire()
+            self.game.playerTwo.lock.acquire()
+        else:
+            while number_of_steps > 0:
+                if offset_to_target < -5:
+                    self.game.playerTwo.lock.release()
+                    self.game.playerTwo.handle_paddle_movement(1)
+                    self.game.playerTwo.lock.acquire()
+                elif offset_to_target > 5:
+                    self.game.playerTwo.lock.release()
+                    self.game.playerTwo.handle_paddle_movement(-1)
+                    self.game.playerTwo.lock.acquire()
+                number_of_steps -= 1
                 self.game.playerTwo.lock.release()
-                self.game.playerTwo.handle_paddle_movement(-1)
+                self.game.ball.lock.release()
+                sleep_time = 1 / original_n_of_steps
+                print("going to sleep ", sleep_time, " seconds")
+                sleep(sleep_time)
                 self.game.playerTwo.lock.acquire()
-            elif offset_to_target > 5:
-                self.game.playerTwo.lock.release()
-                self.game.playerTwo.handle_paddle_movement(1)
-                self.game.playerTwo.lock.acquire()
-            number_of_steps -= 1
-            sleep(1 / number_of_steps)
+                self.game.ball.lock.acquire()
 
 
     def run(self):
         while True:
+            sleep(1)
             if self.game.running and self.game.playing:
                 self.game.ball.lock.acquire()
                 self.game.playerTwo.lock.acquire()
+                should_wait = True
                 if cos(self.game.ball.direction) > 0:
                     predicted_pos = self.predict_ball_position()
                     self.make_ai_moves(predicted_pos)
+                    should_wait = False
                 self.game.ball.lock.release()
                 self.game.playerTwo.lock.release()
-            #sleep(1)
+                if should_wait:
+                    sleep(1)
 
 
 class GameInstance:
