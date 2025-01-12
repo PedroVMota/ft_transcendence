@@ -278,10 +278,9 @@ def MyGame(request, game_id=None):
 			user_code = user["Info"]["userCode"]
 
 			if user_code == player_one_user_code or user_code == player_two_user_code:
-				return render(request, 'Game.html',
-						  {
-							  'game_id': game_id
-							})
+				return render(request, 'Game.html',{
+					'game_id': game_id
+			})
 			else:
 				print("redirecting to: /")
 				return redirect("/")

@@ -79,7 +79,7 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
 	#         gameInstance.loop.game.playerOne.camera.handle_paddle_movement()
 
 	@staticmethod
-	def report_game_state(data):
+	async def report_game_state(data):
 		data["action"] = "game-state-report"
 		data["ball"] = gameInstance.loop.game.ball.get_dict()
 		data["playerOne"] = gameInstance.loop.game.playerOne.get_pos()
