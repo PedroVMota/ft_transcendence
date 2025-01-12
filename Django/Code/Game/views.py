@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse,JsonResponse
-from norminette.rules.check_operators_spacing import lnests
+
 
 from Auth.models import MyUser
 from .models import Game, Lobby
@@ -139,7 +139,6 @@ def createLobby(request: HttpResponse):
 	if request.method == 'POST':
 		user = request.user
 		user_lobbies = Lobby.objects.filter(players=user)
-		
 		if user_lobbies.exists():
 			user_lobby = user_lobbies.first()
 			response = {
@@ -163,6 +162,17 @@ def createLobby(request: HttpResponse):
 			print("Response Body:", response)
 			return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
 		
+		if(Lobby.objects.filter(name=lobbyName).exists()):
+			lobbydata = Lobby.objects.get(name=lobbyName)
+			try:
+				lobbydata.joinPlayer(user)
+				response = {
+					'message': 'User added to lobby',
+					'Lobby': lobbydata.getDict()
+				}
+				return JsonResponse(response, status=HTTP_CODES["SUCCESS"]["OK"])
+			except:
+				pass
 		lobby = Lobby(name=lobbyName)
 		print("saving lobby with Id: ", lobby.id)
 		lobby.save()
@@ -235,9 +245,11 @@ def MyLobby(request, lobby_id=None):
 			lobby = None
 			try:
 				lobby = Lobby.objects.get(id=lobby_id)
+				print(f"Lobbies: {str(lobby.id)}")
 				players = lobby.players.all()
 				if(lobby.isFull() and not (players.filter(id=request.user.id)).exists()):
 					return redirect("/")
+				
 				if not (players.filter(id=request.user.id)).exists():
 					lobby.joinPlayer(request.user)
 				players = lobby.players.all()
