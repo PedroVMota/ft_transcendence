@@ -33,24 +33,6 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
 
 			await self.accept()
 
-			user_dict = await sync_to_async(self.scope["user"].getDict)()
-			user_code = user_dict['Info']['userCode']
-
-			print("user is:", user_dict)
-
-			aiGames[user_code] = GameInstance(aiIncluded=True)
-
-			# game_model = await sync_to_async(GameModel.objects.filter)(id=self.room_group_name)
-			# game_model = await sync_to_async(game_model.get)()
-			# game_model_dict = await sync_to_async(game_model.getDict)()
-			# player_one = game_model_dict["PlayerOne"]
-			# player_two = game_model_dict["PlayerTwo"]
-			#
-			# activeGames[self.room_group_name] = GameInstance(player_one['Info']['userCode'],
-			#                                                  player_two['Info']['userCode']
-			#                                                  , player_one['Info']['first_name'],
-			#                                                  player_two['Info']['first_name'])
-
 			# Send a message back to the client confirming the connection
 			await self.send(text_data=json.dumps({
 				"type": "websocket.accept",
@@ -73,16 +55,49 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
 		)
 
 	@staticmethod
-	def report_score_bar(data, user_code):
+	def report_score_bar(data):
 		player_one = {}
 		player_two = {}
-		player_one['name'] = aiGames[user_code].loop.game.playerOne.name
-		player_one['score'] = aiGames[user_code].loop.game.playerOne.score
-		player_two['name'] = "Crazy AI"
-		player_two['score'] = aiGames[user_code].loop.game.playerTwo.score
+		player_one['name'] = gameInstance.loop.game.playerOne.name
+		player_one['score'] = gameInstance.loop.game.playerOne.score
+		player_two['name'] = gameInstance.loop.game.playerTwo.name
+		player_two['score'] = gameInstance.loop.game.playerTwo.score
 		data['action'] = 'score-bar-report'
 		data['playerOne'] = player_one
 		data['playerTwo'] = player_two
+
+	# @staticmethod
+	# def handle_movement_key_press_notification(player, key):
+	#     if player == 0:
+	#         gameInstance.loop.game.playerOne.handle_paddle_movement(key)
+	#     if player == 1:
+	#         gameInstance.loop.game.playerTwo.handle_paddle_movement(key)
+	#
+	# @staticmethod
+	# def handle_camera_key_press_notification(player, key):
+	#     if player == 0:
+	#         gameInstance.loop.game.playerOne.camera.handle_paddle_movement()
+
+	@staticmethod
+	def report_game_state(data):
+		data["action"] = "game-state-report"
+		data["ball"] = gameInstance.loop.game.ball.get_dict()
+		data["playerOne"] = gameInstance.loop.game.playerOne.get_pos()
+		data["playerTwo"] = gameInstance.loop.game.playerTwo.get_pos()
+
+		# Remove the WebSocket connection from the group
+		await self.channel_layer.group_discard(
+			self.room_group_name,
+			self.channel_name
+		)
+
+	@staticmethod
+	def handle_paddle_move(data):
+		if gameInstance.loop.game.playing:
+			if data["player"] == 0:
+				gameInstance.loop.game.playerOne.handle_paddle_movement(data["direction"])
+			elif data["player"] == 1:
+				gameInstance.loop.game.playerTwo.handle_paddle_movement(data["direction"])
 
 	@staticmethod
 	def report_game_state(data, user_code):
@@ -92,36 +107,52 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
 		data["playerTwo"] = aiGames[user_code].loop.game.playerTwo.get_pos()
 
 
-	@staticmethod
-	def handle_paddle_move(data, user_code):
-		if aiGames[user_code].loop.game.playing:
-			if data["player"] == 0:
-				aiGames[user_code].loop.game.playerOne.handle_paddle_movement(data["direction"])
-			#elif data["player"] == 1:
-			#    aiGames[user_code].loop.game.playerTwo.handle_paddle_movement(data["direction"])
+	async def receive(self, text_data):
+		print("receive")
+		# Receive and process the incoming WebSocket message
+		data = json.loads(text_data)
 
+		if data["action"] == "paddle-move-notification":
+			print("received paddle-move-notification")
+			self.handle_paddle_move(data)
 
+		if data["action"] == "game-state-request":
+			print("received game-state-request")
+			self.report_game_state(data)
 
 	async def receive(self, text_data):
 		#print("receive")
 		# Receive and process the incoming WebSocket message
 		data = json.loads(text_data)
 
-		user_dict = await sync_to_async(self.scope["user"].getDict)()
-		user_code = user_dict['Info']['userCode']
-
-		if data["action"] == "paddle-move-notification":
-			#print("received paddle-move-notification")
-			self.handle_paddle_move(data, user_code)
-
-		if data["action"] == "game-state-request":
-			#print("received game-state-request")
-			self.report_game_state(data, user_code)
-
-
 		if data["action"] == "score-bar-update-request":
-			#print("action is score-bar-update")
-			self.report_score_bar(data, user_code)
+			print("action is score-bar-update")
+			self.report_score_bar(data)
+
+		# Broadcast the message to all WebSocket connections in the group
+		print("sending data: ", data)
+		await self.channel_layer.group_send(
+			self.room_group_name,
+			{
+				"type": "websocket.message",
+				"message": data
+			}
+		)
+
+	async def websocket_message(self, event):
+		print("websoket_message")
+		# This is called when a message is received from the group
+		await self.send(text_data=json.dumps(event["message"]))
+
+	async def websocket_accept(self, event):
+		print("websocket_accept")
+		# Handle WebSocket connection accept event
+		await self.send(text_data=json.dumps(event["message"]))
+
+	async def websocket_close(self, event):
+		print("websocket_close")
+		# Handle WebSocket connection close event
+		await self.send(text_data=json.dumps(event["message"]))
 
 		if data["action"] == "request-pause-play":
 			#print("action is request-pause-play")
@@ -261,11 +292,11 @@ class MultiplayerGame(AsyncWebsocketConsumer):
 
 
 	def check_for_victories(self, data):
-		if activeGames[self.room_group_name].loop.game.playerOne.score >= 7:
+		if activeGames[self.room_group_name].loop.game.playerOne.score >= 5:
 			data["action"] = "game-win"
 			data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
 			activeGames[self.room_group_name].loop.game.playing = False
-		elif activeGames[self.room_group_name].loop.game.playerTwo.score >= 7:
+		elif activeGames[self.room_group_name].loop.game.playerTwo.score >= 5:
 			data["action"] = "game-win"
 			data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
 			activeGames[self.room_group_name].loop.game.playing = False
@@ -455,8 +486,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 		# Remove the user from the group
 		goodbyeMsg = {
 			'type': 'notification',
-			'message': f"{self.user.username} has left the lobby",
-			'data': {}
+			'message': f"{self.user.username} has left the lobby"
 		}
 		await self.channel_layer.group_send(
 			self.room_group_name,
