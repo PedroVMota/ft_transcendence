@@ -29,20 +29,13 @@ export default class Game extends AComponent {
         this.#parentElement = document.getElementById("root");
         this.#spaObject = spaObject;
         this.#coOp = coop;
-
-        const savedColor = localStorage.getItem('selectedColor') || '#00ff00'; // Default to green if no color is saved
-        this.#paddleOne = new Paddle(-4.5, savedColor);
-
-        const savedBallColor = localStorage.getItem('ballColor') || '#ffffff'; // Default to white if no color is saved
-        this.#ball = new Ball(savedBallColor);
-        if (gameId != null)
-            
-        {
-            this.#socket = new WebSocket("ws://" + window.location.host + "/ws/Game/" + gameId);
+        let protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        if (gameId != null){
+            this.#socket = new WebSocket(`${protocol}://` + window.location.host + "/ws/Game/" + gameId);
         }
         else
         {
-             this.#socket = new WebSocket("ws://" + window.location.host + "/ws/Monitor/Game/");
+             this.#socket = new WebSocket(`${protocol}://` + window.location.host + "/ws/Monitor/Game/");
         }
 
         this.#socket.onmessage = (e) =>{
