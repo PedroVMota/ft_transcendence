@@ -9,6 +9,9 @@ import json
 from utils import shell_colors
 from Game.Forms import LobbyForm
 from Game.models import Lobby
+from Game.models import GameHistory as GameHistoryModel
+
+
 
 def Menu(request):
     response = render(request, 'Components/Menu.html')
@@ -144,11 +147,17 @@ def Profile(request, socialCode=None):
         else:
             print(f"{shell_colors['BRIGHT_RED']}They are not friends{shell_colors['RESET']}")
             friend_request_status = 'rejected'
+
+        game_list_as_p1 = GameHistoryModel.objects.filter(playerOne__userSocialCode=socialCode)
+        game_list_as_p2 = GameHistoryModel.objects.filter(playerTwo__userSocialCode=socialCode)
+
+        game_list = game_list_as_p1 | game_list_as_p2
         return render(request, 'Profile.html', {
             'user': userData,
             'friendList': friendList,
             'can_edit': can_edit,
-            'friend_request_status': friend_request_status
+            'friend_request_status': friend_request_status,
+            'game_list': game_list
         })
     
     return JsonResponse({'error': 'Invalid request'}, status=400)

@@ -9,18 +9,42 @@
         </thead>
         <tbody>
             <!-- Example Game Row -->
+{#            <tr>#}
+{#                <td>#}
+{#                    <div class="d-flex flex-column">#}
+{#                        <div class="d-flex align-items-center">#}
+{#                            <span class="text-white fw-bold">PedroMotaPT</span>#}
+{#                            <span class="badge">(443)</span>#}
+{#                            <span class="ms-2">🇵🇹</span>#}
+{#                        </div>#}
+{#                        <div class="d-flex align-items-center mt-1">#}
+{#                            <span class="text-white fw-bold">devarasai9</span>#}
+{#                            <span class="badge">(493)</span>#}
+{#                            <span class="ms-2">🇮🇳</span>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </td>#}
+{#                <td>#}
+{#                    <div class="d-flex flex-column">#}
+{#                        <div>0 <span class="text-danger">🔴</span></div>#}
+{#                        <div>1 <span class="text-success">🟢</span></div>#}
+{#                    </div>#}
+{#                </td>#}
+{#                <td class="text-white">Sep 16, 2024</td>#}
+{#            </tr>#}
+        {% for game in game_list %}
             <tr>
                 <td>
                     <div class="d-flex flex-column">
                         <div class="d-flex align-items-center">
-                            <span class="text-white fw-bold">PedroMotaPT</span>
-                            <span class="badge">(443)</span>
-                            <span class="ms-2">🇵🇹</span>
+                            <span class="text-white fw-bold">{{ game.playerOne.first_name }}</span>
+                            <span class="badge">{{ game.playerOne.userSocialCode }}</span>
+                            <span>{{ game.playerOneScore }}</span>
                         </div>
                         <div class="d-flex align-items-center mt-1">
-                            <span class="text-white fw-bold">devarasai9</span>
-                            <span class="badge">(493)</span>
-                            <span class="ms-2">🇮🇳</span>
+                            <span class="text-white fw-bold">{{ game.playerOne.first_name }}</span>
+                            <span class="badge">{{ game.playerOne.userSocialCode }}</span>
+                            <span>{{ game.playerOneScore }}</span>
                         </div>
                     </div>
                 </td>
@@ -32,6 +56,7 @@
                 </td>
                 <td class="text-white">Sep 16, 2024</td>
             </tr>
+        {% endfor %}
         </tbody>
     </table>
 </div>

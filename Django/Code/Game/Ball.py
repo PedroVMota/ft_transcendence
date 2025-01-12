@@ -32,7 +32,7 @@ class Ball:
     def reset_coordinates_and_speed(self):
         self.xPos = 100
         self.yPos = 50
-        self.speed = 1
+        self.speed = 0.5
         self.direction = pi
 
 
