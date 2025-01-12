@@ -108,42 +108,102 @@ class Menu extends AComponent {
             notificationBadge.textContent = data.friend_requests.length;
             notificationsList.innerHTML = ''; // Clear existing notifications
             data.friend_requests.forEach((friendRequest) => {
-                let notification = document.createElement('a');
-                notification.classList.add('dropdown-item');
-                notification.href = '#';
-                notification.innerHTML = `
-                    <div class="d-flex align-items-center" data-idrequest="${friendRequest.request_id}">
-                        <div class="py-1 px-1">
-                            <img class="rounded-circle" src="${friendRequest.from_user_profile_picture}" width="50" height="50" alt="Profile Picture">
-                        </div>
-                        <div class="flex-grow-1 px-1">
-                            <div class="font-weight-bold">${friendRequest.from_user}</div>
-                            <div class="text-muted small">sent you a friend request.</div>
-                            <div class="mt-2">
-                                <button class="btn btn-success btn-sm mr-2" id="acceptRequest_${friendRequest.request_id}" data-request="${friendRequest.request_id}">Accept</button>
-                                <button class="btn btn-danger btn-sm" id="denyRequest_${friendRequest.request_id}" data-request="${friendRequest.request_id}">Deny</button>
+                console.log(friendRequest);
+                if(friendRequest.request_type === "friend_request"){
+                    console.log("Friend Request");
+                    let notification = document.createElement('a');
+                    notification.classList.add('dropdown-item');
+                    notification.href = '#';
+                    notification.innerHTML = `
+                        <div class="d-flex align-items-center" data-idrequest="${friendRequest.request_id}">
+                            <div class="py-1 px-1">
+                                <img class="rounded-circle" src="${friendRequest.from_user_profile_picture}" width="50" height="50" alt="Profile Picture">
+                            </div>
+                            <div class="flex-grow-1 px-1">
+                                <div class="font-weight-bold">${friendRequest.from_user}</div>
+                                <div class="text-muted small">sent you a friend request.</div>
+                                <div class="mt-2">
+                                    <button class="btn btn-success btn-sm mr-2" id="acceptRequest_${friendRequest.request_id}" data-request="${friendRequest.request_id}">Accept</button>
+                                    <button class="btn btn-danger btn-sm" id="denyRequest_${friendRequest.request_id}" data-request="${friendRequest.request_id}">Deny</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-                notificationsList.appendChild(notification);
-
-               
-    
-                // Add event listeners to buttons
-                document.getElementById(`acceptRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
-                    e.preventDefault();
-                    let requestId = e.target.getAttribute("data-request");
-                    this.#manageFriendRequest(e, requestId, "accept");
-                });
-                document.getElementById(`denyRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
-                    e.preventDefault();
-                    let requestId = e.target.getAttribute("data-request");
-                    this.#manageFriendRequest(e, requestId, "reject"); 
-                });
+                    `;
+                    notificationsList.appendChild(notification);
+                    // Add event listeners to buttons
+                    document.getElementById(`acceptRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
+                        e.preventDefault();
+                        let requestId = e.target.getAttribute("data-request");
+                        this.#manageFriendRequest(e, requestId, "accept");
+                    });
+                    document.getElementById(`denyRequest_${friendRequest.request_id}`).addEventListener("click", (e) => {
+                        e.preventDefault();
+                        let requestId = e.target.getAttribute("data-request");
+                        this.#manageFriendRequest(e, requestId, "reject"); 
+                    });
+                }
+                else if (friendRequest.request_type === "lobby_invite")
+                {
+                    console.log("Lobby Invite");
+                    let notification = document.createElement('a');
+                    notification.classList.add('dropdown-item');
+                    notification.href = '#';
+                    notification.innerHTML = `
+                        <div class="d-flex align-items-center" data-idrequest="${friendRequest.request_id}">
+                            <div class="py-1 px-1">
+                                <img class="rounded-circle" src="${friendRequest.from_user_profile_picture}" width="50" height="50" alt="Profile Picture">
+                            </div>
+                            <div class="flex-grow-1 px-1">
+                                <div class="font-weight-bold">${friendRequest.from_user}</div>
+                                <div class="text-muted small">You have a lobby invitation.</div>
+                                <div class="mt-2">
+                                    <button class="btn btn-success btn-sm mr-2" id="acceptInvite_${friendRequest.request_id}" data-id=${friendRequest.request_id} data-url="${friendRequest.requestUrl}">Accept</button>
+                                    <button class="btn btn-danger btn-sm" id="denyInvite_${friendRequest.request_id}" data-id=${friendRequest.request_id}  data-url="${friendRequest.requestUrl}">Deny</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    notificationsList.appendChild(notification);
+                    // Add event listeners to buttons
+                    document.getElementById(`acceptInvite_${friendRequest.request_id}`).addEventListener("click", (e) => {
+                        e.preventDefault();
+                        let requestId = e.target.getAttribute("data-url");
+                        this.#manageInvite(e, "accept", document.getElementById(`acceptInvite_${friendRequest.request_id}`));
+                    });
+                    document.getElementById(`denyInvite_${friendRequest.request_id}`).addEventListener("click", (e) => {
+                        e.preventDefault();
+                        let requestId = e.target.getAttribute("data-url");
+                        this.#manageInvite(e, "reject", document.getElementById(`denyInvite_${friendRequest.request_id}`));
+                    });
+                }
             });
             this.#decoratorToggle();
         }
+    }
+    #manageInvite = (e, action, div) => {
+        
+        let acceptordeny = `/auth/token/invite/manage/`;
+        let id = e.target.getAttribute("data-id");
+        fetch(acceptordeny, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken') // Assuming you have a getCookie function to retrieve CSRF tokens
+            },
+            body: JSON.stringify({
+                invite_id: id,
+                action: action
+            })
+        }).then((response) => {
+            return response.json();
+        }).then((data) => {
+            console.log(data);
+            if(action === "reject")
+                return;
+            console.table(data);
+            // console.log(`Data: ${data}`);
+            this.#spaObject.setTo(data.url);
+        })
     }
     
     #manageFriendRequest = (e, id, action) => {

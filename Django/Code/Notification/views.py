@@ -8,6 +8,10 @@ from asgiref.sync import async_to_sync
 from rest_framework import status
 from rest_framework.response import Response
 from Auth.models import MyUser
+from django.contrib.auth.decorators import login_required
+from Game.models import Lobby
+from django.http import HttpResponse
+from Game.views import HTTP_CODES
 
 # FRIEND REQUEST HANDLING
 # UTILS
@@ -72,6 +76,8 @@ def get_request(request):
         pending_requests = FriendRequest.objects.filter(to_user=request.user, status='pending')
         requests_data = [{
             'request_id': fr.id,
+            'request_type': fr.type, #output can be friend_request or lobby_invite
+            'requestUrl': fr.urlLobby if fr.urlLobby else None,
             'from_user': fr.from_user.username,
             'from_user_id': fr.from_user.id,
             'from_user_profile_picture': fr.from_user.profile_picture.url
@@ -121,6 +127,98 @@ def get_notifications(request):
         return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+def accept_invite(request, fr: FriendRequest, noti: Notification):
+    fr.status = 'accepted'
+    fr.save()
+    noti.save()
+    print(f"Invite accepted: {fr.id}")
+    return JsonResponse({
+        'message': 'Invite accepted',
+        'url': fr.urlLobby
+        })
+
+def reject_invite(fr: FriendRequest, noti: Notification):
+    fr.status = 'rejected'
+    fr.save()
+    noti.save()
+    print(f"Invite rejected: {fr.id}")
+    return JsonResponse({'message': 'Invite rejected'})
 
 
-# FRIEND REQUEST HANDLING
+
+@login_required
+def manage_invite(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=200)
+    data = json.loads(request.body)
+    print(json.dumps(data, indent=4))
+    invite_id = data.get('invite_id')
+    action = data.get('action')
+    try:
+        print("'=========== Invite ID: ", invite_id)
+        print("'=========== Invite Action: ", action)
+        fr = FriendRequest.objects.get(id=invite_id, to_user=request.user)
+    except FriendRequest.DoesNotExist:
+        return JsonResponse({'error': 'Invite not found'}, status=200)
+    
+    try:
+        invite = Notification.objects.get(fr=fr)
+    except Notification.DoesNotExist:
+        return JsonResponse({'error': 'Notification not found'}, status=200)
+
+    if action == 'accept':
+        return accept_invite(request, fr, invite)
+    elif action == 'reject':
+        return reject_invite(fr, invite)
+
+    return JsonResponse({'error': 'Invalid action'}, status=400)
+
+
+
+
+@login_required
+def inviteToLobby(request: HttpResponse, lobbyId: str):
+    if request.method != 'POST':
+        print("Invalid request method")
+        response = {'error': 'Invalid request method', 'Lobby': None}
+        return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+    if(not lobbyId):
+        print("LobbyId is required to invite")
+        response = {'error': 'LobbyId is required to invite', 'Lobby': None}
+    lobby = None
+    try:
+        print("Finding lobby")
+        lobby = Lobby.objects.get(id=lobbyId)
+    except Lobby.DoesNotExist:
+        print("Lobby not found")
+        response = {'error': 'Lobby not found', 'Lobby': None}
+        return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["NOT_FOUND"])
+    
+    print("Inviting user to lobby")
+    json_body = json.loads(request.body)
+    userCodeToInvite = json_body.get('to')
+    print(f"User code to invite: {userCodeToInvite}")
+    url= f"/Lobby/{lobbyId}"
+    try:
+        print("Creating notification")
+        request: Notification = Notification.objects.create(user=request.user, type='lobby_invite', message=f"You have been invited to a lobby", url=url)
+        request.save()
+        print("Creating friend request")
+        friendReq = FriendRequest.objects.create(from_user=request.user, to_user=MyUser.objects.get(userSocialCode=userCodeToInvite), urlLobby=url, type='lobby_invite', noti=request)
+        friendReq.save()
+        request.fr = friendReq
+        request.save()
+    except Exception as e:
+        response = {'error': f"Error inviting user to lobby: {e}", 'Lobby': None}
+        return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
+    channel = get_channel_layer()
+    async_to_sync(channel.group_send)(
+        f"user_{userCodeToInvite}",
+        {
+            'type': 'Notification',
+            'notifications': f'{request.message}'
+        }
+    )
+    response = {'message': 'User invited to lobby', 'Lobby': None}
+    return JsonResponse(response, status=HTTP_CODES["SUCCESS"]["CREATED"])
+    

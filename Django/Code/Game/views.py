@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse,JsonResponse
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 from Auth.models import MyUser
 from .models import Game, Lobby
@@ -326,3 +327,15 @@ def leave_lobby(request):
         print(f"[LEAVE LOBBY] Failed to leave lobby: {str(e)}")
         return JsonResponse({'error': 'Failed to leave lobby'}, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
 	
+
+
+#    method: 'POST',
+	# headers: {
+	#     'Content-Type': 'application/json',
+	#     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+	# },
+	# body: JSON.stringify({
+	#     'to': userCodeToInvite
+	# })
+
+from Notification.models import Notification, FriendRequest

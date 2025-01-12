@@ -202,6 +202,43 @@ export default class Lobby extends AComponent {
         })
 
 
+        document.getElementById("invite-friend-button").addEventListener('click', (event) => {
+            event.preventDefault();
+            let userCodeToInvite = window.prompt("Enter the user code of the friend you want to invite");
+            if (userCodeToInvite === null |     userCodeToInvite === '' | userCodeToInvite === undefined)
+            {
+                alert("Invalid user code");
+                return;
+            }
+            const url = `/auth/token/notification/invite/${this.#lobbyId}/`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    'to': userCodeToInvite
+                })
+            }).then(response => {
+                console.log(response);
+                if (!response.ok)
+                    throw new Error('Network response was not ok');
+                return response.json();
+            }).then(responseData => {
+                if (responseData['error'])
+                {
+                    alert(responseData['error']);
+                }
+                else
+                {
+                    alert("Invitation sent");
+                }
+            })
+        })
+
+
         document.addEventListener('DOMContentLoaded', (event) => {
             const colorPicker = document.getElementById('colorPicker');
             const ballColorPicker = document.getElementById('ballColorPicker');

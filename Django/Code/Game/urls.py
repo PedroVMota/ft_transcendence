@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/lobby/create/', views.createLobby), # Create a lobby
     path('api/lobby/information/', views.getLobbyInformation), # Get the information of the lobby
     #path('Lobby/<int:lobbyId>/', views.getLobbyInformation, name='Lobby'),
+    
 ] 
