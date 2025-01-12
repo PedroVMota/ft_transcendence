@@ -63,7 +63,7 @@ class AILoop(threading.Thread):
         self.game: Game = gameRef
 
     def predict_ball_position(self):
-        predicted_position = (200 - self.game.ball.xPos) * tan(self.game.ball.direction)
+        predicted_position = (200 - self.game.ball.xPos) * tan( self.game.ball.direction)
 
         print("ball x pos = :", self.game.ball.xPos, "predicted pos: ", predicted_position + 50)
 
