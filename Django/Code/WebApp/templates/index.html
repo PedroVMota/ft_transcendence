@@ -97,6 +97,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.Lobby) {
+                console.log(data.Lobby.uuid);
                 spa.setTo(`/Lobby/${data.Lobby.uuid}`);
             } else if (data.error) {
                 alert(data.error);

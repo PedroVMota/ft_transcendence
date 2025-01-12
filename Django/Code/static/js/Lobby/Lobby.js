@@ -96,7 +96,9 @@ export default class Lobby extends AComponent {
                 
                 if (jsonMsg['data'] !== undefined){
                     
-                    saveSpa.setTo(window.location.pathname);
+                    setTimeout(() => {
+                        saveSpa.setTo(window.location.pathname);
+                    }, 500);
                     return;
                 }
                 
