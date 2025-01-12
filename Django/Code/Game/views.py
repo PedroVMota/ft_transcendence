@@ -267,10 +267,6 @@ def MyLobby(request, lobby_id=None):
 def MyGame(request, game_id=None):
     if request.method == 'GET':
         print("get/game request is: ", request)
-
-    return render(request, 'Game.html',{
-        'game_id': game_id
-    })
         user = request.user.getDict()
         lobby = Lobby.objects.filter(game=game_id).get()
         print("received game id ", game_id)
