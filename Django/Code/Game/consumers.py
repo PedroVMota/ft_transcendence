@@ -8,6 +8,7 @@ from django.utils.decorators import sync_only_middleware
 from Auth.models import MyUser
 from Game.models import Game as GameModel
 from Game.models import Lobby as LobbyModel
+from Game.models import GameHistory as GameHistoryModel
 from django.conf import settings
 import redis
 
@@ -59,13 +60,15 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         print("disconnect")
-
+        user_dict = await sync_to_async(self.scope["user"].getDict)()
+        user_code = user_dict['Info']['userCode']
+        if aiGames[user_code] is not None:
+            aiGames[user_code].delete()
         # Send a disconnect message (optional)
         await self.send(text_data=json.dumps({
             "type": "websocket.close",
             "message": f"You have been disconnected! Code: {close_code}"
         }))
-
         # Remove the WebSocket connection from the group
         await self.channel_layer.group_discard(
             self.room_group_name,
@@ -221,6 +224,8 @@ class MultiplayerGame(AsyncWebsocketConsumer):
             "type": "websocket.close",
             "message": f"You have been disconnected! Code: {close_code}"
         }))
+        if activeGames[self.room_group_name] is not None:
+            activeGames[self.room_group_name].delete()
 
         # Remove the WebSocket connection from the group
         await self.channel_layer.group_discard(
@@ -259,16 +264,36 @@ class MultiplayerGame(AsyncWebsocketConsumer):
         data['playerOne'] = player_one
         data['playerTwo'] = player_two
 
+    async def register_to_history(self, winner):
+        game_model = await sync_to_async(GameModel.objects.filter)(id=self.room_group_name)
+        game_model = await sync_to_async(game_model.get)()
+        p1_score = activeGames[self.room_group_name].loop.game.playerOne.score
+        p2_score = activeGames[self.room_group_name].loop.game.playerTwo.score
+        winner_p = None
+        if winner == 1:
+            winner_p = game_model.pOne
+        elif winner == 2:
+            winner_p = game_model.pTwo
+        history = GameHistoryModel(game_id=str(game_model.id), playerOne=game_model.pOne, playerTwo=game_model.pTwo, winner=winner_p, playerOneScore=p1_score, playerTwoScore=p2_score)
+        history.save()
+
 
     def check_for_victories(self, data):
+        winner_n = 0
         if activeGames[self.room_group_name].loop.game.playerOne.score >= 7:
             data["action"] = "game-win"
             data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
             activeGames[self.room_group_name].loop.game.playing = False
+            winner_n = 1
         elif activeGames[self.room_group_name].loop.game.playerTwo.score >= 7:
             data["action"] = "game-win"
             data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
             activeGames[self.room_group_name].loop.game.playing = False
+            winner_n = 2
+        if winner_n != 0:
+            print("registering-to-history")
+            self.register_to_history(winner_n)
+            self.close(0)
 
     async def receive(self, text_data):
         data = json.loads(text_data)

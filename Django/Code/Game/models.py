@@ -1,3 +1,4 @@
+from email.policy import default
 from typing import Iterable
 from Auth.models import MyUser
 from django.db import models
@@ -123,4 +124,12 @@ class Lobby(models.Model):
         }
     
 
+class GameHistory(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
+    game_id = models.CharField(default="")
+    playerOne = models.ForeignKey(MyUser, related_name='playerOne', on_delete=models.CASCADE, null=True, blank=True)
+    playerTwo = models.ForeignKey(MyUser, related_name='playerTwo', on_delete=models.CASCADE, null=True, blank=True)
+    winner = models.ForeignKey(MyUser, related_name="winner", on_delete=models.CASCADE, null=True, blank=True)
+    playerOneScore = models.IntegerField(default=0)
+    playerTwoScore = models.IntegerField(default=0)
     
