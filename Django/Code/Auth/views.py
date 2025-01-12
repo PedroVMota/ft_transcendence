@@ -20,6 +20,8 @@ from Auth.models import MyUser
 from utils import shell_colors
 import requests
 
+import string
+
 @method_decorator(csrf_exempt, name='dispatch')
 class UserLoginAPIView(View):
     def post(self, request):
@@ -75,8 +77,11 @@ class UserRegistrationView(View):
             last_name = body.get('last_name')
             password = body.get('password')
 
+            if len(password) < 8 or (not any(char in string.punctuation for char in password) or not any(char.isdigit() for char in password)
+                return JsonResponse({'error': 'Invalid Password'}, status=400)
+
+
             if not username or not first_name or not last_name or not password:
-                
                 return JsonResponse({'error': 'All fields are required: username, first_name, last_name, password'}, status=400)
             # Hash the password before creating the user
             hashed_password = make_password(password)
