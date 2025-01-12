@@ -221,6 +221,15 @@ export default class Friends extends AComponent {
         this.#performSearch(form, data, searchResults);
     }
 
+    #showErrorMessage(searchResults, message) {
+        searchResults.innerHTML = `
+            <div class="alert alert-danger text-blue" role="alert">
+                ${message}
+            </div>
+        `;
+    }
+
+
     async #performSearch(form, data, searchResults) {
         try {
             const response = await fetch("/searchUser/", {
@@ -231,15 +240,29 @@ export default class Friends extends AComponent {
                 },
                 body: JSON.stringify(data)
             });
-
+    
+            if (!response.ok) {
+                // Handle non-200 responses
+                if (response.status === 400) {
+                    this.#showErrorMessage(searchResults, 'Unable to find the player. Please check the information provided.');
+                } else {
+                    this.#showErrorMessage(searchResults, 'An unexpected error occurred. Please try again later.');
+                }
+                return;
+            }
+    
             const result = await response.json();
             if (result && result.user && result.user.Info) {
                 this.#renderSearchResults(result.user, searchResults);
+            } else {
+                this.#showErrorMessage(searchResults, 'No player found with the provided information.');
             }
         } catch (error) {
             console.error('Error during search:', error);
+            this.#showErrorMessage(searchResults, 'Unable to complete the search. Please try again later.');
         }
     }
+    
 
     #renderSearchResults(user, searchResults) {
         const searchResultsList = document.getElementById('search-results-list');
