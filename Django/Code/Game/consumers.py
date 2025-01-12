@@ -374,9 +374,6 @@ class MonitorLobbyConsumer(AsyncWebsocketConsumer):
 				"data": {}
 			}
 		)
-		lobbyID = self.scope['url_route']['kwargs']['lobby_id']
-		lobby = await sync_to_async(LobbyModel.objects.get)(id=lobbyID)
-		await sync_to_async(lobby.disconnectPlayer)(self.scope['user'])
 
 		if existing_data:
 			# Decode and load the existing data
