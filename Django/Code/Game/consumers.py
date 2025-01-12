@@ -88,11 +88,23 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
 		data["playerOne"] = gameInstance.loop.game.playerOne.get_pos()
 		data["playerTwo"] = gameInstance.loop.game.playerTwo.get_pos()
 
-		# Remove the WebSocket connection from the group
-		await self.channel_layer.group_discard(
-			self.room_group_name,
-			self.channel_name
-		)
+    async def disconnect(self, close_code):
+        print("disconnect")
+        user_dict = await sync_to_async(self.scope["user"].getDict)()
+        user_code = user_dict['Info']['userCode']
+        if aiGames[user_code] is not None:
+            del aiGames[user_code]
+            aiGames.pop(user_code)
+        # Send a disconnect message (optional)
+        await self.send(text_data=json.dumps({
+            "type": "websocket.close",
+            "message": f"You have been disconnected! Code: {close_code}"
+        }))
+        # Remove the WebSocket connection from the group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
 
 	@staticmethod
 	def handle_paddle_move(data):
@@ -215,14 +227,15 @@ LobbyData = {
 }
 
 class MultiplayerGame(AsyncWebsocketConsumer):
-	async def connect(self):
-		if self.scope["user"].is_anonymous:
-			await self.close()
-		# check if the user has a superuser status
-			if not self.scope["user"].is_superuser:
-				await self.close()
-		else:
-			self.room_group_name = self.scope['url_route']['kwargs']['game_id']
+    async def connect(self):
+        self.finished = False
+        if self.scope["user"].is_anonymous:
+            await self.close()
+        # check if the user has a superuser status
+            if not self.scope["user"].is_superuser:
+                await self.close()
+        else:
+            self.room_group_name = self.scope['url_route']['kwargs']['game_id']
 
 			# Add the WebSocket connection to the group
 			await self.channel_layer.group_add(
@@ -247,16 +260,17 @@ class MultiplayerGame(AsyncWebsocketConsumer):
 			}))
 
 
-	async def disconnect(self, close_code):
-		print("disconnect")
+    async def disconnect(self, close_code):
+        print("DISCONNECTING")
 
-		# Send a disconnect message (optional)
-		await self.send(text_data=json.dumps({
-			"type": "websocket.close",
-			"message": f"You have been disconnected! Code: {close_code}"
-		}))
-		if activeGames[self.room_group_name] is not None:
-			activeGames[self.room_group_name].delete()
+        # Send a disconnect message (optional)
+        await self.send(text_data=json.dumps({
+            "type": "websocket.close",
+            "message": f"You have been disconnected! Code: {close_code}"
+        }))
+        if activeGames[self.room_group_name] is not None:
+            del activeGames[self.room_group_name]
+            #activeGames.pop(self.room_group_name)
 
 		# Remove the WebSocket connection from the group
 		await self.channel_layer.group_discard(
@@ -309,44 +323,46 @@ class MultiplayerGame(AsyncWebsocketConsumer):
 		history.save()
 
 
-	def check_for_victories(self, data):
-		winner_n = 0
-		if activeGames[self.room_group_name].loop.game.playerOne.score >= 7:
-			data["action"] = "game-win"
-			data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
-			activeGames[self.room_group_name].loop.game.playing = False
-			winner_n = 1
-		elif activeGames[self.room_group_name].loop.game.playerTwo.score >= 7:
-			data["action"] = "game-win"
-			data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
-			activeGames[self.room_group_name].loop.game.playing = False
-			winner_n = 2
-		if winner_n != 0:
-			print("registering-to-history")
-			self.register_to_history(winner_n)
-			self.close(0)
+    async def check_for_victories(self, data):
+        winner_n = 0
+        if activeGames[self.room_group_name].loop.game.playerOne.score >= 7:
+            data["action"] = "game-win"
+            data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
+            activeGames[self.room_group_name].loop.game.playing = False
+            winner_n = 1
+        elif activeGames[self.room_group_name].loop.game.playerTwo.score >= 7:
+            data["action"] = "game-win"
+            data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
+            activeGames[self.room_group_name].loop.game.playing = False
+            winner_n = 2
+        if winner_n != 0:
+            print("registering-to-history")
+            await self.register_to_history(winner_n)
+            self.finished = True
+            await self.close(1000)
 
 	async def receive(self, text_data):
 		data = json.loads(text_data)
 
-		if data["action"] == "paddle-move-notification":
-			await self.handle_paddle_move(data)
+        if not self.finished:
+            if data["action"] == "paddle-move-notification":
+                await self.handle_paddle_move(data)
 
-		if data["action"] == "game-state-request":
-			self.report_game_state(data)
+            if data["action"] == "game-state-request":
+                self.report_game_state(data)
 
-		if data["action"] == "score-bar-update-request":
-			self.report_score_bar(data)
+            if data["action"] == "score-bar-update-request":
+                self.report_score_bar(data)
 
-		if data["action"] == "check-for-victory":
-			self.check_for_victories(data)
+            if data["action"] == "check-for-victory":
+                await self.check_for_victories(data)
 
-		if data["action"] == "request-pause-play":
-			print("request-pause-play")
-			if activeGames[self.room_group_name].loop.game.playing:
-				activeGames[self.room_group_name].loop.game.playing = False
-			else:
-				activeGames[self.room_group_name].loop.game.playing = True
+            if data["action"] == "request-pause-play":
+                print("request-pause-play")
+                if activeGames[self.room_group_name].loop.game.playing:
+                    activeGames[self.room_group_name].loop.game.playing = False
+                else:
+                    activeGames[self.room_group_name].loop.game.playing = True
 
 
 		# Broadcast the message to all WebSocket connections in the group

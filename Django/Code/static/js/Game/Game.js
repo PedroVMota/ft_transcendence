@@ -23,6 +23,7 @@ export default class Game extends AComponent {
     #paddleTwo = new Paddle(4.5, 0xff0000);
     #ball = null;
     #coOp = true
+    #finished = false
 
     constructor(url, spaObject, coop=true, gameId=null) {
         super(url, spaObject);
@@ -84,6 +85,11 @@ export default class Game extends AComponent {
                 console.log("winning player was: ", data["victoriousPlayer"])
             }
         };
+
+        this.#socket.onclose =  (e) =>
+        {
+            this.#finished = true;
+        }
     }
 
 
@@ -180,11 +186,14 @@ export default class Game extends AComponent {
         const animate = () => {
             requestAnimationFrame(animate);
 
-            requestUpdateScoreBar();
+            if (!this.#finished)
+            {
+                requestUpdateScoreBar();
 
-            requestGameState();
+                requestGameState();
 
-            checkForVictories();
+                checkForVictories();
+            }
     
             renderer.render(scene, camera);
         }
@@ -229,9 +238,12 @@ export default class Game extends AComponent {
                 switch (event.key)
                 {
                     case 'p':
-                        this.#socket.send(JSON.stringify({
+                        if (!this.#finished)
+                        {
+                            this.#socket.send(JSON.stringify({
                             'action': 'request-pause-play'
-                        }))
+                            }))
+                        }
 
                     case 'q':
                         camera.position.set(0, 0, 10);
