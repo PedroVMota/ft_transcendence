@@ -84,7 +84,8 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         print("disconnect")
-        user_dict = await sync_to_async(self.scope["user"].getDict)()
+        user_model = await sync_to_async(self.scope["user"].get)()
+        user_dict = await sync_to_async(user_model.getDict)()
         user_code = user_dict['Info']['userCode']
         if aiGames[user_code] is not None:
             del aiGames[user_code]
@@ -186,7 +187,9 @@ LobbyData = {
 
 class MultiplayerGame(AsyncWebsocketConsumer):
     def __init__(self):
+        super().__init__()
         self.created = False
+        self.room_group_name = ""
 
     async def connect(self):
         self.finished = False
@@ -275,15 +278,19 @@ class MultiplayerGame(AsyncWebsocketConsumer):
     async def register_to_history(self, winner):
         game_model = await sync_to_async(GameModel.objects.filter)(id=self.room_group_name)
         game_model = await sync_to_async(game_model.get)()
+        game_dict = await sync_to_async(game_model.getDict)()
         p1_score = activeGames[self.room_group_name].loop.game.playerOne.score
         p2_score = activeGames[self.room_group_name].loop.game.playerTwo.score
         winner_p = None
+        print("type is", type(game_model))
         if winner == 1:
-            winner_p = game_model.pOne
+            winner_p = game_dict['PlayerOne']
         elif winner == 2:
-            winner_p = game_model.pTwo
-        history = GameHistoryModel(game_id=str(game_model.id), playerOne=game_model.pOne, playerTwo=game_model.pTwo, winner=winner_p, playerOneScore=p1_score, playerTwoScore=p2_score)
-        history.save()
+            winner_p = game_dict['PlayerTwo']
+        p_one = game_dict['PlayerOne']
+        p_two = game_dict['PlayerTwo']
+        history = GameHistoryModel(game_id=str(game_model.id), playerOne=str(p_one), playerTwo=str(p_two), winner=str(winner_p), playerOneScore=p1_score, playerTwoScore=p2_score)
+        await sync_to_async(history.save)()
 
 
     async def check_for_victories(self, data):
@@ -300,9 +307,8 @@ class MultiplayerGame(AsyncWebsocketConsumer):
             winner_n = 2
         if winner_n != 0:
             print("registering-to-history")
-            await self.register_to_history(winner_n)
+            #await self.register_to_history(winner_n)
             self.finished = True
-            await self.close(1000)
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -327,20 +333,20 @@ class MultiplayerGame(AsyncWebsocketConsumer):
                 else:
                     activeGames[self.room_group_name].loop.game.playing = True
 
-
-        # Broadcast the message to all WebSocket connections in the group
-        #print("sending data: ", data)
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "websocket.message",
-                "message": data
-            }
-        )
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "websocket.message",
+                    "message": data
+                }
+            )
+            if self.finished:
+                await self.close(1000)
 
     async def websocket_message(self, event):
         # This is called when a message is received from the group
-        await self.send(text_data=json.dumps(event["message"]))
+        if not self.finished:
+            await self.send(text_data=json.dumps(event["message"]))
 
     async def websocket_accept(self, event):
         print("websocket_accept")

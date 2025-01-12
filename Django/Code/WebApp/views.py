@@ -8,7 +8,7 @@ from Notification.models import FriendRequest
 import json
 from utils import shell_colors
 from Game.Forms import LobbyForm
-from Game.models import Lobby
+from Game.models import Lobby, GameHistory
 from Game.models import GameHistory as GameHistoryModel
 
 
@@ -148,8 +148,8 @@ def Profile(request, socialCode=None):
             print(f"{shell_colors['BRIGHT_RED']}They are not friends{shell_colors['RESET']}")
             friend_request_status = 'rejected'
 
-        game_list_as_p1 = GameHistoryModel.objects.filter(playerOne__userSocialCode=socialCode)
-        game_list_as_p2 = GameHistoryModel.objects.filter(playerTwo__userSocialCode=socialCode)
+        game_list_as_p1 = GameHistoryModel.objects.filter(playerOne=str(userData.getDict()["Info"]["first_name"]))
+        game_list_as_p2 = GameHistoryModel.objects.filter(playerTwo=str(userData.getDict()["Info"]["first_name"]))
 
         game_list = game_list_as_p1 | game_list_as_p2
         print("game list is:", game_list, "game list size: ", len(game_list))
@@ -159,7 +159,7 @@ def Profile(request, socialCode=None):
             'friendList': friendList,
             'can_edit': can_edit,
             'friend_request_status': friend_request_status,
-            'game_list': game_list
+            'game_list': GameHistoryModel.objects.all()
         })
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
