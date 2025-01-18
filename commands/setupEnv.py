@@ -1,6 +1,7 @@
 import os
 import socket
 import secrets
+import sys
 
 def get_lan_ip_address():
     # Get the LAN IP address of the machine
@@ -15,12 +16,12 @@ def get_lan_ip_address():
         s.close()
     return ip_address
 
-def append_to_env(ip_address):
-    env_file_path = '/home/p/Desktop/42Projects/ft_transcendense/.env'
-    
+def append_to_env(ip_address, port):
+    env_file_path = '.env'
+
     with open(env_file_path, 'r') as env_file:
         lines = env_file.readlines()
-    
+
     with open(env_file_path, 'w') as env_file:
         for line in lines:
             if line.startswith('SECRET_KEY='):
@@ -38,16 +39,33 @@ def append_to_env(ip_address):
                     line = line.strip() + f",{ip_address}\n"
             elif line.startswith('CSRF_TRUSTED_ORIGINS='):
                 if line.strip() == 'CSRF_TRUSTED_ORIGINS=':
-                    line = f"CSRF_TRUSTED_ORIGINS=https://{ip_address},https://localhost,https://127.0.0.1\n"
+                    line = f"CSRF_TRUSTED_ORIGINS=https://{ip_address}:{port},https://localhost:{port},https://127.0.0.1:{port}\n"
                 else:
-                    if 'https://localhost' not in line:
-                        line = line.strip() + ",https://localhost"
-                    if 'https://127.0.0.1' not in line:
-                        line = line.strip() + ",https://127.0.0.1"
-                    line = line.strip() + f",https://{ip_address}\n"
+                    if f'https://localhost:{port}' not in line:
+                        line = line.strip() + ",https://localhost:{port}"
+                    if f'https://127.0.0.1:{port}' not in line:
+                        line = line.strip() + ",https://127.0.0.1:{port}"
+                    line = line.strip() + f",https://{ip_address}:{port}\n"
+            elif line.startswith('PORT='):
+                # Update the port value if it already exists
+                line = f"PORT={port}\n"
             env_file.write(line)
 
+        # If PORT key wasn't in the .env file, add it at the end
+
+
 if __name__ == "__main__":
+    # Default port value if not provided
+    default_port = 8000
+
+    # Parse command-line arguments
+    port = default_port
+    if len(sys.argv) > 1:
+        try:
+            port = int(sys.argv[1])  # Convert argument to integer
+        except ValueError:
+            print("Invalid port number. Using default port 8000.")
+
     ip_address = get_lan_ip_address()
-    append_to_env(ip_address)
-    print(f"IP address {ip_address} appended to .env file.")
+    append_to_env(ip_address, port)
+    print(f"IP address {ip_address} and port {port} appended to .env file.")
