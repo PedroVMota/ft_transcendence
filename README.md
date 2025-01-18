@@ -476,6 +476,18 @@ INTRA_REDIRECT_URI= # Call back
 Because of that everytime you have to generate new things its faster to update and secure. 
 If any case you update the values you have to restart the containers by running the `make restart` or `make down` and after `make all`
 
+Also it was created a folder commands and a py files that will do a specific thing.
+
+in this case it was created a setupEnv.py that will apply the ip address on the .env
+
+How to use 
+
+```bash
+python3 -m venv {enviroment folder name}
+source enviroment/bin/activate
+python3 commands/setupEnv.py
+```
+
 
 
 
