@@ -18,6 +18,7 @@
 8. [Setting Up and Running the Project](#setting-up-and-running-the-project)
 9. [Deployment](#deployment)
 10. [Conclusion](#conclusion)
+11. [Date Changes](#changes)
 
 ---
 ## Modules
@@ -455,3 +456,26 @@ For securing your Nginx server with SSL, you can integrate Let's Encrypt or anot
 ## Conclusion
 
 This README serves as a comprehensive guide to understanding and working with the Transcendence project. Whether you are setting up the project locally for development or deploying it to a production environment, this documentation provides the necessary steps and insights to get started.
+
+
+
+
+# Changes
+
+## Date: 18 Jan
+
+It's possible to update the intra faster.
+
+inside of the .env you will have the following keys:
+```.env
+INTRA_CLIENT_ID= # Your Id
+INTRA_CLIENT_SECRET= # Secrete token
+INTRA_REDIRECT_URI= # Call back
+```
+
+Because of that everytime you have to generate new things its faster to update and secure. 
+If any case you update the values you have to restart the containers by running the `make restart` or `make down` and after `make all`
+
+
+
+
