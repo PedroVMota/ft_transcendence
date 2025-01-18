@@ -1,14 +1,24 @@
 {
-    "Servers": {
-        "1": {
-            "Name": "Django DB",
-            "Group": "Servers",
-            "Host": "db",
-            "Port": 5432,
-            "MaintenanceDB": "postgres",
-            "Username": "postgres",
-            "Password": "example",
-            "SSLMode": "prefer"
-        }
+  "Servers": {
+    "1": {
+      "Name": "Django DB",
+      "Group": "Servers",
+      "Host": "db",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "Password": "example",
+      "SSLMode": "prefer"
+    },
+    "2": {
+      "Name": "Django DB",
+      "Group": "Servers",
+      "Host": "db",
+      "Port": 5432,
+      "MaintenanceDB": "postgress",
+      "Username": "postgres",
+      "Password": "example",
+      "SSLMode": "prefer"
     }
+  }
 }
