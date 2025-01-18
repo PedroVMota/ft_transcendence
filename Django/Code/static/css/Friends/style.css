@@ -144,6 +144,7 @@ input.form-control {
 
 .acrylicButton {
     background: rgba(255, 255, 255, 0.5) !important;
+    width: auto !important;
 }
 
 .acrylicInput:focus {

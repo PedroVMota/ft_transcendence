@@ -166,9 +166,11 @@
     })
       .then(response => {
         // console.log(response.json());
+        console.log(response);
         if (!response.ok) {
-
-          throw new Error(response.status);
+          return response.json().then(errorData => {
+            throw new Error(errorData.error || `Registration failed: ${response.status}`);
+          });
         }
         return response.json();
       })
@@ -181,9 +183,7 @@
         }
       })
       .catch(error => {
-        if(error.message == '400'){
-          document.getElementById('feedback_server').innerHTML = 'Username already taken';
-        }
+          document.getElementById('feedback_server').innerHTML = error;
       });
   });
 

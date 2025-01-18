@@ -11,7 +11,6 @@ services:
       - default
     env_file:
       - .env
-
   redis-server:
     container_name: redis-server
     command: redis-server
@@ -20,7 +19,6 @@ services:
       - redis_data:/data
     networks:
       - default
-
   django:
     container_name: django
     build: ./Django
@@ -40,18 +38,14 @@ services:
       - .env
     ports:
       - 8000:8000
-
   web:
     container_name: Nginx
     build: ./Nginx
     ports:
       - 443:443
-      - 80:80
-      - 3000:3000
     restart: always
     hostname: Nginx
     volumes:
-      
       - ./Django/Code/static/:/static/
       - ./Django/Code/media/:/media/
     networks:
@@ -60,20 +54,18 @@ services:
       - django
     env_file:
       - .env
-
-  portainer:
-    container_name: portainer
-    image: portainer/portainer-ce
-    command: -H unix:///var/run/docker.sock
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    env_file:
+      - .env
     ports:
-      - 9000:9000
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-    restart: always
+      - 444:80
     networks:
       - default
-
+    volumes:
+      - pgadmin:/root/.pgadmin
+      - ./pgadmin/server.json:/pgadmin4/servers.json
 volumes:
   static_volume:
   pgadmin:

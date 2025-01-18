@@ -1,6 +1,17 @@
 import AComponent from "../Spa/AComponent.js";
 import { Requests, getCookie } from "../Utils/Requests.js";
 
+const CONSTANTS = {
+    URLS: {
+        FRIEND_REQUEST: '/auth/token/friend/request/manage/',
+        INVITE_MANAGE: '/auth/token/invite/manage/',
+        FRIEND_REQUEST_GET: '/auth/token/friend/request/get/'
+    },
+    CLASSES: {
+        HIDDEN: 'd-none'
+    }
+};
+    
 
 class Menu extends AComponent {
     #parentElement = null;
@@ -21,7 +32,6 @@ class Menu extends AComponent {
     watchNotifications = () => {
         let notificationsDropdown = document.getElementById("notificationsDropdown");
         let notificationsMenu = document.getElementById("notificationsMenu");
-    
         if (notificationsDropdown === null || notificationsMenu === null) {
             return;
         } else {
@@ -37,61 +47,45 @@ class Menu extends AComponent {
     }
 
     // Increase the number of notifications or messages
-    Increase = (Target, event) => {
-        if (event === "notifications") {
-            this.#numberofNotifications += 1;
-        } else if (event === "message") {
-            this.#numberofMessages += 1;
-        }
-        event === "m"
+    IncreaseNotificationCount = (Target, event) => {
+        if (event === "notifications") this.#numberofNotifications += 1;
+        else if (event === "message") this.#numberofMessages += 1;
         this.#decoratorToggle();
     }
-
     // Decrease the number of notifications or messages
-    Decrease = (Target, event) => {
-        if (event === "notifications") {
-            this.#numberofNotifications -= 1;
-        } else if (event === "message") {
-            this.#numberofMessages -= 1;
-        }
+    DecrementNotificationCount = (Target, event) => {
+        if (event === "notifications") this.#numberofNotifications -= 1;
+        else if (event === "message") this.#numberofMessages -= 1;
         this.#decoratorToggle();
     }
-
     // Check if the element has the class
     #doesHtmlHasClass = (element, className) => {
         return element.classList.contains(className);
     }
-
     // Decorator to toggle the notification badge
     #decoratorToggle() {
         let notificationBadge = document.getElementById("notificationBadge");
         let messagesBadge = document.getElementById("messagesBadge");
-
-
-        if (notificationBadge === null || messagesBadge === null) {
+        if (notificationBadge === null || messagesBadge === null)
             return;
-        }
-
-        let displayOffClass = "d-none";
-
         if (this.#numberofNotifications > 0) {
-            if (this.#doesHtmlHasClass(notificationBadge, displayOffClass))
-                notificationBadge.classList.remove(displayOffClass);
+            if (this.#doesHtmlHasClass(notificationBadge, CONSTANTS.CLASSES.HIDDEN))
+                notificationBadge.classList.remove(CONSTANTS.CLASSES.HIDDEN);
             notificationBadge.innerText = this.#numberofNotifications;
         }
         else {
-            if (!this.#doesHtmlHasClass(notificationBadge, displayOffClass))
-                notificationBadge.classList.add(displayOffClass);
+            if (!this.#doesHtmlHasClass(notificationBadge, CONSTANTS.CLASSES.HIDDEN))
+                notificationBadge.classList.add(CONSTANTS.CLASSES.HIDDEN);
         }
 
         if (this.#numberofMessages > 0) {
-            if (this.#doesHtmlHasClass(messagesBadge, displayOffClass))
-                messagesBadge.classList.remove(displayOffClass);
+            if (this.#doesHtmlHasClass(messagesBadge, CONSTANTS.CLASSES.HIDDEN))
+                messagesBadge.classList.remove(CONSTANTS.CLASSES.HIDDEN);
             messagesBadge.innerText = this.#numberofMessages;
         }
         else {
-            if (!this.#doesHtmlHasClass(messagesBadge, displayOffClass))
-                messagesBadge.classList.add(displayOffClass);
+            if (!this.#doesHtmlHasClass(messagesBadge, CONSTANTS.CLASSES.HIDDEN))
+                messagesBadge.classList.add(CONSTANTS.CLASSES.HIDDEN);
         }
     }
 
@@ -239,9 +233,9 @@ class Menu extends AComponent {
         this.#notificationSocket.onmessage = (e) => {
             let data = JSON.parse(e.data);
             if (data.notifications !== undefined) {
-                this.Increase("notifications", "notifications");
+                this.IncreaseNotificationCount("notifications", "notifications");
                 if (data.Message !== undefined) {
-                    this.Increase("message", "message");
+                    this.IncreaseNotificationCount("message", "message");
                 }
             }
             this.#decoratorToggle();

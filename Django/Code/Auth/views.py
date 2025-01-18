@@ -6,7 +6,6 @@ from django.conf import settings
 from django.views.generic import View
 from django.shortcuts import redirect
 from django.http import JsonResponse, HttpResponse
-from rest_framework import status
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.hashers import make_password
@@ -21,6 +20,28 @@ from utils import shell_colors
 import requests
 import os
 import string
+from django.contrib.auth.password_validation import (
+    UserAttributeSimilarityValidator,
+    MinimumLengthValidator,
+    CommonPasswordValidator,
+    NumericPasswordValidator,
+)
+from django.core.exceptions import ValidationError
+
+def validate_password_with_django(password, user=None):
+    validators = [
+        UserAttributeSimilarityValidator(),
+        MinimumLengthValidator(min_length=8),
+        CommonPasswordValidator(),
+        NumericPasswordValidator(),
+    ]
+    
+    try:
+        for validator in validators:
+            validator.validate(password, user)
+        return True, ""
+    except ValidationError as e:
+        return False, e.messages[0]
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserLoginAPIView(View):
@@ -55,15 +76,15 @@ class UserRegistrationView(View):
             first_name = body.get('first_name')
             last_name = body.get('last_name')
             password = body.get('password')
-            if len(password) < 8 or (not any(char in string.punctuation for char in password) or not any(char.isdigit() for char in password)):
-                return JsonResponse({'error': 'Password must contain at least 8 characters, a digit and a special character'}, status=400)
+            is_valid, error_message = validate_password_with_django(password)
+            if not is_valid:
+                return JsonResponse({'error': error_message}, status=400)
             if not username or not first_name or not last_name or not password:
                 return JsonResponse({'error': 'All fields are required: username, first_name, last_name, password'}, status=400)
             # Hash the password before creating the user
             hashed_password = make_password(password)
             # Create and save the new user
             if(MyUser.objects.filter(username=username).exists()):
-                # throw new Error(`Registration failed: ${response.status}`);
                 return JsonResponse({'error': 'User already exists'}, status=400)
             new_user = MyUser.objects.create(
                 username=username,
