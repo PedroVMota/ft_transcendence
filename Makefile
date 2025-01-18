@@ -10,7 +10,7 @@ dockerComposeCommand = $(shell docker-compose version >/dev/null 2>&1 && echo do
 help:
 	@echo -e "$(GREEN)Available Commands:$(NC)"
 	@grep -E '^[a-zA-Z_-]+:.*
-	awk 'BEGIN {FS = ":.*
+	awk 'BEGIN {FS = ":.*?## "}; {printf "$(YELLOW)%-20s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | grep -v grep
 
 all:
 	@echo -e "$(BLUE)Starting all services...$(NC)"
@@ -28,9 +28,8 @@ start:
 	@echo -e "$(BLUE)Starting containers...$(NC)"
 	$(dockerComposeCommand) start
 
-restart:
+restart: down start
 	@echo -e "$(BLUE)Restarting containers...$(NC)"
-	$(dockerComposeCommand) restart
 
 down:
 	@echo -e "$(BLUE)Taking down services...$(NC)"
@@ -85,8 +84,12 @@ makemigrations:
 
 logs:
 	@if [ -z "$(service)" ]; then \
-		echo -e "$(BLUE)Displaying logs from all services...$(NC)"; \
-		$(dockerComposeCommand) logs -f; \
+		while true; do \
+			echo -e "$(BLUE)Displaying logs from all services...$(NC)"; \
+			$(dockerComposeCommand) logs -f; \
+			echo -e "$(RED)Logs closed. Restarting...$(NC)"; \
+			sleep 1; \
+		done; \
 	else \
 		echo -e "$(BLUE)Displaying logs from $(YELLOW)$(service)$(NC) service...$(NC)"; \
 		$(dockerComposeCommand) logs -f $(service); \

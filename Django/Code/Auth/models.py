@@ -17,62 +17,8 @@ def upload_to(instance, filename):
 
 
 def RandomNumber(min=1000, max=9999):
+    print("RandomNumber")
     return random.randint(min, max)
-
-
-class TrasationTable(models.Model):
-    TYPE = (
-        ('Deposit', 'Deposit'),
-        ('Transfer', 'Transfer'),
-    )
-
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
-    create_date = models.DateTimeField(auto_now_add=True)
-
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    Description = models.CharField(max_length=255, null=True, blank=True)
-    type = models.CharField(max_length=10, choices=TYPE)
-
-
-    def __str__(self):
-        return self.uuid
-    
-    def getDict(self):
-        return {
-            'uuid': self.uuid,
-            'amount': self.amount,
-            'type': self.type,
-            'Description': self.Description
-        }
-
-
-class UserWallet(models.Model):
-    User = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True)
-    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
-    TransactionsHistory = models.ManyToManyField(TrasationTable, blank=True)
-
-    def makeTransaction(self, amount: int, type: str, description: str) -> TrasationTable:
-        if type == 'Deposit':
-            self.balance += amount
-        elif type == 'Transfer':
-            self.balance -= amount
-        else:
-            raise ValueError("Invalid Transaction Type")
-        self.save()
-        transaction = TrasationTable.objects.create(amount=amount, type=type, Description=description)
-        self.TransactionsHistory.add(transaction)
-        self.save()
-        return transaction
-    
-    def getTransactions(self):
-        return [transaction.getDict() for transaction in self.TransactionsHistory.all()]
-    
-    def getBalance(self):
-        return self.balance
-    
-    def __str__(self):
-        return f"{self.User.username} Wallet"
 
 class MyUser(AbstractUser):
     intraCode = models.CharField(max_length=2048, null=True, blank=True)
@@ -80,30 +26,20 @@ class MyUser(AbstractUser):
     profile_banner = models.ImageField(upload_to=upload_to, default=DEFAULT_BANNER)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
-
     userSocialCode = models.BigIntegerField(unique=True, null=True, blank=True)
-    Wallet = models.OneToOneField(UserWallet, on_delete=models.CASCADE, null=True, blank=True)
-
     friendlist = models.ManyToManyField('self', blank=True)
     allChat = models.ManyToManyField(currentChat, blank=True)
-
     create_date = models.DateTimeField(auto_now_add=True)
     email = models.EmailField(blank=True, unique=False, null=True)
-
-
-    #Statistics About the User
     TotalOfGames = models.IntegerField(default=0)
     NumberOfWins = models.IntegerField(default=0)
     NumberOfLosses = models.IntegerField(default=0)
-
-    MMR = models.IntegerField(default=1) # Match Making Rank
-
-    HigherRank = models.IntegerField(default=1) # The Highest Rank the user has ever reached
-    DateOfHigherRank = models.DateTimeField(auto_now_add=True) # The Date the user reached the highest rank
+    MMR = models.IntegerField(default=1)
+    HigherRank = models.IntegerField(default=1)
+    DateOfHigherRank = models.DateTimeField(auto_now_add=True)
 
     # AllPlayedGames = 
     def __add__user__(self, friend: 'MyUser'):
-        """Add a user to the friend list."""
         if friend in self.friendlist.all():
             raise ValueError("User is already a friend")
         if friend == self:

@@ -1,5 +1,6 @@
 import os
 import socket
+import secrets
 
 def get_lan_ip_address():
     # Get the LAN IP address of the machine
@@ -22,15 +23,27 @@ def append_to_env(ip_address):
     
     with open(env_file_path, 'w') as env_file:
         for line in lines:
-            if line.startswith('ALLOWED_HOSTS='):
+            if line.startswith('SECRET_KEY='):
+                if line.strip() == 'SECRET_KEY=':
+                    secret_key = secrets.token_urlsafe(50)
+                    line = f"SECRET_KEY={secret_key}\n"
+            elif line.startswith('ALLOWED_HOSTS='):
                 if line.strip() == 'ALLOWED_HOSTS=':
-                    line = f"ALLOWED_HOSTS={ip_address}\n"
+                    line = f"ALLOWED_HOSTS={ip_address},localhost,127.0.0.1\n"
                 else:
+                    if 'localhost' not in line:
+                        line = line.strip() + ",localhost"
+                    if '127.0.0.1' not in line:
+                        line = line.strip() + ",127.0.0.1"
                     line = line.strip() + f",{ip_address}\n"
             elif line.startswith('CSRF_TRUSTED_ORIGINS='):
                 if line.strip() == 'CSRF_TRUSTED_ORIGINS=':
-                    line = f"CSRF_TRUSTED_ORIGINS=https://{ip_address}\n"
+                    line = f"CSRF_TRUSTED_ORIGINS=https://{ip_address},https://localhost,https://127.0.0.1\n"
                 else:
+                    if 'https://localhost' not in line:
+                        line = line.strip() + ",https://localhost"
+                    if 'https://127.0.0.1' not in line:
+                        line = line.strip() + ",https://127.0.0.1"
                     line = line.strip() + f",https://{ip_address}\n"
             env_file.write(line)
 

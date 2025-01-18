@@ -1,7 +1,5 @@
 from django.contrib import admin
-from .models import TrasationTable, UserWallet, MyUser
+from .models import MyUser
 # Register your models here.
 
-admin.site.register(TrasationTable)
-admin.site.register(UserWallet)
 admin.site.register(MyUser)

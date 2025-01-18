@@ -7,3 +7,4 @@ system
 !/media/Auth/defaultAssets/**
 *.zip
 sys
+.env
