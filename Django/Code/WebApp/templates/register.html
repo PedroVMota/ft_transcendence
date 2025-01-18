@@ -22,8 +22,8 @@
             <button type="submit" class="btn create-account-btn">Login</button>
           </form>
           <p class="text-center">Login with</p>
-          <a class="btn bg-intra d-flex justify-content-center align-items-center" href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-6797340cf0815ac0286e74fb21bd6a3b9352ebf48cb8523c972b318e307f5be2&redirect_uri=https%3A%2F%2Flocalhost%2Fauth%2Fintra&response_type=code">
-            <img width="45" src="https://auth.42.fr/auth/resources/yyzrk/login/students/img/42_logo.svg" alt="">
+          <a class="btn bg-intra d-flex justify-content-center align-items-center" href="{% url 'initiate_oauth' %}">
+            <img width="50" src="https://auth.42.fr/auth/resources/yyzrk/login/students/img/42_logo.svg" alt="">
           </a>
         </div>
 
@@ -42,7 +42,7 @@
           </form>
           <!-- Other logins -->
           <p class="text-center">Register with</p>
-          <a class="btn bg-intra d-flex justify-content-center align-items-center" href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-6797340cf0815ac0286e74fb21bd6a3b9352ebf48cb8523c972b318e307f5be2&redirect_uri=https%3A%2F%2Flocalhost%2Fauth%2Fintra&response_type=code">
+          <a class="btn bg-intra d-flex justify-content-center align-items-center" href="{% url 'initiate_oauth' %}">
             <img width="50" src="https://auth.42.fr/auth/resources/yyzrk/login/students/img/42_logo.svg" alt="">
           </a>
           <div id="feedback_server" class="text-danger"></div>

@@ -1,115 +1,98 @@
 .PHONY: all stop start restart down db django nginx fclean clean inside removeVolumes help logs removeAll stop_container down_container
 
-# Color Codes
 GREEN  := \033[1;32m
 BLUE   := \033[1;34m
 YELLOW := \033[1;33m
-NC     := \033[0m    # No Color
+NC     := \033[0m   
 
-# Help Command
-help: ## Display this help message
+dockerComposeCommand = $(shell docker-compose version >/dev/null 2>&1 && echo docker-compose || echo docker compose)
+
+help:
 	@echo -e "$(GREEN)Available Commands:$(NC)"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-	awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-15s$(NC)%s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*
+	awk 'BEGIN {FS = ":.*
 
-# Build and run the entire Docker Compose environment
-all: ## Build and run the entire Docker Compose environment
+all:
 	@echo -e "$(BLUE)Starting all services...$(NC)"
-	docker-compose up -d --build
+	$(dockerComposeCommand) up -d --build
 	@echo -e "$(GREEN)All services are up and running:$(NC)"
 	@echo -e "$(YELLOW)Django:$(NC) http://localhost:8000"
 	@echo -e "$(YELLOW)Nginx:$(NC) http://localhost:80"
 	@echo -e "$(YELLOW)Portainer:$(NC) http://localhost:9000"
 
-# Stop running containers
-stop: ## Stop running containers
+stop:
 	@echo -e "$(BLUE)Stopping containers...$(NC)"
-	docker-compose stop
+	$(dockerComposeCommand) stop
 
-# Start stopped containers
-start: ## Start stopped containers
+start:
 	@echo -e "$(BLUE)Starting containers...$(NC)"
-	docker-compose start
+	$(dockerComposeCommand) start
 
-# Restart running containers
-restart: ## Restart running containers
+restart:
 	@echo -e "$(BLUE)Restarting containers...$(NC)"
-	docker-compose restart
+	$(dockerComposeCommand) restart
 
-# Bring down the Docker Compose environment
-down: ## Bring down the Docker Compose environment
+down:
 	@echo -e "$(BLUE)Taking down services...$(NC)"
-	docker-compose down
+	$(dockerComposeCommand) down
 
-# Bring up only the database container
-db: ## Bring up only the database container
+db:
 	@echo -e "$(BLUE)Starting database service...$(NC)"
-	docker-compose up -d db
+	$(dockerComposeCommand) up -d db
 
-# Bring up only the Django container
-django: ## Bring up only the Django container
+django:
 	@echo -e "$(BLUE)Starting Django service...$(NC)"
-	docker-compose up -d django
+	$(dockerComposeCommand) up -d django
 
-# Bring up only the Nginx (web) container
-nginx: ## Bring up only the Nginx (web) container
+nginx:
 	@echo -e "$(BLUE)Starting Nginx service...$(NC)"
-	docker-compose up -d web
+	$(dockerComposeCommand) up -d web
 
-# Remove all containers and images, but keep volumes
-fclean: ## Remove all containers and images, but keep volumes
+fclean:
 	@echo -e "$(BLUE)Removing all containers and images...$(NC)"
 	- docker rm -f $$(docker ps -a -q) || true
 	- docker rmi -f $$(docker images -q) || true
 	- docker network rm $$(docker network ls -q) || true
 
-# Clean everything: containers, images, networks, and volumes
-clean: fclean ## Clean everything: containers, images, networks, and volumes
+clean: fclean
 	@echo -e "$(BLUE)Removing all volumes and networks...$(NC)"
 	- docker volume rm $$(docker volume ls -q) || true
 	- docker network rm $$(docker network ls -q) || true
 
-# Remove containers, images, and volumes completely
-removeVolumes: ## Remove containers, images, and volumes completely
+removeVolumes:
 	@echo -e "$(BLUE)Removing containers, images, and volumes...$(NC)"
-	docker-compose down -v
+	$(dockerComposeCommand) down -v
 
-# Enter a running container interactively
-inside: ## Enter a running container interactively (Usage: make inside userinput=container_name)
+inside:
 	@echo -e "$(BLUE)Entering container $(YELLOW)$(userinput)$(NC)"
 	docker exec -it $(userinput) bash
 
-# Create a new Django app
-createapp: ## Create a new Django app (Usage: make createapp appname=your_app_name)
+createapp:
 	@echo -e "$(BLUE)Creating Django app $(YELLOW)$(appname)$(NC)"
-	docker-compose exec django python manage.py startapp $(appname)
+	$(dockerComposeCommand) exec django python manage.py startapp $(appname)
 
-# Create a Django superuser
-createsuperuser: ## Create a Django superuser
+createsuperuser:
 	@echo -e "$(BLUE)Creating Django superuser...$(NC)"
-	docker-compose exec django python manage.py createsuperuser
+	$(dockerComposeCommand) exec django python manage.py createsuperuser
 
-# Apply migrations
-migrate: ## Apply database migrations
+migrate:
 	@echo -e "$(BLUE)Applying migrations...$(NC)"
-	docker-compose exec django python manage.py migrate
+	$(dockerComposeCommand) exec django python manage.py migrate
 
-# Make migrations
-makemigrations: ## Create new migrations based on model changes
+makemigrations:
 	@echo -e "$(BLUE)Making migrations...$(NC)"
-	docker-compose exec django python manage.py makemigrations
+	$(dockerComposeCommand) exec django python manage.py makemigrations
 
-# View logs of containers in real time
-logs: ## View logs of containers in real time (Usage: make logs [service=service_name])
+logs:
 	@if [ -z "$(service)" ]; then \
 		echo -e "$(BLUE)Displaying logs from all services...$(NC)"; \
-		docker-compose logs -f; \
+		$(dockerComposeCommand) logs -f; \
 	else \
 		echo -e "$(BLUE)Displaying logs from $(YELLOW)$(service)$(NC) service...$(NC)"; \
-		docker-compose logs -f $(service); \
+		$(dockerComposeCommand) logs -f $(service); \
 	fi
 
-logs_container: ## View logs of a specific container in real time (Usage: make logs_container container=container_name)
+logs_container:
 	@if [ -z "$(container)" ]; then \
 		echo -e "$(RED)Error: container name is required.$(NC)"; \
 		exit 1; \
@@ -121,17 +104,14 @@ logs_container: ## View logs of a specific container in real time (Usage: make l
 		sleep 2; \
 	done
 
-# Remove all Docker Compose content related to this project
-removeAll: ## Remove all Docker Compose content related to this project
+removeAll:
 	@echo -e "$(BLUE)Removing all Docker Compose content...$(NC)"
-	docker-compose down -v --remove-orphans
+	$(dockerComposeCommand) down -v --remove-orphans
 
-# Stop a specific container
-stop_container: ## Stop a specific container (Usage: make stop_container container=container_name)
+stop_container:
 	@echo -e "$(BLUE)Stopping container $(YELLOW)$(container)$(NC)"
-	docker-compose stop $(container)
+	$(dockerComposeCommand) stop $(container)
 
-# Bring down a specific container
-down_container: ## Bring down a specific container (Usage: make down_container container=container_name)
+down_container:
 	@echo -e "$(BLUE)Taking down container $(YELLOW)$(container)$(NC)"
-	docker-compose rm -f $(container)
+	$(dockerComposeCommand) rm -f $(container)

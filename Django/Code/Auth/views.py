@@ -77,8 +77,8 @@ class UserRegistrationView(View):
             last_name = body.get('last_name')
             password = body.get('password')
 
-            if len(password) < 8 or (not any(char in string.punctuation for char in password) or not any(char.isdigit() for char in password)
-                return JsonResponse({'error': 'Invalid Password'}, status=400)
+            if len(password) < 8 or (not any(char in string.punctuation for char in password) or not any(char.isdigit() for char in password)):
+                return JsonResponse({'error': 'Password must contain at least 8 characters, a digit and a special character'}, status=400)
 
 
             if not username or not first_name or not last_name or not password:
@@ -99,7 +99,6 @@ class UserRegistrationView(View):
 
             # Return success response
             return JsonResponse({'message': 'User created successfully'}, status=201)
-
         except json.JSONDecodeError:
             # Handle invalid JSON
             return JsonResponse({'error': 'Invalid JSON data received'}, status=400)
@@ -164,9 +163,9 @@ def intra_auth(request):
         # Step 1: Exchange the authorization code for an access token
         oauth_url = 'https://api.intra.42.fr/oauth/token'
         
-        INTRA_CLIENT_ID = "u-s4t2ud-6797340cf0815ac0286e74fb21bd6a3b9352ebf48cb8523c972b318e307f5be2"
-        INTRA_CLIENT_SECRET = "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"
-        INTRA_REDIRECT_URI = "https://localhost/auth/intra"
+        INTRA_CLIENT_ID = os.environ.get('INTRA_CLIENT_ID')
+        INTRA_CLIENT_SECRET = os.environ.get('INTRA_CLIENT_SECRET')
+        INTRA_REDIRECT_URI = os.environ.get('INTRA_REDIRECT_URI')
 
         data = {
             'grant_type': 'authorization_code',
@@ -231,3 +230,11 @@ def get_user_info(access_token):
         print(response.status_code)
         print(response.json())
         return None
+
+
+
+def start_intra_auth_protection(request):
+    client_id = os.environ.get('INTRA_CLIENT_ID')
+    redirect_uri = os.environ.get('INTRA_REDIRECT_URI')
+    oauth_url = f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code"
+    return redirect(oauth_url)
