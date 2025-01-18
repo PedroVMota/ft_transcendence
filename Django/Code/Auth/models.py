@@ -20,6 +20,9 @@ def RandomNumber(min=1000, max=9999):
     print("RandomNumber")
     return random.randint(min, max)
 
+def generate_random_color():
+    """Gera uma cor aleatória no formato hexadecimal"""
+    return f"#{random.randint(0, 0xFFFFFF):06x}"
 class MyUser(AbstractUser):
     intraCode = models.CharField(max_length=2048, null=True, blank=True)
     profile_picture = models.ImageField(upload_to=upload_to, default=DEFAULT_IMAGE)
@@ -37,6 +40,7 @@ class MyUser(AbstractUser):
     MMR = models.IntegerField(default=1)
     HigherRank = models.IntegerField(default=1)
     DateOfHigherRank = models.DateTimeField(auto_now_add=True)
+    paddle_color = models.CharField(max_length=7, default=generate_random_color)
 
     # AllPlayedGames = 
     def __add__user__(self, friend: 'MyUser'):
@@ -87,6 +91,7 @@ class MyUser(AbstractUser):
                 'userCode': self.userSocialCode,
                 "profile_picture": self.profile_picture.url,
                 "profile_banner": self.profile_banner.url,
+                "paddle_color": self.paddle_color,
             },
             "Chats": self.getChatData(),
         }
