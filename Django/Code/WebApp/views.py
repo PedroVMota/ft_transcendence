@@ -8,7 +8,8 @@ from Notification.models import FriendRequest
 import json
 from utils import shell_colors
 from Game.Forms import LobbyForm
-from Game.models import Lobby, GameHistory
+from Game.models import GameHistory
+from Lobby.models import Lobby as LobbyModel
 from Game.models import GameHistory as GameHistoryModel
 
 
@@ -23,7 +24,7 @@ from datetime import datetime
 def index(request):
     print(" ====  INDEX REQUEST ====")
     user = request.user
-    user_lobbies = Lobby.objects.filter(players=user)
+    user_lobbies = LobbyModel.objects.filter(players=user)
     context = {'user': user}
     if user_lobbies.exists():
         print(" ====  LOBBY EXISTS ====")
@@ -36,9 +37,9 @@ def index(request):
                 lobby_data[key] = value.strftime('%Y-%m-%d %H:%M:%S')
         context['lobby'] = lobby_data
         context['lobbyJson'] = json.dumps(lobby_data)
-        # /Lobby/6f6aeb32-9b41-4b2c-be5d-1769f2c87628
-        print(f"Redirecting to /Lobby/{user_lobby.id}")
-        return redirect(f'/Lobby/{user_lobby.id}')
+        # /LobbyModel/6f6aeb32-9b41-4b2c-be5d-1769f2c87628
+        print(f"Redirecting to /LobbyModel/{user_lobby.id}")
+        return redirect(f'/LobbyModel/{user_lobby.id}')
 
     else:
         print(" ====  LOBBY FORM ====")

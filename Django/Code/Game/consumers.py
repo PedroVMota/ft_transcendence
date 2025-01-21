@@ -1,15 +1,17 @@
 # Sockets/consumers.py
-import json
+
 from channels.layers import get_channel_layer
 from channels.generic.websocket import AsyncWebsocketConsumer
-from asgiref.sync import async_to_sync
-from django.utils.decorators import sync_only_middleware
 
 from Auth.models import MyUser
 from Game.models import Game as GameModel
-from Game.models import Lobby as LobbyModel
 from Game.models import GameHistory as GameHistoryModel
+
 from django.conf import settings
+
+from asgiref.sync import sync_to_async
+
+import json
 import redis
 
 from Game.Game import GameInstance, activeGames, aiGames
@@ -19,6 +21,7 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.created = False
+        self.room_group_name = None
 
     async def connect(self):
         print("connect")
@@ -63,18 +66,6 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
         data['playerOne'] = player_one
         data['playerTwo'] = player_two
 
-    # @staticmethod
-    # def handle_movement_key_press_notification(player, key):
-    #     if player == 0:
-    #         aiGames[user_code].loop.game.playerOne.handle_paddle_movement(key)
-    #     if player == 1:
-    #         aiGames[user_code].loop.game.playerTwo.handle_paddle_movement(key)
-    #
-    # @staticmethod
-    # def handle_camera_key_press_notification(player, key):
-    #     if player == 0:
-    #         aiGames[user_code].loop.game.playerOne.camera.handle_paddle_movement()
-
     @staticmethod
     def report_game_state(data, user_code):
         data["action"] = "game-state-report"
@@ -106,8 +97,6 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
         if aiGames[user_code].loop.game.playing:
             if data["player"] == 0:
                 aiGames[user_code].loop.game.playerOne.handle_paddle_movement(data["direction"])
-            # elif data["player"] == 1:
-            #     aiGames[user_code].loop.game.playerTwo.handle_paddle_movement(data["direction"])
 
 
     async def receive(self, text_data):
@@ -119,15 +108,12 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
         user_code = user_dict['Info']['userCode']
 
         if data["action"] == "paddle-move-notification":
-            #print("received paddle-move-notification")
             self.handle_paddle_move(data, user_code)
 
         if data["action"] == "game-state-request":
-            #print("received game-state-request")
             self.report_game_state(data, user_code)
 
         if data["action"] == "score-bar-update-request":
-            #print("action is score-bar-update")
             self.report_score_bar(data, user_code)
 
         if data["action"] == "request-pause-play":
@@ -138,7 +124,6 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
                     aiGames[user_code].loop.game.playing = True
 
         # Broadcast the message to all WebSocket connections in the group
-        #print("sending data: ", data)
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -148,20 +133,16 @@ class MonitorGameConsumer(AsyncWebsocketConsumer):
         )
 
     async def websocket_message(self, event):
-        #print("websoket_message")
         # This is called when a message is received from the group
         await self.send(text_data=json.dumps(event["message"]))
 
     async def websocket_accept(self, event):
-        #print("websocket_accept")
         # Handle WebSocket connection accept event
         await self.send(text_data=json.dumps(event["message"]))
 
     async def websocket_close(self, event):
-        #print("websocket_close")
         # Handle WebSocket connection close event
         await self.send(text_data=json.dumps(event["message"]))
-
 
 
 redis_instance = redis.StrictRedis(
@@ -169,10 +150,6 @@ redis_instance = redis.StrictRedis(
     port=settings.REDIS_PORT,
     db=0
 )
-
-from asgiref.sync import sync_to_async
-
-
 
 LobbyData = {
     "data" : {
@@ -190,6 +167,7 @@ class MultiplayerGame(AsyncWebsocketConsumer):
         super().__init__()
         self.created = False
         self.room_group_name = ""
+        self.finished = False
 
     async def connect(self):
         self.finished = False
@@ -310,7 +288,7 @@ class MultiplayerGame(AsyncWebsocketConsumer):
             #await self.register_to_history(winner_n)
             self.finished = True
 
-    async def receive(self, text_data):
+    async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
 
         if not self.finished:
@@ -358,117 +336,13 @@ class MultiplayerGame(AsyncWebsocketConsumer):
         # Handle WebSocket connection close event
         await self.send(text_data=json.dumps(event["message"]))
 
-
-
-# re_path(r'ws/Lobby/(?P<lobby_id>[\w-]+)/$', consumers.LobbyConsumer.as_asgi()),
-class MonitorLobbyConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        if self.scope["user"].is_anonymous:
-            await self.close()
-            if not self.scope["user"].is_superuser:
-                await self.close()
-        else:
-            self.room_group_name = self.scope['url_route']['kwargs']['lobby_id']
-            await self.channel_layer.group_add(
-                self.room_group_name,
-                self.channel_name
-            )
-            await self.accept()
-
-            lobbyusers = await sync_to_async(lambda: list(LobbyModel.objects.filter(players=self.scope['user'])))()
-            if lobbyusers:
-                print("User already in the lobby")
-                return
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "notification",
-                    "message": f"Player {self.scope['user'].first_name} has joined the lobby",
-                    "data": {
-                        "userCode": self.scope['user'].userSocialCode,
-                        "first_name": self.scope['user'].first_name,
-                        "last_name": self.scope['user'].last_name,
-                        "profile_picture": self.scope['user'].profile_picture.url,
-                    }
-                }
-            )
-
-    async def notification(self, event):
-        message = event['message']
-        data = event['data']
-        await self.send(text_data=json.dumps({
-            'type': 'notification',
-            'message': message,
-            'data': data
-        }))
-
-    async def disconnect(self, close_code):
-        # Redis key for the lobby
-        redis_key = f"lobby:{self.scope['url_route']['kwargs']['lobby_id']}"
-        # Fetch the existing data from Redis
-        existing_data = await sync_to_async(redis_instance.get)(redis_key)
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "notification",
-                "message": f"Player {self.scope['user'].first_name} has left the lobby",
-                "data": {}
-            }
-        )
-
-        if existing_data:
-            # Decode and load the existing data
-            decoded_result = existing_data.decode("utf-8")
-            lobby_data = json.loads(decoded_result)
-
-            # Decrement the SizeOfPlayers if greater than 0
-            if lobby_data["data"]["SizeOfPlayers"] > 0:
-                lobby_data["data"]["SizeOfPlayers"] -= 1
-
-            # Save the updated data back to Redis
-            updated_data = json.dumps(lobby_data)
-            await sync_to_async(redis_instance.set)(redis_key, updated_data)
-
-
-
-            print(f"Updated Lobby Data after disconnection: {updated_data}")
-        else:
-            print(f"Lobby data not found for key: {redis_key}")
-
-
-    @staticmethod
-    def handle_lobby_message(data, user):
-        data["action"] = "lobby-message-submission"
-        data["user"] = user['first_name']
-
-
-
-    async def receive(self, text_data=None, bytes_data=None):
-        print("receive")
-        print(text_data)
-        data= json.loads(text_data)
-        user = await sync_to_async(self.scope["user"].getDict)()
-        #print("consumer.receive printing its scope: ", user)
-        #await sync_to_async(redis_instance.set)(redis_key, serialized_data)
-        if data["action"] == "message-sent-on-lobby":
-            self.handle_lobby_message(data, user['Info'])
-
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "websocket.message",
-                "message": data
-            }
-        )
-
-    async def websocket_message(self, event):
-        print("websoket_message")
-        # This is called when a message is received from the group
-        await self.send(text_data=json.dumps(event["message"]))
-
-
 # re_path(r'ws/Monitor/Lobby/(?P<lobby_id>[\w-]+)/$', consumers.LobbyConsumer.as_asgi()),
 class LobbyConsumer(AsyncWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self.room_group_name = None
+        self.user = None
+
     async def connect(self):
         self.room_group_name = self.scope['url_route']['kwargs']['lobby_id']
         self.user = self.scope['user']
@@ -481,33 +355,32 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-
         # Send welcome message
-        welcomeMsg = {
+        welcome_msg = {
             'type': 'notification',
             'message': f"You have joined the lobby {self.room_group_name}"
         }
-        await self.send(text_data=json.dumps(welcomeMsg))
+        await self.send(text_data=json.dumps(welcome_msg))
 
         # Print and log the welcome message
-        print(welcomeMsg['message'])
+        print(welcome_msg['message'])
 
     async def disconnect(self, close_code):
         # Remove the user from the group
-        goodbyeMsg = {
+        goodbye_msg = {
             'type': 'notification',
             'message': f"{self.user.username} has left the lobby"
         }
         await self.channel_layer.group_send(
             self.room_group_name,
-            goodbyeMsg
+            goodbye_msg
         )
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
 
-    async def receive(self, text_data):
+    async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
         data['type'] = 'message'
         await self.channel_layer.group_send(

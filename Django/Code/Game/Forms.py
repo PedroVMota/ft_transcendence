@@ -1,9 +1,7 @@
 from django import forms
 
 
-from .models import Lobby
-
-
+from Lobby.models import Lobby
 
 
 
@@ -21,5 +19,5 @@ there is a methid that getter of the lobby class.
 """
 class LobbyForm(forms.ModelForm):
     class Meta:
-        model = Lobby
+        model = Lobby # todo -> change this to somewhere in the Lobby module
         fields = ['name']
