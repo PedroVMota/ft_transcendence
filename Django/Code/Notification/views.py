@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from Auth.models import MyUser
 from django.contrib.auth.decorators import login_required
-from Game.models import Lobby
+from Lobby.models import Lobby
 from django.http import HttpResponse
 from Game.views import HTTP_CODES
 

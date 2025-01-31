@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Auth.apps.AuthConfig',
+    'Lobby.apps.LobbyConfig',
     'Game.apps.GameConfig',
 ]
 
