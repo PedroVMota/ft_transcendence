@@ -2,6 +2,8 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+
 from django.conf import settings
 from django.views.generic import View
 from django.shortcuts import redirect
@@ -30,10 +32,10 @@ from django.core.exceptions import ValidationError
 
 def validate_password_with_django(password, user=None):
     validators = [
-        UserAttributeSimilarityValidator(),
-        MinimumLengthValidator(min_length=8),
-        CommonPasswordValidator(),
-        NumericPasswordValidator(),
+        # UserAttributeSimilarityValidator(),
+        # MinimumLengthValidator(min_length=8),
+        # CommonPasswordValidator(),
+        # NumericPasswordValidator(),
     ]
     
     try:

@@ -7,7 +7,7 @@ from Auth.models import MyUser
 from Notification.models import FriendRequest
 import json
 from utils import shell_colors
-from Game.Forms import LobbyForm
+from Lobby.Forms import LobbyForm
 from Game.models import GameHistory
 from Lobby.models import Lobby as LobbyModel
 from Game.models import GameHistory as GameHistoryModel

@@ -4,6 +4,6 @@ from . import views
 from django.urls import path
 
 urlpatterns = [
-    path('api/lobby/create', views.createLobby),
-    path('api/lobby/information', views.getLobbyInformation),
+    path('create/', views.createLobby),
+    path('information/', views.getLobbyInformation),
 ]

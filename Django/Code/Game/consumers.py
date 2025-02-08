@@ -2,6 +2,7 @@
 
 from channels.layers import get_channel_layer
 from channels.generic.websocket import AsyncWebsocketConsumer
+from Game.Game import GameInstance, activeGames, aiGames
 
 from Auth.models import MyUser
 from Game.models import Game as GameModel
@@ -14,41 +15,30 @@ from asgiref.sync import sync_to_async
 import json
 import redis
 
-from Game.Game import GameInstance, activeGames, aiGames
 
 
-class MonitorGameConsumer(AsyncWebsocketConsumer):
+
+class GameConsumerIA(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.created = False
         self.room_group_name = None
 
     async def connect(self):
-        print("connect")
-        if self.scope["user"].is_anonymous:
+        if self.scope["user"].is_anonymous: # check if the user is anonymous
             await self.close()
-        # check if the user has a superuser status
-            if not self.scope["user"].is_superuser:
-                await self.close()
         else:
-            self.room_group_name = 'Monitor_Game'
-
-            # Add the WebSocket connection to the group
+            user_dictionary = await sync_to_async(self.scope["user"].getDict)()
+            user_code = user_dictionary['Info']['userCode']
+            self.room_group_name = 'Monitor_Game_' + user_code
             await self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name
             )
-
             await self.accept()
-
-            user_dict = await sync_to_async(self.scope["user"].getDict)()
-            user_code = user_dict['Info']['userCode']
-
             if self.created is False:
                 aiGames[user_code] = GameInstance(aiIncluded=True)
                 self.created = True
-
-            # Send a message back to the client confirming the connection
             await self.send(text_data=json.dumps({
                 "type": "websocket.accept",
                 "message": "You are now connected!"
@@ -212,9 +202,14 @@ class MultiplayerGame(AsyncWebsocketConsumer):
             "type": "websocket.close",
             "message": f"You have been disconnected! Code: {close_code}"
         }))
-        if activeGames[self.room_group_name] is not None:
-            del activeGames[self.room_group_name]
+
+
+        try:
+            if activeGames[self.room_group_name] is not None:
+                del activeGames[self.room_group_name]
             #activeGames.pop(self.room_group_name)
+        except KeyError:
+            print("Error: Key not found")
 
         # Remove the WebSocket connection from the group
         await self.channel_layer.group_discard(

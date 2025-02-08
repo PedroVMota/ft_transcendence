@@ -185,16 +185,9 @@ export default class Game extends AComponent {
         
         const animate = () => {
             requestAnimationFrame(animate);
-
-            if (true)
-            {
-                requestUpdateScoreBar();
-
-                requestGameState();
-
-                checkForVictories();
-            }
-    
+            requestUpdateScoreBar();
+            requestGameState();
+            checkForVictories();
             renderer.render(scene, camera);
         }
     

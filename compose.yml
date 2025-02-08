@@ -22,7 +22,7 @@ services:
   django:
     container_name: django
     build: ./Django
-    command: bash -c "python manage.py makemigrations Auth Chat Game Notification WebApp && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py makemigrations Lobby Auth Chat Game Notification WebApp && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./Django/Code/:/code/
     environment:
@@ -66,6 +66,8 @@ services:
     volumes:
       - pgadmin:/root/.pgadmin
       - ./pgadmin/server.json:/pgadmin4/servers.json
+
+
 volumes:
   static_volume:
   pgadmin:
