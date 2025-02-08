@@ -74,71 +74,54 @@
         backdrop-filter: blur(10px);
         border-radius: 8px;
     }
-    #start-game-button {
-        background-color: #673ab7;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
+
+    button{
         cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    #leave-game-button{
-        background-color: #673ab7;
-        color: white;
+        outline: none;
         border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    #start-game-button:hover {
-        background-color: #512da8;
+        box-sizing: border-box;
     }
 </style>
 {% endblock %}
-
 {% block content %}
-<div class="body acrylicStyle border-0 w-100">
-    <!-- Lobby View -->
-    <div id="lobbyContainer" class="container mt-5">
-        <div class="card mb-4 bg-transparent border-0">
-            <div class="card-header px-0">
-                <h2 class="card-title text-white">Lobby: {{ lobby.name }}</h2>
-                <p class="card-subtitle text-white-50">Lobby ID: {{ lobby.id }}</p>
-            </div>
+<div class="container-md bg-acrylic-purple rounded-4 p-4">
+    <div class="card mb-4 bg-transparent border-0">
+        <div class="card-header px-0">
+            <h2 class="card-title text-white">Lobby: {{ lobby.name }}</h2>
+            <p class="card-subtitle text-white-50">Lobby ID: {{ lobby.id }}</p>
         </div>
-        <div class="row">
-            <!-- Players Section (Narrower Column) -->
-            <div class="col-md-4">
-                <h3 class="text-white">Players</h3>
+    </div>
+    <div class="row p-0">
+        <div class="col-md-3 p-0">
+            <div class="p-3 rounded">
+                <!-- Player Section -->
+                <div>
+                    <div class="py-2">
+                        <h3 class="text-white">Players</h3>
+                        <div class="d-flex flex-row">
+                            {% if first_player %}
+                                <p class="text-white mt-2">{{ first_player.Info.first_name }}</p>
+                            {% endif %}
+                            {% if second_player %}
+                                <p class="text-white mt-2">{{ second_player.Info.first_name }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
                 <div class="d-flex flex-row">
-                    {% if first_player %}
-                        <div class="">
-                            <div class="card player-card bg-transparent position-relative border-0">
-                                <img src="{{ first_player.Info.profile_picture }}" alt="Profile Picture" class="card-img-top">
-                                <div class="overlay" data-user-code="{{ first_player.Info.userCode }}">
-                                    <i class="icon">Profile</i>
-                                </div>
-                            </div>
-                            <p class="text-white mt-2">{{ first_player.Info.username }}</p>
-                        </div>
-                    {% endif %}
-                    {% if second_player %}
-                        <div style="margin-left: -10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);">
-                            <div class="card player-card bg-transparent position-relative border-0">
-                                <img src="{{ second_player.Info.profile_picture }}" alt="Profile Picture" class="card-img-top">
-                                <div class="overlay" data-user-code="{{ second_player.Info.userCode }}">
-                                    <i class="icon">Profile</i>
-                                </div>
-                            </div>
-                            <p class="text-white mt-2">{{ second_player.Info.username }}</p>
-                        </div>
-                    {% endif %}
+                    <div class="mt-3 d-flex p-1">
+                        <label for="colorPicker" class="text-white">Your Color:</label>
+                        <input type="color" id="colorPicker" name="colorPicker">
+                    </div>
+                    <div class="mt-3 d-flex p-1">
+                        <label for="ballColorPicker" class="text-white">Ball Color:</label>
+                        <input type="color" class= id="ballColorPicker" name="ballColorPicker">
+                    </div>
                 </div>
             </div>
-            <!-- Chat Section (Wider Column) -->
-            <div class="col-md-8">
+        </div>
+        <div class="col">
+            <div class="p-3 rounded">
                 <div class="chat-container">
                     <div class="chat-header">Chat</div>
                     <div id="messages" class="chat-body">
@@ -155,25 +138,17 @@
                 </div>
             </div>
         </div>
-        <div class="text-center mt-4">
-            <button id="start-game-button">Start Game</button>
-            <button id="invite-friend-button">Invite Friend</button>
-            <button id="leave-game-button">Leave Lobby</button>
+        <div class="d-flex flex-row align-items-center justify-content-center">
+            <button id="start-game-button" class="mx-1 py-2 px-3 bg-acrylic-blue-light text-white rounded-2 bottom-0">Start Game</button>
+            <button id="invite-friend-button" class="mx-1 py-2 px-3 bg-acrylic-blue-light text-white rounded-2 bottom-0">Invite Friend</button>
+            <button id="leave-game-button" class="mx-1 py-2 px-3 bg-acrylic-blue-light text-white rounded-2 bottom-0">Leave Lobby</button>
         </div>
     </div>
-        <div class="mt-3">
-            <label for="colorPicker" class="text-white">Select Color:</label>
-            <input type="color" id="colorPicker" name="colorPicker">
-        </div>
-        <div class="mt-3">
-            <label for="ballColorPicker" class="text-white">Select Ball Color:</label>
-            <input type="color" id="ballColorPicker" name="ballColorPicker">
-        </div>
-        
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script type="module" src="../../static/js/Lobby/Lobby.js"></script>
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

@@ -88,9 +88,6 @@ html[data-theme="light"],
         "Noto Color Emoji";
 }
 
-html, body {
-    height: 100%;
-}
 
 body {
     margin: 0;

@@ -31,66 +31,19 @@
 	--color-dark-gray-brighter: rgb(59, 54, 72);
 }
 
-
-
-
-.text-secondary {
-	color: var(--text-white) !important;
-}
-
-/* Primary color classes */
-.bg-myprimary {
-	background-color: var(--color-deep-blue-brighter) !important;
-	color: var(--text-white) !important;
-}
-
-.bg-myprimary:hover {
-	background-color: var(--color-deep-blue) !important;
-	color: var(--text-white) !important;
-}
-
-.btn-myprimary {
-	background-color: var(--color-deep-blue-brighter) !important;
-	border-color: var(--color-deep-blue-brighter) !important;
-	color: var(--text-white) !important;
-}
-
-.btn-myprimary:hover {
-	background-color: var(--color-deep-blue) !important;
-	border-color: var(--color-deep-blue) !important;
-	color: var(--text-white) !important;
-}
-
-/* General reset */
 * {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
 }
 
-.root {
-	min-height: auto;
-}
-
-.body {
-	min-height: 100vh;
-}
-
-/* Body and background */
 body {
-	height: 100vh;
-	width: 100vw;
 	overflow-x: hidden;
-	background: url('https://wallpapercave.com/wp/wp3837751.jpg') no-repeat center center;
+	background: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnFieGh3eTdwbGxleWliamI5OWR0MHMwa2kzOHE4MWR3N3lsb2xpeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FY9chKp6rulXy/giphy.gif') no-repeat center center;
 	background-size: cover;
 	background-attachment: fixed;
 }
 
-.backgroundBody {
-	background-color: #3772c41f;
-	backdrop-filter: blur(5px);
-	z-index: -1;
-}
 
 /* Text colors */
 .text-success-ligher {
@@ -235,10 +188,14 @@ body {
 }
 
 .bg-acrylic-blue-dark {
-	background: rgba(48, 87, 158, 0.352) !important;
+	background: rgba(48, 87, 158, 0.542) !important;
 	backdrop-filter: blur(5px) !important;
 }
 
+.bg-acrylic-blue-light {
+	background: rgba(124, 158, 221, 0.595) !important;
+	backdrop-filter: blur(5px) !important;
+}
 
 .bg-acrylic-purple {
 	background: rgba(119, 93, 198, 0.4) !important;
@@ -246,5 +203,9 @@ body {
 }
 .bg-acrylic-purple-dark {
 	background: rgba(89, 69, 148, 0.512) !important;
+	backdrop-filter: blur(5px) !important;
+}
+.bg-acrylic-purple-light {
+	background: rgba(119, 93, 198, 0.4) !important;
 	backdrop-filter: blur(5px) !important;
 }

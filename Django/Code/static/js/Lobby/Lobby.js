@@ -1,6 +1,8 @@
 import AComponent from "../Spa/AComponent.js";
 
 
+
+
 export default class Lobby extends AComponent {
     #webSocket = null
     #parentElement = null

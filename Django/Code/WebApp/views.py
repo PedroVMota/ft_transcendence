@@ -38,8 +38,8 @@ def index(request):
         context['lobby'] = lobby_data
         context['lobbyJson'] = json.dumps(lobby_data)
         # /LobbyModel/6f6aeb32-9b41-4b2c-be5d-1769f2c87628
-        print(f"Redirecting to /LobbyModel/{user_lobby.id}")
-        return redirect(f'/LobbyModel/{user_lobby.id}')
+        print(f"Redirecting to /Lobby/{user_lobby.id}")
+        return redirect(f'/Lobby/{user_lobby.id}')
 
     else:
         print(" ====  LOBBY FORM ====")
