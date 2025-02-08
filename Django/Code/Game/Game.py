@@ -2,13 +2,11 @@
 
 import threading
 
-from Game.Ball import Ball
-from Game.Player import Player
+from Game.gamelogic.Ball import Ball
+from Game.gamelogic.Player import Player
 
 from math import cos, tan, fabs, ceil
 from time import sleep
-
-from WebApp.views import searchUser
 
 
 class Game:
@@ -58,9 +56,9 @@ class GameLoop(threading.Thread):
 
 
 class AILoop(threading.Thread):
-    def __init__(self, gameRef):
+    def __init__(self, game_ref):
         super().__init__()
-        self.game: Game = gameRef
+        self.game: Game = game_ref
 
     def predict_ball_position(self):
         predicted_position = (200 - self.game.ball.xPos) * tan(self.game.ball.direction)

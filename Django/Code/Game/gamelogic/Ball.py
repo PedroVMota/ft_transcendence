@@ -17,6 +17,7 @@ class Ball:
     def tick(self):
         self.yPos += self.speed * sin(self.direction)
         self.xPos += self.speed * cos(self.direction)
+        self.check_collisions_y_axis()
 
     def reflection_on_axis(self, x_axis):
         if x_axis:

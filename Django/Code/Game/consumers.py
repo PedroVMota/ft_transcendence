@@ -1,6 +1,5 @@
 # Sockets/consumers.py
 
-from channels.layers import get_channel_layer
 from channels.generic.websocket import AsyncWebsocketConsumer
 from Game.Game import GameInstance, activeGames, aiGames
 
@@ -15,9 +14,6 @@ from asgiref.sync import sync_to_async
 import json
 import redis
 
-
-
-
 class GameConsumerIA(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,7 +26,7 @@ class GameConsumerIA(AsyncWebsocketConsumer):
         else:
             user_dictionary = await sync_to_async(self.scope["user"].getDict)()
             user_code = user_dictionary['Info']['userCode']
-            self.room_group_name = 'Monitor_Game_' + user_code
+            self.room_group_name = 'Monitor_Game_' + str(user_code)
             await self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name
@@ -48,10 +44,10 @@ class GameConsumerIA(AsyncWebsocketConsumer):
     def report_score_bar(data, user_code):
         player_one = {}
         player_two = {}
-        player_one['name'] = aiGames[user_code].loop.game.playerOne.name
-        player_one['score'] = aiGames[user_code].loop.game.playerOne.score
+        player_one['name'] = aiGames[user_code].gameLoop.game.playerOne.name
+        player_one['score'] = aiGames[user_code].gameLoop.game.playerOne.score
         player_two['name'] = "Crazy AI"
-        player_two['score'] = aiGames[user_code].loop.game.playerTwo.score
+        player_two['score'] = aiGames[user_code].gameLoop.game.playerTwo.score
         data['action'] = 'score-bar-report'
         data['playerOne'] = player_one
         data['playerTwo'] = player_two
@@ -59,9 +55,9 @@ class GameConsumerIA(AsyncWebsocketConsumer):
     @staticmethod
     def report_game_state(data, user_code):
         data["action"] = "game-state-report"
-        data["ball"] = aiGames[user_code].loop.game.ball.get_dict()
-        data["playerOne"] = aiGames[user_code].loop.game.playerOne.get_pos()
-        data["playerTwo"] = aiGames[user_code].loop.game.playerTwo.get_pos()
+        data["ball"] = aiGames[user_code].gameLoop.game.ball.get_dict()
+        data["playerOne"] = aiGames[user_code].gameLoop.game.playerOne.get_pos()
+        data["playerTwo"] = aiGames[user_code].gameLoop.game.playerTwo.get_pos()
 
     async def disconnect(self, close_code):
         print("disconnect")
@@ -84,9 +80,9 @@ class GameConsumerIA(AsyncWebsocketConsumer):
 
     @staticmethod
     def handle_paddle_move(data, user_code):
-        if aiGames[user_code].loop.game.playing:
+        if aiGames[user_code].gameLoop.game.playing:
             if data["player"] == 0:
-                aiGames[user_code].loop.game.playerOne.handle_paddle_movement(data["direction"])
+                aiGames[user_code].gameLoop.game.playerOne.handle_paddle_movement(data["direction"])
 
 
     async def receive(self, text_data):
@@ -108,10 +104,10 @@ class GameConsumerIA(AsyncWebsocketConsumer):
 
         if data["action"] == "request-pause-play":
                 print("action is request-pause-play")
-                if aiGames[user_code].loop.game.playing:
-                    aiGames[user_code].loop.game.playing = False
+                if aiGames[user_code].gameLoop.game.playing:
+                    aiGames[user_code].gameLoop.game.playing = False
                 else:
-                    aiGames[user_code].loop.game.playing = True
+                    aiGames[user_code].gameLoop.game.playing = True
 
         # Broadcast the message to all WebSocket connections in the group
         await self.channel_layer.group_send(
@@ -143,7 +139,7 @@ redis_instance = redis.StrictRedis(
 
 LobbyData = {
     "data" : {
-        "GAME_STATE": "Waitting",
+        "GAME_STATE": "Waiting",
         "SizeOfPlayers": 0,
         "Player": {
             "PlayerOne": None,
@@ -218,32 +214,32 @@ class MultiplayerGame(AsyncWebsocketConsumer):
         )
 
     async def handle_paddle_move(self, data):
-        if activeGames[self.room_group_name].loop.game.playing:
+        if activeGames[self.room_group_name].gameLoop.game.playing:
             user = await sync_to_async(self.scope["user"].getDict)()
             user_code = user["Info"]["userCode"]
             print("received handle_paddle_move from user: ", user_code)
             if user_code == activeGames[self.room_group_name].playerOne:
                 print("moving player one with direction: ", data["direction"])
-                activeGames[self.room_group_name].loop.game.playerOne.handle_paddle_movement(data["direction"])
+                activeGames[self.room_group_name].gameLoop.game.playerOne.handle_paddle_movement(data["direction"])
             elif user_code == activeGames[self.room_group_name].playerTwo:
                 print("moving player two with direction: ", data["direction"])
-                activeGames[self.room_group_name].loop.game.playerTwo.handle_paddle_movement(data["direction"])
+                activeGames[self.room_group_name].gameLoop.game.playerTwo.handle_paddle_movement(data["direction"])
 
 
     def report_game_state(self, data):
         data["action"] = "game-state-report"
-        data["ball"] = activeGames[self.room_group_name].loop.game.ball.get_dict()
-        data["playerOne"] = activeGames[self.room_group_name].loop.game.playerOne.get_pos()
-        data["playerTwo"] = activeGames[self.room_group_name].loop.game.playerTwo.get_pos()
+        data["ball"] = activeGames[self.room_group_name].gameLoop.game.ball.get_dict()
+        data["playerOne"] = activeGames[self.room_group_name].gameLoop.game.playerOne.get_pos()
+        data["playerTwo"] = activeGames[self.room_group_name].gameLoop.game.playerTwo.get_pos()
 
 
     def report_score_bar(self, data):
         player_one = {}
         player_two = {}
         player_one['name'] =  activeGames[self.room_group_name].playerOneName
-        player_one['score'] =  activeGames[self.room_group_name].loop.game.playerOne.score
+        player_one['score'] =  activeGames[self.room_group_name].gameLoop.game.playerOne.score
         player_two['name'] =  activeGames[self.room_group_name].playerTwoName
-        player_two['score'] =  activeGames[self.room_group_name].loop.game.playerTwo.score
+        player_two['score'] =  activeGames[self.room_group_name].gameLoop.game.playerTwo.score
         data['action'] = 'score-bar-report'
         data['playerOne'] = player_one
         data['playerTwo'] = player_two
@@ -252,8 +248,8 @@ class MultiplayerGame(AsyncWebsocketConsumer):
         game_model = await sync_to_async(GameModel.objects.filter)(id=self.room_group_name)
         game_model = await sync_to_async(game_model.get)()
         game_dict = await sync_to_async(game_model.getDict)()
-        p1_score = activeGames[self.room_group_name].loop.game.playerOne.score
-        p2_score = activeGames[self.room_group_name].loop.game.playerTwo.score
+        p1_score = activeGames[self.room_group_name].gameLoop.game.playerOne.score
+        p2_score = activeGames[self.room_group_name].gameLoop.game.playerTwo.score
         winner_p = None
         print("type is", type(game_model))
         if winner == 1:
@@ -268,15 +264,15 @@ class MultiplayerGame(AsyncWebsocketConsumer):
 
     async def check_for_victories(self, data):
         winner_n = 0
-        if activeGames[self.room_group_name].loop.game.playerOne.score >= 7:
+        if activeGames[self.room_group_name].gameLoop.game.playerOne.score >= 7:
             data["action"] = "game-win"
             data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
-            activeGames[self.room_group_name].loop.game.playing = False
+            activeGames[self.room_group_name].gameLoop.game.playing = False
             winner_n = 1
-        elif activeGames[self.room_group_name].loop.game.playerTwo.score >= 7:
+        elif activeGames[self.room_group_name].gameLoop.game.playerTwo.score >= 7:
             data["action"] = "game-win"
             data["victoriousPlayer"] = activeGames[self.room_group_name].playerTwoName
-            activeGames[self.room_group_name].loop.game.playing = False
+            activeGames[self.room_group_name].gameLoop.game.playing = False
             winner_n = 2
         if winner_n != 0:
             print("registering-to-history")
@@ -301,10 +297,10 @@ class MultiplayerGame(AsyncWebsocketConsumer):
 
             if data["action"] == "request-pause-play":
                 print("request-pause-play")
-                if activeGames[self.room_group_name].loop.game.playing:
-                    activeGames[self.room_group_name].loop.game.playing = False
+                if activeGames[self.room_group_name].gameLoop.game.playing:
+                    activeGames[self.room_group_name].gameLoop.game.playing = False
                 else:
-                    activeGames[self.room_group_name].loop.game.playing = True
+                    activeGames[self.room_group_name].gameLoop.game.playing = True
 
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -332,71 +328,3 @@ class MultiplayerGame(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event["message"]))
 
 # re_path(r'ws/Monitor/Lobby/(?P<lobby_id>[\w-]+)/$', consumers.LobbyConsumer.as_asgi()),
-class LobbyConsumer(AsyncWebsocketConsumer):
-    def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
-        self.room_group_name = None
-        self.user = None
-
-    async def connect(self):
-        self.room_group_name = self.scope['url_route']['kwargs']['lobby_id']
-        self.user = self.scope['user']
-
-        # Join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-
-        await self.accept()
-
-        # Send welcome message
-        welcome_msg = {
-            'type': 'notification',
-            'message': f"You have joined the lobby {self.room_group_name}"
-        }
-        await self.send(text_data=json.dumps(welcome_msg))
-
-        # Print and log the welcome message
-        print(welcome_msg['message'])
-
-    async def disconnect(self, close_code):
-        # Remove the user from the group
-        goodbye_msg = {
-            'type': 'notification',
-            'message': f"{self.user.username} has left the lobby"
-        }
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            goodbye_msg
-        )
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-
-    async def receive(self, text_data=None, bytes_data=None):
-        data = json.loads(text_data)
-        data['type'] = 'message'
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            data
-        )
-
-    async def notification(self, event):
-        message = event['message']
-
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({
-            'type': 'notification',
-            'message': message
-        }))
-
-    async def message(self, event):
-        message = event['message']
-
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({
-            'type': 'message',
-            'message': message
-        }))
