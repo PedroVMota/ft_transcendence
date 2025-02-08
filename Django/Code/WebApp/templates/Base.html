@@ -14,15 +14,15 @@
 </head>
 
 <body>
-    <div class="w-100 h-100 d-flex justify-content-center">
-        <div class="position-relative px-4" style="width: 100%;">
-            <div class="backgroundBody position-absolute"></div>
+    <div class="w-100 h-100">
+        <div class="position-relative container-fluid h-100">
+            <div class="backgroundBody position-absolute top-0 start-0 bottom-0 end-0"></div>
             <div id="headerMenu">
                 {% if user.is_authenticated %}
                 {% include 'Components/Menu.html' %}
                 {% endif %}
             </div>
-            <div id="root" class="px-0 relative w-100">
+            <div id="root" class="position-relative">
                 {% block content %}
                     
                 {% endblock %}

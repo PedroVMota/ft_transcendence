@@ -6,38 +6,63 @@
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/Home/style.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+<style>
+    ::placeholder {
+        color: rgb(213, 213, 213) !important;
+        font-weight: 600;
+    }
+</style>
 {% endblock %}
 {% block content %}
 <div id="formsContainer" class="container mt-5">
     <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
+        <div class="col-md-6">
+            <div class="card h-100 bg-acrylic-blue p-4 rounded-4">
+                <div class="card-header text-white">
                     <h2>Create a Lobby</h2>
                 </div>
                 <div class="card-body">
                     <form id="createLobbyForm" method="post">
                         {% csrf_token %}
                         <div class="form-group">
-                            <input type="text" name="LobbyName" class="form-control" id="createName" placeholder="Lobby Name">
+                            <input type="text" name="LobbyName"
+                                class="form-control text-white bg-transparent p-3"
+                                style="color: white !important; border-color: rgb(128, 165, 235);"
+                                id="createName"
+                                placeholder="Lobby Name"
+                            >
                         </div>
-                        <button class="btn" type="submit">Create Lobby</button>
+                        <div class="my-2 w-100">
+                            <button class="btn bg-acrylic-blue-dark text-white" type="submit">
+                                Create Lobby
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h2>Join a Lobby</h2>
+        <div class="col-md-6 ">
+            <div class="card h-100 bg-acrylic-purple p-4 rounded-4">
+                <div class="card-header text-white">
+                    <h2>Create a Lobby</h2>
                 </div>
                 <div class="card-body">
                     <form id="joinLobbyForm" method="post">
                         {% csrf_token %}
                         <div class="form-group">
-                            <input type="text" name="LobbyName" class="form-control" id="joinName" placeholder="Enter Lobby Name">
+                            <input type="text"
+                                name="LobbyName"
+                                class="form-control text-white bg-transparent p-3"
+                                style="color: white !important; border-color: rgb(128, 165, 235);"
+                                id="joinName"
+                                placeholder="Enter Lobby Name"
+                            >
                         </div>
-                        <button class="btn" type="submit">Join Lobby</button>
+                        <div class="my-2 w-100">
+                            <button class="btn bg-acrylic-purple-dark text-white" type="submit">
+                                Create Lobby
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>

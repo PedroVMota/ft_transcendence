@@ -24,7 +24,7 @@ from datetime import datetime
 def index(request):
     print(" ====  INDEX REQUEST ====")
     user = request.user
-    user_lobbies = LobbyModel.objects.filter(players=user)
+    user_lobbies = LobbyModel.objects.filter(players=user, status='Active')
     context = {'user': user}
     if user_lobbies.exists():
         print(" ====  LOBBY EXISTS ====")

@@ -4,11 +4,18 @@ from django.db import models
 from Game.models import Game as GameMode
 import uuid
 
+
+STATUS_ENUM = (
+    ("Active", "Active"),
+    ("Inactive", "Inactive"),
+)
+
 class Lobby(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)  # Unique ID for the game
     name = models.CharField(max_length=255, null=True, blank=True)  # Name of the room
     players = models.ManyToManyField(MyUser, related_name='players', )  # Player One
     game = models.ForeignKey(GameMode, related_name='game', on_delete=models.CASCADE, null=True, blank=True)  # Player Two
+    status = models.CharField(max_length=255, choices=STATUS_ENUM, default="Active")  # Status of the game
 
     def save(self, *args, **kwargs):
         # Create a new game if one does not already exist

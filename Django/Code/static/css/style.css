@@ -69,7 +69,7 @@
 }
 
 .root {
-	min-height: 100vh;
+	min-height: auto;
 }
 
 .body {
@@ -84,22 +84,12 @@ body {
 	background: url('https://wallpapercave.com/wp/wp3837751.jpg') no-repeat center center;
 	background-size: cover;
 	background-attachment: fixed;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-
 }
 
 .backgroundBody {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
 	background-color: #3772c41f;
 	backdrop-filter: blur(5px);
 	z-index: -1;
-	pointer-events: none;
 }
 
 /* Text colors */
@@ -140,7 +130,6 @@ body {
 
 /* Page layout */
 #root {
-	height: 100%;
 	z-index: 2 !important;
 }
 
@@ -238,4 +227,24 @@ body {
 
 .text-dangerl{
 	color: #ff0000 !important ;
+}
+
+.bg-acrylic-blue {
+	background: rgba(68, 122, 222, 0.2) !important;
+	backdrop-filter: blur(5px) !important;
+}
+
+.bg-acrylic-blue-dark {
+	background: rgba(48, 87, 158, 0.352) !important;
+	backdrop-filter: blur(5px) !important;
+}
+
+
+.bg-acrylic-purple {
+	background: rgba(119, 93, 198, 0.4) !important;
+	backdrop-filter: blur(5px) !important;
+}
+.bg-acrylic-purple-dark {
+	background: rgba(89, 69, 148, 0.512) !important;
+	backdrop-filter: blur(5px) !important;
 }
