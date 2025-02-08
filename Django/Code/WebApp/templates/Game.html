@@ -10,7 +10,10 @@ integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2
 {% endblock %}
 
 {% block content %}
-{% include 'Components/ScoreBar.html' %}
+    {% include 'Components/ScoreBar.html' %}
+    <div class="my-2 container-sm d-flex justify-content-center p-0">
+        <canvas id="gameCanvas" class="border-1 w-100 rounded-4"></canvas>
+    </div>
 {% endblock %}
 
 {% block scripts %}

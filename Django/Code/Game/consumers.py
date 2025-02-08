@@ -30,7 +30,7 @@ class GameConsumerIA(AsyncWebsocketConsumer):
         else:
             user_dictionary = await sync_to_async(self.scope["user"].getDict)()
             user_code = user_dictionary['Info']['userCode']
-            self.room_group_name = 'Monitor_Game_' + user_code
+            self.room_group_name = 'Monitor_Game_' + str(user_code)
             await self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name

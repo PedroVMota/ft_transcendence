@@ -1,19 +1,57 @@
 {% load static %}
 
-<link rel="stylesheet" href="{% static '/css/ScoreBar.css' %}">
+<style>
+    .main-score{
+        min-height: 10em;
+        height: 10em;
+        background-color: rgba(84, 84, 144, 0.19);
+        border-radius: 1em;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(84, 84, 144, 0.41);
+    }
+    .player-one-background {
+        /* background-image: url("{% static '/png/ScoreBarLeft.png' %}"); */
+        position: relative;
+        background-size: 15%;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-width: 50%;
+    }
+    .player-two-background {
+        /* background-image: url("{% static '/png/ScoreBarRight.png' %}"); */
+        position: relative;
+        background-size: 15%;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-width: 50%;
+    }
 
-<div id="score-bar-wrapper">
-    <div class="score-player-section">
-        <label id="player-one-name" class="player-name-label">Player One</label>
-        <img src="{% static '/png/ScoreBarLeft.png' %}" alt="ALT" class="player-name-background"/>
-        <label id="player-one-score" class="player-score-label">0</label>
+    .player-image {
+        position: absolute;
+        margin: auto;
+        width: auto;
+        height: 100%;
+        z-index: 0;
+    }
+    .text-white {
+    color: white !important;
+}
+    
+</style>
+<div id="score-bar-wrapper" class="container-sm position-relative main-score  d-flex justify-content-center flex-row">
+    <div class="player-one-background h-100 d-flex justify-content-center align-items-center">
+        <img id="player-one-image" class="player-image" src="{% static '/png/ScoreBarLeft.png' %}"/>
+        <label id="player-one-name" class="player-name-label text-white">
+            Player One = 0
+        </label>
     </div>
     <div class="vs-image-wrapper">
-        <img class="vs-image" src="{% static '/png/Versus.png' %}">
+        <img class="vs-image" src="{% static '/png/Versus.png' %}" width="200" />
     </div>
-    <div class="score-player-section">
-        <label id="player-two-name" class="player-name-label">Player Two</label>
-        <img src="{% static '/png/ScoreBarRight.png' %}" alt="ALT" class="player-name-background"/>
-        <label id="player-two-score" class="player-score-label">0</label>
+    <div class="player-two-background h-100 d-flex justify-content-center align-items-center">
+        <img id="player-two-image" class="player-image" src="{% static '/png/ScoreBarRight.png' %}"/>
+        <label id="player-two-name" class="player-name-label z-1 text-white">
+            Player Two = 0
+        </label>
     </div>
 </div>

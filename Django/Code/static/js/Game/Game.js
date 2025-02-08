@@ -122,33 +122,40 @@ export default class Game extends AComponent {
         const iaSpeed = 0.1; // Velocidade de movimentação da IA
         
             const init = () => {
-            scene = new THREE.Scene();
-            // Defina a posição e rotação da câmera para ficar inclinada atrás dos paddles
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-            camera.position.set(0, 0, 10); // Posição mais centrada e elevada
-            camera.lookAt(new THREE.Vector3(0, 0, 0)); // Mira no centro da cena
-            
-            
-            renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            this.#parentElement.appendChild(renderer.domElement); // Anexa o canvas ao elemento root
+                const canvas = document.getElementById('gameCanvas');
+                const aspectRatio = canvas.clientWidth / canvas.clientHeight;
+                scene = new THREE.Scene();
+                // Defina a posição e rotação da câmera para ficar inclinada atrás dos paddles
+                camera = new THREE.PerspectiveCamera(75, aspectRatio, 1, 1000);
+                camera.position.set(0, 0, 5); // Posição mais centrada e elevada
+                camera.lookAt(new THREE.Vector3(0, 0, 0)); // Mira no centro da cena
+                
+                
+                renderer = new THREE.WebGLRenderer({canvas});
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
 
-            // Criação das paredes superior e inferior
-            wallTop = new Wall(2.5); // Parede superior
-            wallBottom = new Wall(-2.5); // Parede inferior
-            
-            // Adicionando à cena
-            scene.add(this.#paddleOne.mesh);
-            scene.add(this.#paddleTwo.mesh);
-            scene.add(this.#ball.mesh);
-            scene.add(wallTop.mesh);
-            scene.add(wallBottom.mesh);
-            handleCameraControls();
-            
-            this.#aiController = new AIController(this.#paddleTwo, this.#ball, this.#paddleOne, iaSpeed);   // Instancia da AI com paddle adversário
 
-            animate();
-        }
+                // renderer = new THREE.WebGLRenderer();
+
+                // renderer.setSize(window.innerWidth, window.innerHeight);
+                // this.#parentElement.appendChild(renderer.domElement); // Anexa o canvas ao elemento root
+
+                // Criação das paredes superior e inferior
+                wallTop = new Wall(2.5); // Parede superior
+                wallBottom = new Wall(-2.5); // Parede inferior
+                
+                // Adicionando à cena
+                scene.add(this.#paddleOne.mesh);
+                scene.add(this.#paddleTwo.mesh);
+                scene.add(this.#ball.mesh);
+                scene.add(wallTop.mesh);
+                scene.add(wallBottom.mesh);
+                handleCameraControls();
+                
+                this.#aiController = new AIController(this.#paddleTwo, this.#ball, this.#paddleOne, iaSpeed);   // Instancia da AI com paddle adversário
+
+                animate();
+            }
         const printCameraPositionAndRotation = () => {
             //console.log(`Posição da câmera: X = ${camera.position.x}, Y = ${camera.position.y}, Z = ${camera.position.z}`);
             //console.log(`Rotação da câmera: X = ${camera.rotation.x}, Y = ${camera.rotation.y}, Z = ${camera.rotation.z}`);
