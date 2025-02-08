@@ -1,11 +1,6 @@
+
 from django import forms
-
-
 from .models import Lobby
-
-
-
-
 
 # class Lobby(models.Model):
     # id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True) # Unique ID for the game
@@ -17,9 +12,10 @@ from .models import Lobby
     
 """
 FORM TO CREATE THE LOBBY IS ONLY REQUIRED NAME OF THE LOBBY
-there is a methid that getter of the lobby class.
+there is a method that getter of the lobby class.
 """
 class LobbyForm(forms.ModelForm):
     class Meta:
         model = Lobby
+        # todo -> change this to somewhere in the Lobby module
         fields = ['name']

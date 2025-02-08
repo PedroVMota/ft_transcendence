@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('WebApp.urls')),
     path('auth/', include('Auth.urls')),
     path('Game/', include('Game.urls')),
+    path('api/lobby/', include('Lobby.urls')),
 ]

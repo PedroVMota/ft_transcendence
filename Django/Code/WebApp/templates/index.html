@@ -61,7 +61,7 @@
             'LobbyName': document.getElementById('createName').value,
         };
 
-        fetch('/Game/api/lobby/create/', {
+        fetch('/api/lobby/create/', {
             method: 'POST', 
             headers: {
                 'Content-Type': 'application/json',
@@ -87,7 +87,7 @@
             'LobbyName': document.getElementById('joinName').value,
         };
         console.log(JSON.stringify(data));
-        fetch('/Game/api/lobby/information/', {
+        fetch('api/lobby/information/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}',
