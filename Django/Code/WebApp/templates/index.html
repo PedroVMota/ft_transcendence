@@ -73,56 +73,5 @@
 
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-<script type="module">
-    const lobbyId = "{{ lobby.uuid }}";
-    import  spa from "{% static 'js/Spa/Spa.js' %}";
-    import { reloadWindow } from "{% static 'js/Spa/Spa.js' %}";
 
-    // Form submissions
-    document.getElementById('createLobbyForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const data = {
-            'LobbyName': document.getElementById('createName').value,
-        };
-
-        fetch('/api/lobby/create/', {
-            method: 'POST', 
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': `{{ csrf_token }}`,
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        }).then(data => {
-            spa.setTo(`/Lobby/${data.Lobby.uuid}`);
-        })
-    });
-
-    document.getElementById('joinLobbyForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const data = {
-            'LobbyName': document.getElementById('joinName').value,
-        };
-        fetch('api/lobby/information/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.Lobby) {
-                spa.setTo(`/Lobby/${data.Lobby.uuid}`);
-            } else if (data.error) {
-                alert(data.error);
-            }
-        })
-    });
-</script>
 {% endblock %}

@@ -5,6 +5,8 @@ from Game.views import HTTP_CODES # todo -> put this somewhere else, that is mak
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, redirect
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 import json
 import random
@@ -122,6 +124,12 @@ def MyLobby(request, lobby_id=None):
                     return redirect("/")
                 if not (players.filter(id=request.user.id)).exists():
                     lobby.joinPlayer(request.user)
+                    channel_layer = get_channel_layer()
+                    async_to_sync(channel_layer.group_send)(
+                        f"lobby_{lobby_id}",{
+                            'type': 'refresh',
+                        }
+                    )
                 players = lobby.players.all()
                 if len(players) == 1:
                     p_one = players[0].getDict()
@@ -141,10 +149,7 @@ def MyLobby(request, lobby_id=None):
                 'random_color_hex': random_color_hex,
                 'random_ball_color': random_ball_color
             }
-
-            print(f"Data: {data}")
            
-
             return render(request, 'Lobby.html', data)
 
     else:

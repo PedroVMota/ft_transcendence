@@ -42,7 +42,6 @@ export default class Lobby extends AComponent {
         console.log("Rendering Lobby");
         const url = this.getUrl();
         this._getHtml(url)
-
             .then((html) => {
                 const newDom = new DOMParser().parseFromString(html, 'text/html');
                 document.head.innerHTML = newDom.head.innerHTML;
@@ -54,32 +53,15 @@ export default class Lobby extends AComponent {
             })
             .catch((error) => {
             })
-
     }
 
     #setWebSocketEventHandlers() {
         console.log("Setting up web socket event handlers");
 
-        /*
-            await self.channel_layer.group_send(
-            self.room_group_name,{
-                'type': 'refresh',
-            }
-        )
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-
-        async def refresh(self, event):
-        await self.send(text_data=json.dumps({
-            'message': '',
-        }))
-        */
         this.#webSocket.onopen = function () { };
         this.#webSocket.onmessage = function (event) {
-            console.log(event);
-            if(event.data === 'refresh'){
+            const message = JSON.parse(event.data);
+            if (message.action === 'refresh') {
                 reloadWindow();
             }
         };

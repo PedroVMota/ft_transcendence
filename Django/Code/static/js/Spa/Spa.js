@@ -25,21 +25,24 @@ class Spa {
             }],
             [/^\/Lobby\/[0-9a-fA-F-]{36}\/?$/, async function (url) {
                 const lobbyId = url.split("/")[2];
-                console.log("Creating Lobby instance with ID:", lobbyId);
                 try {
                     const { default: Lobby } = await import("../Lobby/Lobby.js");
                     let lob = new Lobby(url, this, lobbyId);
-                    console.log("Lobby instance created:", lob);
                     return lob;
                 } catch (error) {
-                    console.error("Error creating Lobby instance:", error);
                     throw error;
                 }
             }.bind(this)],
-            [/^\/Game\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\/?$/, (url) => {
+            [/^\/Game\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\/?$/, async function (url) {
                 const gameId = url.split("/")[2];
-                return new Game(url, this, false, gameId);
-            }]
+                try{
+                    const { default: Game } = await import("../Game/Game.js");
+                    let gam = new Game(url, this, false, gameId);
+                    return gam;
+                } catch (error) {
+                    throw error;
+                }
+            }.bind(this)]
         ]);
 
         this.#menu = new Menu('/Menu/', this);
@@ -61,33 +64,31 @@ class Spa {
         window.addEventListener('popstate', () => this.loadPage());
     }
 
-    setTo(url) {
-        this.#currentRoute?.destroy(); // Clean up the previous route
-        this.#currentRoute = null;
+    async setTo(url) {
+        
     
         window.history.pushState({}, "", window.location.origin + url);
     
         for (const [route, handler] of this.#routes) {
             if (typeof route === "string" && route === url) {
-                console.log("Matched exact route:", route);
                 this.#currentRoute = handler();
                 break;
             } else if (route instanceof RegExp && route.test(url)) {
-                console.log("Matched regex route:", route);
-                this.#currentRoute = handler(url);
-                console.log("Handler:", handler);
-                console.log("Current Route:", this.#currentRoute);
+                console.log("Matched regex route");
+                this.#currentRoute = await handler(url);
+         
                 break;
             } else {
-                console.log("Route not matched:", route);
             }
         }
+        console.log("Current route set", this.#currentRoute);
+        this.#currentRoute?.destroy(); // Clean up the previous route
     
-        if (this.#currentRoute) {
-            console.log("About to render current route.");
-            this.#currentRoute.render();
-        } else {
-            console.error("Handler did not return a valid component instance.");
+        try{
+            this.#currentRoute?.render();
+        }
+        catch (error) {
+            console.error(error);
         }
     }
 
