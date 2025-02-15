@@ -16,6 +16,8 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth import get_user_model
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
+from .utils import create_jwt  # Importe sua função create_jwt
+from .utils import jwt_required
 import json
 from Auth.models import MyUser
 from utils import shell_colors
@@ -52,18 +54,30 @@ class UserLoginAPIView(View):
             body = json.loads(request.body)
             username = body.get('username')
             password = body.get('password')
+            
             if not username or not password:
                 return JsonResponse({'error': 'Username and password are required'}, status=400)
+            
+            # Authenticate the user
             user = authenticate(request, username=username, password=password)
+            
             if user is not None:
-                login(request, user)
-                return JsonResponse({'message': 'Login successful'}, status=200)
+                # Gera o JWT
+                payload = {
+                    "user_id": user.id,
+                    "username": user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                }
+                token = create_jwt(payload)  # Cria o token usando a função do utils.py
+                return JsonResponse({'message': 'Login successful', 'token': token}, status=200)
             else:
                 return JsonResponse({'error': 'Invalid username or password'}, status=400)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
     def get(self, request):
         csrf_token = get_token(request)
         return JsonResponse({'csrfToken': csrf_token})
@@ -78,16 +92,20 @@ class UserRegistrationView(View):
             first_name = body.get('first_name')
             last_name = body.get('last_name')
             password = body.get('password')
+            
             is_valid, error_message = validate_password_with_django(password)
             if not is_valid:
                 return JsonResponse({'error': error_message}, status=400)
+            
             if not username or not first_name or not last_name or not password:
                 return JsonResponse({'error': 'All fields are required: username, first_name, last_name, password'}, status=400)
+            
             # Hash the password before creating the user
             hashed_password = make_password(password)
-            # Create and save the new user
-            if(MyUser.objects.filter(username=username).exists()):
+            
+            if MyUser.objects.filter(username=username).exists():
                 return JsonResponse({'error': 'User already exists'}, status=400)
+            
             new_user = MyUser.objects.create(
                 username=username,
                 password=hashed_password,
@@ -96,14 +114,22 @@ class UserRegistrationView(View):
             )
             new_user.save()
 
-            # Return success response
-            return JsonResponse({'message': 'User created successfully'}, status=201)
+            # Gera o JWT para o usuário recém-criado
+            payload = {
+                "user_id": new_user.id,
+                "username": new_user.username,
+                "first_name": new_user.first_name,
+                "last_name": new_user.last_name,
+            }
+            token = create_jwt(payload)
+
+            # Retorna sucesso com o token
+            return JsonResponse({'message': 'User created successfully', 'token': token}, status=201)
         except json.JSONDecodeError:
-            # Handle invalid JSON
             return JsonResponse({'error': 'Invalid JSON data received'}, status=400)
         except Exception as e:
-            # Handle other exceptions
             return JsonResponse({'error': str(e)}, status=500)
+
     
 @method_decorator(csrf_exempt, name='dispatch')
 class CloseSession(APIView):
@@ -115,7 +141,6 @@ class CloseSession(APIView):
             return Response({'message': 'No active session'})
 
 
-@login_required
 def update_user(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
