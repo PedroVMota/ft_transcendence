@@ -1,13 +1,21 @@
-<div class="search-bar d-flex flex-column p-2">
-	<form class="d-flex justify-content-between w-100">
+<style>
+	::placeholder{
+		color: white !important;
+	}
+	input{
+		border: solid 1px rgba(92, 127, 196, 0.397) !important;
+	}
+</style>
+<div class="px-4 py-0">
+	<form class="d-flex justify-content-between mt-4" id="searchForm">
 		{% csrf_token %}
-		<input type="text" id="searchField" class="form-control acrylicInput rounded-0"
-			placeholder="Search first name, or username" style="width: 100%;">
-		<button class="ms-1 btn acrylicInput acrylicButton rounded-0" type="submit">Search</button>
+		<input type="text" id="searchField" class="form-control bg-acrylic-blue-dark  rounded-2" placeholder="Search first name, or username or code">
+		<button class="ms-1 btn acrylicInput acrylicButton rounded-0 text-white" type="submit">Search</button>
 	</form>
-	<div id="search-results" class="mt-3 border-bottom border-info-subtle"
+	<div id="search-results" class="mt-3 border-info-subtle"
 		style="display: block; transition: all 0.3s ease-in-out !important;">
-		<h5 class="">Search Results</h5>
-		<div class="list-group" id="search-results-list"></div>
+		<h5 class="text-white">Search Results</h5>
+		<div class="list-group" id="search-results-list">
+		</div>
 	</div>
 </div>

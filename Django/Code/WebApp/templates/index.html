@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 <style>
     ::placeholder {
-        color: rgb(213, 213, 213) !important;
+        color: rgb(255, 255, 255) !important;
         font-weight: 600;
     }
 </style>
@@ -17,7 +17,7 @@
 <div id="formsContainer" class="container mt-5">
     <div class="row">
         <div class="col-md-6">
-            <div class="card h-100 bg-acrylic-blue p-4 rounded-4">
+            <div class="card h-100 bg-acrylic-blue-dark p-4 rounded-4">
                 <div class="card-header text-white">
                     <h2>Create a Lobby</h2>
                 </div>
@@ -42,7 +42,7 @@
             </div>
         </div>
         <div class="col-md-6 ">
-            <div class="card h-100 bg-acrylic-purple p-4 rounded-4">
+            <div class="card h-100 bg-acrylic-purple-dark p-4 rounded-4">
                 <div class="card-header text-white">
                     <h2>Create a Lobby</h2>
                 </div>
@@ -74,7 +74,6 @@
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script type="module">
-    console.log('Hello');
     const lobbyId = "{{ lobby.uuid }}";
     import  spa from "{% static 'js/Spa/Spa.js' %}";
     import { reloadWindow } from "{% static 'js/Spa/Spa.js' %}";
@@ -102,16 +101,13 @@
         }).then(data => {
             spa.setTo(`/Lobby/${data.Lobby.uuid}`);
         })
-        .catch(error => console.error('Error:', error));
     });
 
     document.getElementById('joinLobbyForm').addEventListener('submit', function(event) {
         event.preventDefault();
-        console.log('attemption to join a lobby')
         const data = {
             'LobbyName': document.getElementById('joinName').value,
         };
-        console.log(JSON.stringify(data));
         fetch('api/lobby/information/', {
             method: 'POST',
             headers: {
@@ -122,13 +118,11 @@
         .then(response => response.json())
         .then(data => {
             if (data.Lobby) {
-                console.log(data.Lobby.uuid);
                 spa.setTo(`/Lobby/${data.Lobby.uuid}`);
             } else if (data.error) {
                 alert(data.error);
             }
         })
-        .catch(error => console.error('Error:', error));
     });
 </script>
 {% endblock %}

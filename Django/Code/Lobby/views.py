@@ -7,6 +7,7 @@ from django.http import HttpResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, redirect
 
 import json
+import random
 
 @login_required
 def getLobbyInformation(request: HttpResponse):
@@ -109,9 +110,7 @@ def createLobby(request: HttpRequest):
 @login_required
 def MyLobby(request, lobby_id=None):
     if request.method == 'GET':
-
         if request.user.is_authenticated:
-
             p_one = None
             p_two = None
             lobby = None
@@ -121,7 +120,6 @@ def MyLobby(request, lobby_id=None):
                 players = lobby.players.all()
                 if lobby.isFull() and not (players.filter(id=request.user.id)).exists():
                     return redirect("/")
-
                 if not (players.filter(id=request.user.id)).exists():
                     lobby.joinPlayer(request.user)
                 players = lobby.players.all()
@@ -133,11 +131,20 @@ def MyLobby(request, lobby_id=None):
             except LobbyModel.DoesNotExist:
                 print("Lobby not found", lobby_id)
                 return redirect("/")
+            
+            random_color_hex = f"#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
+            random_ball_color = f"#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
             data = {
                 'lobby': lobby,
                 'first_player': p_one,
-                'second_player': p_two
+                'second_player': p_two,
+                'random_color_hex': random_color_hex,
+                'random_ball_color': random_ball_color
             }
+
+            print(f"Data: {data}")
+           
+
             return render(request, 'Lobby.html', data)
 
     else:

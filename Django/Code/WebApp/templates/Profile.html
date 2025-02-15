@@ -5,14 +5,11 @@
 
 {% block content %}
     
-    <div class="body acrylicStyle border-0 w-100 rounded-0">
+    <div class="bg-acrylic-blue-dark p-4 rounded-4 container-md">
         <div class="container-lg position-relative">
-            <div class="banner-cover d-flex justify-content-center align-items-center bg-centered-fixed pic-filter-theme rounded-5 z-n1"
-                style="width: 100%; height: 450px; background-image: url('/media/{{ user.profile_banner }}'); background-size: cover; background-position: center;">
-            </div>
+            <div class="banner-cover d-flex justify-content-center align-items-center bg-centered-fixed pic-filter-theme rounded-4 z-n1" style="height: 450px; background-image: url('/media/{{ user.profile_banner }}'); background-size: cover; background-position: center;"> </div>
 
-            <div style="width: 90%; margin: 0 auto;"
-                class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
                 <div class="d-flex flex-column flex-md-row justify-content-center z-0" style="margin-top: -2em;">
                     <img src="/media/{{ user.profile_picture }}" alt="Profile Picture"
                         class="profile-picture rounded-circle m-2 me-3" style="width: 100px; height: 100px;">
@@ -43,9 +40,9 @@
                 {% endif %}
             </div>
 
-            <div class="container-lg" style="width: 90%; margin: 0 auto;">
+            <div>
                 <div class="row">
-                    <div class="col-lg-8">
+                    <div class="col-lg-8 p-1">
                         <div class="card bg-transparent border-0 p-3">
                             <h5 class="mb-3 text-white">Completed Games</h5>
                             {% include 'ProfileComp/PlayedGames.html' %}

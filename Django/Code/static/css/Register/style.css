@@ -2,6 +2,14 @@
 
 /* Container holding the form */
 /* Form Sections */
+
+.screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+
+}
 .form-section {
   color: white;
   border-radius: 20px; /* Rounded corners */
@@ -9,7 +17,7 @@
   backdrop-filter: blur(10px); /* Blur effect */
   margin: 0 auto;
   position: relative;
-  background-color: rgba(0, 0, 0, 0.75); /* Semi-transparent dark background */
+  background-color: rgba(49, 21, 69, 0.52); /* Semi-transparent dark background */
   padding: 2rem;
   width: 100%;
   max-width: 600px;

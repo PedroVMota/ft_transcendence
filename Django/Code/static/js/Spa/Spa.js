@@ -19,7 +19,6 @@ class Spa {
         ["/Game/", () => new Game("/Game/", this)],
         [/^\/Profile\/\d+\/?$/, (url) => {
             const profileId = url.split("/")[2];
-            console.log(`Matched Profile route with ID: ${profileId}`);
             return new Profile(url, this, false, profileId);
         }],
         [/^\/Lobby\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\/?$/, (url) => {
@@ -47,14 +46,12 @@ class Spa {
 
         this.#footer = document.getElementById("footer");
         if (!this.#footer) {
-            console.error("Footer element not found");
         }
 
         window.addEventListener('popstate', () => this.loadPage());
     }
 
     setTo(url) {
-        console.log("Navigating to:", url);
         this.#currentRoute?.destroy(); // Clean up the previous route
         this.#currentRoute = null;
     
@@ -63,7 +60,6 @@ class Spa {
     
         // Match route dynamically
         for (const [route, handler] of this.#routes) {
-            console.log("Route:", route);
             if (typeof route === "string" && route === url) {
                 this.#currentRoute = handler();
                 break;
@@ -76,7 +72,6 @@ class Spa {
         if (this.#currentRoute) {
             this.#currentRoute.render(); // Render the matched route
         } else {
-            console.error("No route found for:", url);
         }
     }
 
@@ -86,10 +81,8 @@ class Spa {
             if (url) {
                 this.setTo(url);
             } else {
-                console.error("No URL found to load page");
             }
         } catch (error) {
-            console.error("Error during loadPage execution:", error);
             
         }
     }
@@ -105,10 +98,8 @@ const reloadWindow = () => {
             root.innerHTML = "";
             spa.loadPage();
         } else {
-            console.error("Root element not found. Unable to reload window.");
         }
     } catch (error) {
-        console.error("Error during reloadWindow:", error);
     }
 };
 

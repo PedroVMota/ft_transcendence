@@ -29,7 +29,6 @@ export default class Friends extends AComponent {
                 null
             }
         }).catch((error) => {
-            console.error('Error fetching HTML:', error);
         });
     }
 
@@ -65,7 +64,6 @@ export default class Friends extends AComponent {
             return;
         }
         this.#activeChatId = conversationId;
-        console.log(item);
         this.#markChatAsActive(item);
         if (user_profile_picture) {
             user_profile_picture.setAttribute('src', profile_picture);
@@ -113,7 +111,6 @@ export default class Friends extends AComponent {
     }
 
     #handleSocketError(e) {
-        console.error("WebSocket error:", e);
     }
 
     #handleSocketMessage(event) {
@@ -139,7 +136,7 @@ export default class Friends extends AComponent {
     #createMessageElement(data) {
         const messageClass = data.userSocialCode === this.#userSocialCode ? 'message-mine' : 'message-other';
         const alignmentClass = data.userSocialCode === this.#userSocialCode ? 'text-end' : 'text-start';
-        const messageColorClass = data.userSocialCode === this.#userSocialCode ? 'mine-bg text-white' : 'bg-secondary text-white';
+        const messageColorClass = data.userSocialCode === this.#userSocialCode ? 'bg-acrylic-purple-light text-white' : 'bg-acrylic-blue-light text-white';
 
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', messageClass, 'd-flex', 'mb-3');
@@ -166,7 +163,7 @@ export default class Friends extends AComponent {
         waitingDiv.style.cssText = 'display: none !important';
         chatTop.style.cssText = 'display: flex !important';   
         chatBody.style.cssText = 'display: flex !important';  
-        chatInput.style.cssText = 'display: block !important';
+        chatInput.style.cssText = 'display: flex !important justify-content: space-between;';
     }
 
     #handleMessageSend(event) {
@@ -191,11 +188,10 @@ export default class Friends extends AComponent {
     // New methods for handling search functionality
 
     #initializeSearch() {
-        const form = document.querySelector('.search-bar form');
+        const form = document.getElementById('searchForm');
         const searchResults = document.getElementById('search-results');
-
-        if (!form || !searchResults) return;
-
+        if (!form || !searchResults)
+            return;
         if (form) {
             form.addEventListener('submit', (e) => this.#handleSearchSubmit(e, form, searchResults));
         }
@@ -258,7 +254,6 @@ export default class Friends extends AComponent {
                 this.#showErrorMessage(searchResults, 'No player found with the provided information.');
             }
         } catch (error) {
-            console.error('Error during search:', error);
             this.#showErrorMessage(searchResults, 'Unable to complete the search. Please try again later.');
         }
     }
@@ -268,16 +263,14 @@ export default class Friends extends AComponent {
         const searchResultsList = document.getElementById('search-results-list');
         if(!searchResultsList) return;
         if (searchResultsList) {
-
             searchResultsList.innerHTML = '';
             const userItem = document.createElement('a');
-            userItem.classList.add('list-group-item', 'border-0', 'list-group-item-action', 'bg-transparent', 'd-flex', 'justify-content-between', 'align-items-center');
+            userItem.classList.add('list-group-item', 'border-0', 'list-group-item-action', 'bg-acrylic-blue-dark', 'd-flex', 'justify-content-between', 'align-items-center');
             userItem.href = `javascript:void(0)`;  // Use javascript:void(0) to prevent full page reload
             userItem.setAttribute('data-profile', user.Info.userCode); // Attach user code
-            
             userItem.innerHTML = `
                 <div class="d-flex align-items-center text-white">
-                    <img src="${user.Info.profile_picture}" style="width: 50px; height: 50px;">
+                    <img src="${user.Info.profile_picture}" class="rounded-2" style="width: 50px; height: 50px;">
                     <div class="ms-3 text-white">
                         <h5 class="mb-0">${user.Info.first_name} ${user.Info.last_name}</h5>
                         <small class="text-muted fs-6 text-white-50">${user.Info.userCode}</small>

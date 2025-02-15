@@ -69,7 +69,6 @@ export default class Game extends AComponent {
                 const ballData = data['ball'];
                 this.#ball.update(ballData['x'], ballData['y']);
 
-                console.log("updateGameState")
             }
 
             if (data['action'] === 'score-bar-report')
@@ -82,7 +81,6 @@ export default class Game extends AComponent {
             }
             if (data['action'] === 'game-win')
             {
-                console.log("winning player was: ", data["victoriousPlayer"])
             }
         };
 
@@ -112,7 +110,6 @@ export default class Game extends AComponent {
                 }, 1000);
             }
         }).catch((error) => {
-            console.error(error);
         });
     }
 
@@ -157,19 +154,15 @@ export default class Game extends AComponent {
                 animate();
             }
         const printCameraPositionAndRotation = () => {
-            //console.log(`Posição da câmera: X = ${camera.position.x}, Y = ${camera.position.y}, Z = ${camera.position.z}`);
-            //console.log(`Rotação da câmera: X = ${camera.rotation.x}, Y = ${camera.rotation.y}, Z = ${camera.rotation.z}`);
         }
         const moveCameraToPaddleTwo = () => {
             camera.position.set(8.5, -2.275957200481571e-15, -1.6);  // Coordenadas da posição
             camera.rotation.set(-1.571, 1.571, 0);  // Coordenadas da rotação
-            console.log("Câmera movida para trás do paddle vermelho.");
         };
 
         const moveCameraToPaddleOne = () => {
             camera.position.set(-8.5, -2.275957200481571e-15, -1.6);
             camera.rotation.set(-1.571, -1.571, 0);
-            console.log("Câmera movida para trás do lado verde")
         }
 
         const requestUpdateScoreBar = () => {
@@ -234,7 +227,6 @@ export default class Game extends AComponent {
                 switch (event.key)
                 {
                     case 'p':
-                        console.log("sending to web socket")
                         this.#socket.send(JSON.stringify({
                             'action': 'request-pause-play'
                         }))

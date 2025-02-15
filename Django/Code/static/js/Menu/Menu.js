@@ -36,7 +36,6 @@ class Menu extends AComponent {
             return;
         } else {
             setInterval(() => {
-                console.log(`Notifications: ${this.#showNotifications}\n`);
                 if (this.#showNotifications) {
                     notificationsMenu.style.display = "block";
                 } else {
@@ -102,9 +101,7 @@ class Menu extends AComponent {
             notificationBadge.textContent = data.friend_requests.length;
             notificationsList.innerHTML = ''; // Clear existing notifications
             data.friend_requests.forEach((friendRequest) => {
-                console.log(friendRequest);
                 if(friendRequest.request_type === "friend_request"){
-                    console.log("Friend Request");
                     let notification = document.createElement('a');
                     notification.classList.add('dropdown-item');
                     notification.href = '#';
@@ -138,7 +135,6 @@ class Menu extends AComponent {
                 }
                 else if (friendRequest.request_type === "lobby_invite")
                 {
-                    console.log("Lobby Invite");
                     let notification = document.createElement('a');
                     notification.classList.add('dropdown-item');
                     notification.href = '#';
@@ -191,11 +187,8 @@ class Menu extends AComponent {
         }).then((response) => {
             return response.json();
         }).then((data) => {
-            console.log(data);
             if(action === "reject")
                 return;
-            console.table(data);
-            // console.log(`Data: ${data}`);
             this.#spaObject.setTo(data.url);
         })
     }
@@ -214,9 +207,7 @@ class Menu extends AComponent {
         }).then((response) => {
             return response.json();
         }).then((data) => {
-            console.log(data);
         }).catch((error) => {
-            console.error(error);
         });
     }
 
@@ -272,7 +263,6 @@ class Menu extends AComponent {
             friends.addEventListener("click", (e) => this.navigateTo(e, "/Friends/"));
             logout.addEventListener("click", (e) => this.#logout(e));
             notificationsDropdown.addEventListener("click", (e) => {
-                console.log("Notifications clicked");
                 this.#numberofNotifications = 0;
                 this.#decoratorToggle();
 
@@ -290,12 +280,10 @@ class Menu extends AComponent {
                 }).then((response) => {
                     return response.json();
                 }).then((data) => {
-                    console.log(data);
                     let notificationsList = document.getElementById("notificationsMenu");
                     notificationsList.innerHTML = '';
                     this.#renderFriendRequests(data);
                 }).catch((error) => {
-                    console.error(error);
                 }
                 );
             });
