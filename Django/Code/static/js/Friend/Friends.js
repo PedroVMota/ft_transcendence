@@ -163,7 +163,7 @@ export default class Friends extends AComponent {
         waitingDiv.style.cssText = 'display: none !important';
         chatTop.style.cssText = 'display: flex !important';   
         chatBody.style.cssText = 'display: flex !important';  
-        chatInput.style.cssText = 'display: block !important';
+        chatInput.style.cssText = 'display: flex !important justify-content: space-between;';
     }
 
     #handleMessageSend(event) {

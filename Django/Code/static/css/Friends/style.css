@@ -8,8 +8,6 @@
 
 /* Chat widget with message overflow */
 .chat-widget {
-    background-color: rgba(29, 73, 112, 0.172);
-    border-bottom: 1px solid rgba(124, 182, 233, 0.172);
     flex-grow: 1;
     overflow-y: auto;
     display: flex;
@@ -21,7 +19,6 @@
 .chat-input-section {
     position: sticky;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.1); /* Slight transparent background */
     padding: 10px;
 }
 
