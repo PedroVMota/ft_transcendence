@@ -16,21 +16,30 @@ from Game.views import HTTP_CODES
 # FRIEND REQUEST HANDLING
 # UTILS
 
+class Helpers:
+    @staticmethod
+    def getUserByCode(user_code: str) -> MyUser:
+        return MyUser.objects.get(userSocialCode=user_code) if MyUser.objects.filter(userSocialCode=user_code).exists() else None
+    @staticmethod
+    def acceptFriendRequest(request, friend_request: FriendRequest):
+        friend_request.status = 'accepted'
+        friend_request.save()
+        User: MyUser = request.user
+        User.__add__user__(friend_request.from_user)
+        return JsonResponse({'message': 'Friend request accepted'})
+    @staticmethod
+    def rejectFriendRequest(friend_request: FriendRequest): 
+        friend_request.status = 'rejected'
+        friend_request.save()
+        return JsonResponse({'message': 'Friend request rejected'})
+
 def accept_friend_request(request, friend_request):
-    friend_request.status = 'accepted'
-    friend_request.save()
-
-    User: MyUser = request.user
-    User.__add__user__(friend_request.from_user)
-
-    print(f"Friend request accepted: {friend_request.id}")
-    return JsonResponse({'message': 'Friend request accepted'})
+    print("[Friend Request] Accepting friend request")
+    return Helpers.acceptFriendRequest(request, friend_request)
 
 def reject_friend_request(friend_request):
-    friend_request.status = 'rejected'
-    friend_request.save()
-    print(f"Friend request rejected: {friend_request.id}")
-    return JsonResponse({'message': 'Friend request rejected'})
+    print("[Friend Request] Rejecting friend request")
+    return Helpers.rejectFriendRequest(friend_request)
 
 
 def handle_friend_request(request):
@@ -39,26 +48,20 @@ def handle_friend_request(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Not authenticated'}, status=401)
     data = json.loads(request.body)
-    user_code = ""
-    username = ""
-
-    if 'user_code' in data:
-        user_code = data.get('user_code')
-    else:
+    user_code = None
+    user_code = data.get('user_code')
+    if not user_code:
         return JsonResponse({'error': 'Invalid request data'}, status=400)
-    
+
     try:
         target_user = MyUser.objects.get(userSocialCode=user_code)
     except MyUser.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
-    
-    from_user = request.user
-    friend_request = FriendRequest.objects.create(from_user=from_user, to_user=target_user)
-    notification = Notification.objects.create(user=target_user, message=f"{from_user.username} sent you a friend request.")
-
+    friend_request = FriendRequest.objects.create(from_user=request.user, to_user=target_user)
+    notification = Notification.objects.create(user=target_user, message=f"{request.user.username} sent you a friend request.")
     friend_request.save()
     notification.save()
-    # Send notification to target user
+
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         f"user_{target_user.userSocialCode}",
@@ -82,8 +85,6 @@ def get_request(request):
             'from_user_id': fr.from_user.id,
             'from_user_profile_picture': fr.from_user.profile_picture.url
         } for fr in pending_requests]
-        
-        print(requests_data)
         return JsonResponse({'friend_requests': requests_data})
     else:
         return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -92,7 +93,6 @@ def manage_request(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method'}, status=405)
     data = json.loads(request.body)
-    print(json.dumps(data, indent=4))
     friend_request_id = data.get('friend_request_id')
     action = data.get('action')
     try:
@@ -104,9 +104,6 @@ def manage_request(request):
     elif action == 'reject':
         return reject_friend_request(friend_request)
     return JsonResponse({'error': 'Invalid action'}, status=400)
-
-# SEND
-
 
 def send_request(request):
     if request.method == 'POST':
@@ -131,7 +128,7 @@ def accept_invite(request, fr: FriendRequest, noti: Notification):
     fr.status = 'accepted'
     fr.save()
     noti.save()
-    print(f"Invite accepted: {fr.id}")
+    
     return JsonResponse({
         'message': 'Invite accepted',
         'url': fr.urlLobby
@@ -151,12 +148,9 @@ def manage_invite(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method'}, status=200)
     data = json.loads(request.body)
-    print(json.dumps(data, indent=4))
     invite_id = data.get('invite_id')
     action = data.get('action')
     try:
-        print("'=========== Invite ID: ", invite_id)
-        print("'=========== Invite Action: ", action)
         fr = FriendRequest.objects.get(id=invite_id, to_user=request.user)
     except FriendRequest.DoesNotExist:
         return JsonResponse({'error': 'Invite not found'}, status=200)
@@ -179,22 +173,17 @@ def manage_invite(request):
 @login_required
 def inviteToLobby(request: HttpResponse, lobbyId: str):
     if request.method != 'POST':
-        print("Invalid request method")
         response = {'error': 'Invalid request method', 'Lobby': None}
         return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["BAD_REQUEST"])
     if(not lobbyId):
-        print("LobbyId is required to invite")
         response = {'error': 'LobbyId is required to invite', 'Lobby': None}
     lobby = None
     try:
-        print("Finding lobby")
         lobby = Lobby.objects.get(id=lobbyId)
     except Lobby.DoesNotExist:
-        print("Lobby not found")
         response = {'error': 'Lobby not found', 'Lobby': None}
         return JsonResponse(response, status=HTTP_CODES["CLIENT_ERROR"]["NOT_FOUND"])
-    
-    print("Inviting user to lobby")
+
     json_body = json.loads(request.body)
     userCodeToInvite = json_body.get('to')
     print(f"User code to invite: {userCodeToInvite}")

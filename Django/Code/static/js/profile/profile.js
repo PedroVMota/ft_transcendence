@@ -17,11 +17,9 @@ export default class Profile extends AComponent {
     }
 
     render() {
-        console.log("Rendering Profile");
 
         // If the parent already has content, just attach event listeners again.
         if (this.#parentElement.innerHTML !== '') {
-            console.log("Parent element not empty");
             this.#attachEventListeners();
             return;
         }
@@ -35,7 +33,6 @@ export default class Profile extends AComponent {
 
                 const root = newDom.getElementById("root");
                 if (!root) {
-                    console.error("Root not found in fetched HTML");
                     return;
                 }
 
@@ -45,7 +42,6 @@ export default class Profile extends AComponent {
                 this.#attachEventListeners();
             })
             .catch((error) => {
-                console.error("Error fetching HTML:", error);
             });
     }
 
@@ -54,11 +50,9 @@ export default class Profile extends AComponent {
     }
 
     #attachEventListeners = () => {
-        console.log(`Attaching event listeners for profile ${this.#profileId} with myProfile = ${this.#myProfile}`);
 
         // If the profile is not mine, enable add/remove friend features
         if (!this.#myProfile) {
-            console.log("Profile is not mine");
             this.#enableAddFriend();
             this.#enableRemoveFriend();
         }
@@ -70,10 +64,8 @@ export default class Profile extends AComponent {
     #enableAddFriend = () => {
         const addFriendButton = document.getElementById('addFriendButton');
         if (addFriendButton) {
-            console.log('Add friend button found');
             addFriendButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Add friend button clicked');
                 const url = `/auth/token/friend/request/send/`;
                 fetch(url, {
                     method: 'POST',
@@ -92,7 +84,6 @@ export default class Profile extends AComponent {
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
                     });
             });
         }
@@ -101,10 +92,8 @@ export default class Profile extends AComponent {
     #enableRemoveFriend = () => {
         const removeFriendButton = document.getElementById('removeFriendButton');
         if (removeFriendButton) {
-            console.log('Remove friend button found');
             removeFriendButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Remove friend button clicked');
                 const url = `/auth/token/remove/${this.#profileId}/`;
                 fetch(url, {
                     method: 'POST',
@@ -122,7 +111,6 @@ export default class Profile extends AComponent {
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
                     });
             });
         }
@@ -169,7 +157,6 @@ export default class Profile extends AComponent {
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     alert('An error occurred while updating the profile');
                 });
         });

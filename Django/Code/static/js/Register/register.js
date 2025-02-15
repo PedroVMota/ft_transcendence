@@ -36,7 +36,6 @@ export default class Login extends AComponent {
         if (!this.#okeyToExcute)
             return;
         this.#Register.addEventListener('submit', (e) => {
-            console.log('Registering');
         });
     }
 }

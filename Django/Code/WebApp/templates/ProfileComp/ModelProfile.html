@@ -120,9 +120,7 @@
             })
             .then(data => {
                 if (data.error) {
-                    console.error('Error:', data.error);
                 } else {
-                    console.log('Submitted successfully!', data);
                     const modalElement = document.getElementById('editProfileModal');
                     const modal = bootstrap.Modal.getInstance(modalElement);
                     if(!modal) {

@@ -89,69 +89,9 @@
     border-radius: 50%;
 }
 
-/* Additional padding for the search section */
-.box {
-    width: 80%;
-    margin: 0 auto;
-    background: linear-gradient(135deg, #71b7e622, #9c59b62c);
-}
 
 .border-modern-right {
     border-right: 1px solid rgba(249, 249, 249, 0.15) !important;
 }
 
-.chat-friends {
-    border-radius: 5px;
-    border: 1px solid #6c52733e;
-}
 
-.info img {
-    border-radius: calc(5px / 2);
-}
-
-.active {
-    background: linear-gradient(135deg, #f1f1f12d, #9c59b600);
-}
-
-.active, .info {
-    padding-left: 1em;
-}
-
-.w-95 {
-    width: 95%;
-}
-
-.outline-none {
-    outline: none !important;
-    box-sizing: none !important;
-    border: none !important;
-}
-
-/* Input styling */
-input.form-control {
-    width: 100%;
-}
-
-.acrylicInput {
-    background: rgba(255, 255, 255, 0.5) !important;
-    border: none !important;
-    padding: 10px !important;
-    border-radius: 5px !important;
-    width: 100% !important;
-    outline: none !important;
-    box-sizing: none !important;
-}
-
-.acrylicButton {
-    background: rgba(255, 255, 255, 0.5) !important;
-    width: auto !important;
-}
-
-.acrylicInput:focus {
-    background: rgba(255, 255, 255, 0.509) !important; /* Modify the background on focus */
-}
-
-/* Background color for your messages */
-.mine-bg {
-    background-color: rgba(85, 156, 231, 0.584) !important;
-}
